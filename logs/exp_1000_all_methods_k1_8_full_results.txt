@@ -1,0 +1,19 @@
+prefix=5_8da1eb84c3024317be0075db05257b28
+shape: (33, 6)
+┌─────┬─────────────────┬─────────────┬─────────────────┬───────────────┬───────────────┐
+│ n   ┆ method          ┆ reweight    ┆ score_type      ┆ AATPS         ┆ ANLPPT        │
+│ --- ┆ ---             ┆ ---         ┆ ---             ┆ ---           ┆ ---           │
+│ i64 ┆ str             ┆ str         ┆ str             ┆ str           ┆ str           │
+╞═════╪═════════════════╪═════════════╪═════════════════╪═══════════════╪═══════════════╡
+│ 1   ┆ basic_uwm       ┆ deltagumbel ┆ DeltaGumbel_U   ┆ 1.0±0.0       ┆ 0.0898±0.0016 │
+│ 1   ┆ ersd            ┆ none        ┆ null            ┆ 1.6150±0.0017 ┆ nan           │
+│ 1   ┆ ersd_wm         ┆ ersd        ┆ ERSD_Aaronson_U ┆ 1.6125±0.0017 ┆ 0.0872±0.0016 │
+│ 1   ┆ mc_uwm_speed    ┆ deltagumbel ┆ DeltaGumbel_U   ┆ 1.6237±0.0017 ┆ 0.0393±0.0009 │
+│ 1   ┆ mc_uwm_strength ┆ deltagumbel ┆ DeltaGumbel_U   ┆ 1.6031±0.0017 ┆ 0.0910±0.0016 │
+│ …   ┆ …               ┆ …           ┆ …               ┆ …             ┆ …             │
+│ 7   ┆ mc_uwm_strength ┆ deltagumbel ┆ DeltaGumbel_U   ┆ 2.547±0.009   ┆ 0.0901±0.0016 │
+│ 8   ┆ ersd            ┆ none        ┆ null            ┆ 2.599±0.009   ┆ nan           │
+│ 8   ┆ ersd_wm         ┆ ersd        ┆ ERSD_Aaronson_U ┆ 2.617±0.009   ┆ 0.0909±0.0017 │
+│ 8   ┆ mc_uwm_speed    ┆ deltagumbel ┆ DeltaGumbel_U   ┆ 2.780±0.010   ┆ 0.0227±0.0006 │
+│ 8   ┆ mc_uwm_strength ┆ deltagumbel ┆ DeltaGumbel_U   ┆ 2.579±0.009   ┆ 0.0902±0.0017 │
+└─────┴─────────────────┴─────────────┴─────────────────┴───────────────┴───────────────┘

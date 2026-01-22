@@ -1,0 +1,19 @@
+prefix 5_846fc2ac433d41c8811202764ea98109
+ n          method    reweight          score_type     AATPS      ANLPPT
+ 1           basic        none                none   1.0±0.0    -0.0±0.0
+ 1       basic_uwm deltagumbel       DeltaGumbel_C   1.0±0.0 0.019±0.003
+ 1       basic_uwm deltagumbel       DeltaGumbel_U   1.0±0.0 0.021±0.003
+ 1       basic_uwm deltagumbel                 LLR   1.0±0.0      -50±50
+ 1       basic_uwm deltagumbel           RobustLLR   1.0±0.0   0.32±0.03
+ 4            ersd        none                none 1.49±0.03    -0.0±0.0
+ 4         ersd_wm        ersd ERSD_Aaronson_Gamma 1.72±0.04     1.8±0.2
+ 4         ersd_wm        ersd     ERSD_Aaronson_U 1.72±0.04   0.74±0.13
+ 4              mc        none                none 2.58±0.07    -0.0±0.0
+ 4    mc_uwm_speed deltagumbel       DeltaGumbel_C 2.50±0.07 0.020±0.005
+ 4    mc_uwm_speed deltagumbel       DeltaGumbel_U 2.50±0.07 0.025±0.004
+ 4    mc_uwm_speed deltagumbel                 LLR 2.50±0.07    -inf±inf
+ 4    mc_uwm_speed deltagumbel           RobustLLR 2.50±0.07 0.046±0.015
+ 4 mc_uwm_strength deltagumbel       DeltaGumbel_C 2.39±0.06 0.059±0.013
+ 4 mc_uwm_strength deltagumbel       DeltaGumbel_U 2.39±0.06 0.082±0.016
+ 4 mc_uwm_strength deltagumbel                 LLR 2.39±0.06   0.66±0.06
+ 4 mc_uwm_strength deltagumbel           RobustLLR 2.39±0.06   0.64±0.06

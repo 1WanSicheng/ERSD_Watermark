@@ -1,0 +1,14 @@
+prefix 5_706fdf64ecac42eb99224f61faa57aa6
+ n  method reweight          score_type       AATPS      ANLPPT
+ 1    ersd     none                none 1.612±0.005    -0.0±0.0
+ 1 ersd_wm     ersd ERSD_Aaronson_Gamma 1.610±0.005 0.159±0.009
+ 1 ersd_wm     ersd     ERSD_Aaronson_U 1.610±0.005 0.092±0.005
+ 2    ersd     none                none 1.998±0.011    -0.0±0.0
+ 2 ersd_wm     ersd ERSD_Aaronson_Gamma 1.993±0.011 0.150±0.008
+ 2 ersd_wm     ersd     ERSD_Aaronson_U 1.993±0.011 0.094±0.006
+ 4    ersd     none                none 2.334±0.020    -0.0±0.0
+ 4 ersd_wm     ersd ERSD_Aaronson_Gamma   2.36±0.02 0.147±0.008
+ 4 ersd_wm     ersd     ERSD_Aaronson_U   2.36±0.02 0.087±0.006
+ 8    ersd     none                none   2.59±0.03    -0.0±0.0
+ 8 ersd_wm     ersd ERSD_Aaronson_Gamma   2.62±0.03 0.147±0.007
+ 8 ersd_wm     ersd     ERSD_Aaronson_U   2.62±0.03 0.094±0.005

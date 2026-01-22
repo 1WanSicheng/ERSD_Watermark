@@ -1,0 +1,18 @@
+shape: (25, 5)
+┌─────┬─────────────────┬─────────────┬─────────────────┬───────────┐
+│ n   ┆ method          ┆ reweight    ┆ score_type      ┆ anlppt_u  │
+│ --- ┆ ---             ┆ ---         ┆ ---             ┆ ---       │
+│ i64 ┆ str             ┆ str         ┆ str             ┆ f64       │
+╞═════╪═════════════════╪═════════════╪═════════════════╪═══════════╡
+│ 1   ┆ basic_uwm       ┆ deltagumbel ┆ DeltaGumbel_U   ┆ 14.335053 │
+│ 1   ┆ ersd_wm         ┆ ersd        ┆ ERSD_Aaronson_U ┆ 7.359887  │
+│ 2   ┆ ersd_wm         ┆ ersd        ┆ ERSD_Aaronson_U ┆ 7.453016  │
+│ 3   ┆ ersd_wm         ┆ ersd        ┆ ERSD_Aaronson_U ┆ 6.644717  │
+│ 4   ┆ ersd_wm         ┆ ersd        ┆ ERSD_Aaronson_U ┆ 6.73652   │
+│ …   ┆ …               ┆ …           ┆ …               ┆ …         │
+│ 4   ┆ mc_uwm_strength ┆ deltagumbel ┆ DeltaGumbel_U   ┆ 8.30024   │
+│ 5   ┆ mc_uwm_strength ┆ deltagumbel ┆ DeltaGumbel_U   ┆ 8.241051  │
+│ 6   ┆ mc_uwm_strength ┆ deltagumbel ┆ DeltaGumbel_U   ┆ 8.253282  │
+│ 7   ┆ mc_uwm_strength ┆ deltagumbel ┆ DeltaGumbel_U   ┆ 8.203517  │
+│ 8   ┆ mc_uwm_strength ┆ deltagumbel ┆ DeltaGumbel_U   ┆ 8.155944  │
+└─────┴─────────────────┴─────────────┴─────────────────┴───────────┘
