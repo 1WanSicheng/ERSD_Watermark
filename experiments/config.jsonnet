@@ -127,6 +127,21 @@ local Exp1_RaceSharpness_Config = DefaultConfig {
   seeds: [1],
   repartition_size: 50,
 };
+local Exp2_AcceptanceDynamics_Config = DefaultConfig {
+  data_folder: 'extra_exp2_data',
+  task: 'summarization_scan_n',
+  model_str: large_qwens[0],
+  ref_model_str: small_qwens[0],
+  ds_name: 'summarization',
+  ds_cut_len: 200,
+  ns: [1, 2, 3, 4, 5, 6, 7, 8],
+  top_k: 0,
+  top_p: 1.0,
+  methods: ['ersd', 'ersd_wm', 'ersd_nocc', 'ersd_nocc_wm'],
+  reweights: ['deltagumbel'],
+  seeds: [1],
+  repartition_size: 50,
+};
 local configs = [
                   // Debug_Config,
                   // Exp1_Verify_Config,
@@ -139,6 +154,9 @@ local configs = [
                 ]
                 + [
                   Exp1_RaceSharpness_Config
+                ]
+                + [
+                  Exp2_AcceptanceDynamics_Config
                 ]
 ;
 configs
