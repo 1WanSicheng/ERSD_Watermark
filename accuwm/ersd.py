@@ -138,6 +138,35 @@ def sample_seeded_exponential_noise_from_tokens(input_ids, step, vocab_size, dev
     uniform_noise = torch.from_numpy(uniform_noise).unsqueeze(0).to(device)
     return -log(uniform_noise)
 
+def _cc_bytes(cc):
+    if isinstance(cc, (bytes, bytearray)):
+        return bytes(cc)
+    if isinstance(cc, np.ndarray):
+        if cc.size == 1:
+            return cc.item()
+        return cc.reshape(-1)[0].item()
+    return cc
+
+
+def sample_seeded_exponential_noise_from_cc(cc, step, tag, vocab_size, device, nonce=None):
+    cc_bytes = _cc_bytes(cc)
+    t_bytes = step.to_bytes(8, byteorder="big")
+    tag_bytes = tag.encode("ascii")
+    seed_components = [cc_bytes, t_bytes, tag_bytes]
+    if nonce is not None:
+        seed_components.append(nonce)
+    rng = uwm.lm.get_rng(*seed_components)
+    uniform_noise = rng.random(vocab_size).astype(np.float32)
+    uniform_noise = torch.from_numpy(uniform_noise).unsqueeze(0).to(device)
+    return -log(uniform_noise)
+
+
+def _extract_cc(cc_extractor, tokens):
+    if cc_extractor is None:
+        raise ValueError("cc_extractor is required for seed_source='cc'")
+    return cc_extractor.extract(tokens)
+
+
 
 @torch.no_grad()
 def gen_n_token_ersd(
@@ -147,6 +176,8 @@ def gen_n_token_ersd(
     past_key_values=None,
     max_vocab_size: int | None = None,
     process_logits_kwargs={},
+    seed_source: str = "prefix",
+    cc_extractor: uwm.AbstractContextCodeExtractor | None = None,
 ) -> tuple[LongTensor, FloatTensor, FloatTensor, any, bool]:
     """
     Generate n draft tokens using exponential sampling (for ERSD algorithm).
@@ -198,9 +229,17 @@ def gen_n_token_ersd(
         # Sample seeded exponential noise for this step (draft side).
         vocab_size = probs.shape[1]
         t = input_ids.shape[1] + 1
-        exp_noise = sample_seeded_exponential_noise_from_tokens(
-            input_ids, t, vocab_size, device
-        )
+        if seed_source == "prefix":
+            exp_noise = sample_seeded_exponential_noise_from_tokens(
+                input_ids, t, vocab_size, device
+            )
+        elif seed_source == "cc":
+            cc = _extract_cc(cc_extractor, input_ids)
+            exp_noise = sample_seeded_exponential_noise_from_cc(
+                cc, t, "race", vocab_size, device
+            )
+        else:
+            raise ValueError(f"unknown seed_source {seed_source}")
         exp_noises.append(exp_noise[0, :])  # Store for batch_size=1 case
 
         # Sample using exponential distribution: arg min_i (ei / P(i))
@@ -238,6 +277,8 @@ def gen_ersd(
     debug_iter=None,
     coupled: bool = True,
     return_meta: bool = False,
+    seed_source: str = "prefix",
+    cc_extractor: uwm.AbstractContextCodeExtractor | None = None,
 ) -> tuple[LongTensor, FloatTensor, FloatTensor, any, bool]:
     """
     Generate tokens using ERSD (Exponentially Smoothed Random Sampling Decoding) algorithm.
@@ -348,9 +389,17 @@ def gen_ersd(
         t = prefix_len + 1
         prefix_tokens = _ids[:, :prefix_len]
         if coupled:
-            exp_noise_k = sample_seeded_exponential_noise_from_tokens(
-                prefix_tokens, t, vocab_size, device
-            )[0, :]  # [vocab_size]
+            if seed_source == "prefix":
+                exp_noise_k = sample_seeded_exponential_noise_from_tokens(
+                    prefix_tokens, t, vocab_size, device
+                )[0, :]  # [vocab_size]
+            elif seed_source == "cc":
+                cc = _extract_cc(cc_extractor, prefix_tokens)
+                exp_noise_k = sample_seeded_exponential_noise_from_cc(
+                    cc, t, "race", vocab_size, device
+                )[0, :]
+            else:
+                raise ValueError(f"unknown seed_source {seed_source}")
         else:
             exp_noise_k = sample_exponential_noise((1, vocab_size), device)[0, :]
         
@@ -520,6 +569,8 @@ def ersd_sample_generator(
     ref_past_key_values=None,
     coupled: bool = True,
     return_meta: bool = False,
+    seed_source: str = "prefix",
+    cc_extractor: uwm.AbstractContextCodeExtractor | None = None,
     **kwargs,
 ):
     """
@@ -559,6 +610,8 @@ def ersd_sample_generator(
             n,
             past_key_values=ref_past_key_values,
             max_vocab_size=model.config.vocab_size,
+            seed_source=seed_source,
+            cc_extractor=cc_extractor,
             **kwargs,
         )
         # ref_output_ids: (batch_size, n)
@@ -577,6 +630,8 @@ def ersd_sample_generator(
             debug_iter=debug_iter,
             coupled=coupled,
             return_meta=True,
+            seed_source=seed_source,
+            cc_extractor=cc_extractor,
         )
         
         # Step 4: Fix reference model cache to match accepted tokens

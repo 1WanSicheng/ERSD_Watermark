@@ -207,15 +207,26 @@ class Worker:
             generator = accuwm.ersd.ersd_sample_generator
         elif d["method"] == "ersd_nocc":
             generator = accuwm.ersd.ersd_sample_generator
+        elif d["method"] == "ersd_cc":
+            generator = accuwm.ersd.ersd_sample_generator
         elif d["method"] == "ersd_wm":
             generator = accuwm.ersd_wm.ersd_wm_sample_generator
         elif d["method"] == "ersd_nocc_wm":
             generator = accuwm.ersd_wm.ersd_wm_sample_generator
         else:
             raise ValueError(f"unknown sampling method {d['method']}")
-        if ("mc" in d["method"] or d["method"] in ["ersd", "ersd_nocc", "ersd_wm", "ersd_nocc_wm"]):
+        if ("mc" in d["method"] or d["method"] in ["ersd", "ersd_nocc", "ersd_cc", "ersd_wm", "ersd_nocc_wm"]):
             generator = partial(generator, ref_model=self.ref_model)
-        if ("uwm" in d["method"] or d["method"] in ["ersd_wm", "ersd_nocc_wm"]):
+        
+        if d["method"] == "ersd_cc":
+            cc_extractor = uwm.lm.PrevN_ContextCodeExtractor(n=3)
+            generator = partial(
+                generator,
+                cc_extractor=cc_extractor,
+                seed_source="cc",
+            )
+
+if ("uwm" in d["method"] or d["method"] in ["ersd_wm", "ersd_nocc_wm"]):
             if "deltagumbel" == d["reweight"]:
                 reweight = uwm.DeltaGumbel_Reweight()
             elif "gamma" == d["reweight"]:
@@ -249,7 +260,7 @@ class Worker:
         logits_warper = LogitsProcessorList(warpers) if warpers else None
 
         gen_kwargs = {}
-        if d["method"] in ["ersd", "ersd_nocc", "ersd_wm", "ersd_nocc_wm"]:
+        if d["method"] in ["ersd", "ersd_nocc", "ersd_cc", "ersd_wm", "ersd_nocc_wm"]:
             gen_kwargs["return_meta"] = True
         if d["method"] in ["ersd_nocc", "ersd_nocc_wm"]:
             gen_kwargs["coupled"] = False
@@ -304,7 +315,7 @@ class Worker:
                     ersd_meta["verify_ops"].append(meta["verify_ops"])
                 if "draft_len" in meta:
                     ersd_meta["draft_lens"].append(meta["draft_len"])
-            elif d["method"] in ["ersd", "ersd_nocc"]:
+            elif d["method"] in ["ersd", "ersd_nocc", "ersd_cc"]:
                 step_output_ids, step_output_logprobs, meta = step
                 if "accepted_draft_len" in meta:
                     ersd_meta["accepted_draft_lens"].append(meta["accepted_draft_len"])
@@ -396,7 +407,7 @@ class Worker:
             "target_gaps": [],
             "accept_indicators": [],
         }
-        if d["method"] in ["ersd", "ersd_nocc", "ersd_wm", "ersd_nocc_wm"]:
+        if d["method"] in ["ersd", "ersd_nocc", "ersd_cc", "ersd_wm", "ersd_nocc_wm"]:
             r["target_fwd"] = len(gen_seq_lens)
             if ersd_meta["draft_lens"]:
                 r["draft_fwd"] = int(sum(ersd_meta["draft_lens"]))

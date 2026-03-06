@@ -20,6 +20,7 @@ def estimate_fpass(config):
         + len(config["ns"]) * len(config["reweights"])  # mc_uwm_speed
         + len(config["ns"])  # ersd
         + len(config["ns"])  # ersd_wm
+        + len(config["ns"])  # ersd_cc
         + len(config["ns"])  # ersd_nocc
         + len(config["ns"])  # ersd_nocc_wm
     )
@@ -104,6 +105,14 @@ def run(config):
             ds.extend(
                 [
                     {**d, "method": "ersd", "n": n, "reweight": "none"}
+                    for n in config["ns"]
+                ]
+            )
+
+        if "ersd_cc" in config["methods"]:
+            ds.extend(
+                [
+                    {**d, "method": "ersd_cc", "n": n, "reweight": "none"}
                     for n in config["ns"]
                 ]
             )
