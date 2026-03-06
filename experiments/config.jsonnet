@@ -158,6 +158,23 @@ local Exp3_AATPS_Decompose_Config = DefaultConfig {
   repartition_size: 50,
 };
 
+
+local Exp2CC_GapAcceptance_Config = DefaultConfig {
+  data_folder: 'extra_exp2cc_exp4_data',
+  task: 'summarization_scan_n',
+  model_str: large_qwens[0],
+  ref_model_str: small_qwens[0],
+  ds_name: 'summarization',
+  ds_cut_len: 200,
+  ns: [1, 2, 3, 4, 5, 6, 7, 8],
+  top_k: 0,
+  top_p: 1.0,
+  methods: ['ersd', 'ersd_cc', 'ersd_wm'],
+  reweights: ['deltagumbel'],
+  seeds: [1],
+  repartition_size: 50,
+};
+
 local Exp4_GapAcceptance_Config = DefaultConfig {
   data_folder: 'extra_exp4_data',
   task: 'summarization_scan_n',
@@ -194,6 +211,9 @@ local configs = [
                 ]
                 + [
                   Exp4_GapAcceptance_Config
+                ]
+                + [
+                  Exp2CC_GapAcceptance_Config
                 ]
 ;
 configs

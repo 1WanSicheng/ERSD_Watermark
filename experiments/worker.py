@@ -226,7 +226,7 @@ class Worker:
                 seed_source="cc",
             )
 
-if ("uwm" in d["method"] or d["method"] in ["ersd_wm", "ersd_nocc_wm"]):
+        if ("uwm" in d["method"] or d["method"] in ["ersd_wm", "ersd_nocc_wm"]):
             if "deltagumbel" == d["reweight"]:
                 reweight = uwm.DeltaGumbel_Reweight()
             elif "gamma" == d["reweight"]:
