@@ -205,13 +205,17 @@ class Worker:
             )
         elif d["method"] == "ersd":
             generator = accuwm.ersd.ersd_sample_generator
+        elif d["method"] == "ersd_nocc":
+            generator = accuwm.ersd.ersd_sample_generator
         elif d["method"] == "ersd_wm":
+            generator = accuwm.ersd_wm.ersd_wm_sample_generator
+        elif d["method"] == "ersd_nocc_wm":
             generator = accuwm.ersd_wm.ersd_wm_sample_generator
         else:
             raise ValueError(f"unknown sampling method {d['method']}")
-        if "mc" in d["method"] or d["method"] == "ersd" or d["method"] == "ersd_wm":
+        if ("mc" in d["method"] or d["method"] in ["ersd", "ersd_nocc", "ersd_wm", "ersd_nocc_wm"]):
             generator = partial(generator, ref_model=self.ref_model)
-        if "uwm" in d["method"] or d["method"] == "ersd_wm":
+        if ("uwm" in d["method"] or d["method"] in ["ersd_wm", "ersd_nocc_wm"]):
             if "deltagumbel" == d["reweight"]:
                 reweight = uwm.DeltaGumbel_Reweight()
             elif "gamma" == d["reweight"]:
@@ -244,6 +248,11 @@ class Worker:
             warpers.append(TopPLogitsWarper(top_p))
         logits_warper = LogitsProcessorList(warpers) if warpers else None
 
+        gen_kwargs = {}
+        if d["method"] in ["ersd", "ersd_nocc", "ersd_wm", "ersd_nocc_wm"]:
+            gen_kwargs["return_meta"] = True
+        if d["method"] in ["ersd_nocc", "ersd_nocc_wm"]:
+            gen_kwargs["coupled"] = False
         gen = generator(
             model=self.model,
             input_ids=input_ids,
@@ -255,6 +264,7 @@ class Worker:
                 ),
                 "logits_warper": logits_warper,
             },
+            **gen_kwargs,
         )
         output_ids = []
         output_logprobs = []
@@ -269,15 +279,43 @@ class Worker:
             "tags": [],
             "skipped": [],
         }
+        ersd_meta = {
+            "accepted_draft_lens": [],
+            "rejected_positions": [],
+            "verify_ops": [],
+            "draft_lens": [],
+            "target_gaps": [],
+            "accept_indicators": [],
+        }
         for step in gen:
-            if d["method"] == "ersd_wm":
+            if d["method"] in ["ersd_wm", "ersd_nocc_wm"]:
                 step_output_ids, step_output_logprobs, meta = step
                 ersd_wm_meta["context_codes"].append(meta["context_codes"])
                 ersd_wm_meta["time_steps"].append(meta["time_steps"])
                 ersd_wm_meta["tags"].append(meta["tags"])
                 ersd_wm_meta["skipped"].append(meta["skipped"])
-            elif d["method"] == "ersd":
-                step_output_ids, step_output_logprobs = step
+                if "accepted_draft_len" in meta:
+                    ersd_meta["accepted_draft_lens"].append(meta["accepted_draft_len"])
+                if "accept_indicators" in meta:
+                    ersd_meta["accept_indicators"].extend(meta["accept_indicators"])
+                if "target_gaps" in meta:
+                    ersd_meta["target_gaps"].extend(meta["target_gaps"])
+                if "verify_ops" in meta:
+                    ersd_meta["verify_ops"].append(meta["verify_ops"])
+                if "draft_len" in meta:
+                    ersd_meta["draft_lens"].append(meta["draft_len"])
+            elif d["method"] in ["ersd", "ersd_nocc"]:
+                step_output_ids, step_output_logprobs, meta = step
+                if "accepted_draft_len" in meta:
+                    ersd_meta["accepted_draft_lens"].append(meta["accepted_draft_len"])
+                if "accept_indicators" in meta:
+                    ersd_meta["accept_indicators"].extend(meta["accept_indicators"])
+                if "target_gaps" in meta:
+                    ersd_meta["target_gaps"].extend(meta["target_gaps"])
+                if "verify_ops" in meta:
+                    ersd_meta["verify_ops"].append(meta["verify_ops"])
+                if "draft_len" in meta:
+                    ersd_meta["draft_lens"].append(meta["draft_len"])
             else:
                 step_output_ids, step_output_logprobs = step
             if t_got_first_output is None:
@@ -350,9 +388,36 @@ class Worker:
             "u_score_std": None,
             "u_skipped_ratio": None,
             "u_score_count": None,
+            "target_fwd": None,
+            "draft_fwd": None,
+            "verify_ops": None,
+            "accepted_draft_lens": [],
+            "rejected_positions": [],
+            "target_gaps": [],
+            "accept_indicators": [],
         }
+        if d["method"] in ["ersd", "ersd_nocc", "ersd_wm", "ersd_nocc_wm"]:
+            r["target_fwd"] = len(gen_seq_lens)
+            if ersd_meta["draft_lens"]:
+                r["draft_fwd"] = int(sum(ersd_meta["draft_lens"]))
+            else:
+                r["draft_fwd"] = int(d["n"] * len(gen_seq_lens))
+            if ersd_meta["verify_ops"]:
+                r["verify_ops"] = int(sum(ersd_meta["verify_ops"]))
+            r["accepted_draft_lens"] = ersd_meta["accepted_draft_lens"]
+            r["target_gaps"] = ersd_meta["target_gaps"]
+            r["accept_indicators"] = ersd_meta["accept_indicators"]
+            rejected_positions = []
+            for val in ersd_meta["accepted_draft_lens"]:
+                if val is None:
+                    continue
+                if val >= d["n"]:
+                    rejected_positions.append(0)
+                else:
+                    rejected_positions.append(int(val) + 1)
+            r["rejected_positions"] = rejected_positions
         log_p_values = []
-        if d["method"] == "ersd_wm":
+        if d["method"] in ["ersd_wm", "ersd_nocc_wm"]:
             out_ids = torch.tensor(output_ids).unsqueeze(0).to(input_ids.device)
             context_codes = np.concatenate(ersd_wm_meta["context_codes"], axis=0)[
                 None, :

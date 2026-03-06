@@ -236,6 +236,8 @@ def gen_ersd(
     past_key_values=None,
     process_logits_kwargs={},
     debug_iter=None,
+    coupled: bool = True,
+    return_meta: bool = False,
 ) -> tuple[LongTensor, FloatTensor, FloatTensor, any, bool]:
     """
     Generate tokens using ERSD (Exponentially Smoothed Random Sampling Decoding) algorithm.
@@ -323,6 +325,9 @@ def gen_ersd(
     # Verify each draft token sequentially using exponential races
     accepted_tokens = []
     original_seq_len = input_ids.shape[1]
+    accepted_draft_len = 0
+    target_gaps = []
+    accept_indicators = []
     do_debug = _ersd_debug_enabled()
     max_debug_steps, max_debug_iters = _ersd_debug_limits()
     debug_active = do_debug and (debug_iter is not None) and (debug_iter < max_debug_iters)
@@ -342,12 +347,27 @@ def gen_ersd(
         prefix_len = input_ids.shape[1] + k
         t = prefix_len + 1
         prefix_tokens = _ids[:, :prefix_len]
-        exp_noise_k = sample_seeded_exponential_noise_from_tokens(
-            prefix_tokens, t, vocab_size, device
-        )[0, :]  # [vocab_size]
+        if coupled:
+            exp_noise_k = sample_seeded_exponential_noise_from_tokens(
+                prefix_tokens, t, vocab_size, device
+            )[0, :]  # [vocab_size]
+        else:
+            exp_noise_k = sample_exponential_noise((1, vocab_size), device)[0, :]
         
         # Compute x1^next_k = arg min_i (ei_k / P(i|x:n||x̃1...x̃k-1))
         # Use exponential_sample to find the token with minimum ratio
+        ratios = torch.where(
+            target_probs_before > 0,
+            exp_noise_k / target_probs_before,
+            torch.full_like(target_probs_before, float("inf")),
+        )
+        if ratios.numel() >= 2:
+            top2 = torch.topk(-ratios, k=2)
+            min1 = -top2.values[0]
+            min2 = -top2.values[1]
+            target_gaps.append(float((min2 - min1).item()))
+        else:
+            target_gaps.append(float("nan"))
         x1_next_k = exponential_sample(
             target_probs_before.unsqueeze(0),  # [1, vocab_size]
             exp_noise_k.unsqueeze(0),  # [1, vocab_size]
@@ -400,6 +420,8 @@ def gen_ersd(
         if draft_token_k == x1_next_k:
             # Accept x̃k
             accepted_tokens.append(draft_token_k)
+            accepted_draft_len += 1
+            accept_indicators.append(1)
             
             # If this is the last draft token and it's accepted, generate additional token
             if k == n - 1:
@@ -412,6 +434,7 @@ def gen_ersd(
             # Reject x̃k and all subsequent tokens
             # Return x1^next_k
             accepted_tokens.append(x1_next_k)
+            accept_indicators.append(0)
             break
     
     # Build output tensors
@@ -462,7 +485,23 @@ def gen_ersd(
     past_key_values = output.past_key_values
     cache_len_needed = original_seq_len + accept_count - 1
     past_key_values = truncate_cache(past_key_values, cache_len_needed)
-    
+    verify_ops = accepted_draft_len if accepted_draft_len == n else accepted_draft_len + 1
+    if return_meta:
+        meta = {
+            "accepted_draft_len": accepted_draft_len,
+            "target_gaps": target_gaps,
+            "accept_indicators": accept_indicators,
+            "verify_ops": verify_ops,
+            "draft_len": n,
+        }
+        return (
+            output_ids,
+            output_logprobs,
+            poverlaps,
+            past_key_values,
+            got_eos,
+            meta,
+        )
     return (
         output_ids,
         output_logprobs,
@@ -479,6 +518,8 @@ def ersd_sample_generator(
     n: int,
     past_key_values=None,
     ref_past_key_values=None,
+    coupled: bool = True,
+    return_meta: bool = False,
     **kwargs,
 ):
     """
@@ -525,7 +566,7 @@ def ersd_sample_generator(
         # exp_noises: (n, vocab_size) - exponential noises used for draft generation
         
         # Step 3: Verify draft tokens using target model
-        output_ids, output_logprobs, poverlaps, past_key_values, got_eos = gen_ersd(
+        output_ids, output_logprobs, poverlaps, past_key_values, got_eos, meta = gen_ersd(
             model,
             input_ids,
             ref_output_ids,
@@ -534,6 +575,8 @@ def ersd_sample_generator(
             past_key_values=past_key_values,
             **kwargs,
             debug_iter=debug_iter,
+            coupled=coupled,
+            return_meta=True,
         )
         
         # Step 4: Fix reference model cache to match accepted tokens
@@ -542,7 +585,10 @@ def ersd_sample_generator(
         )
         
         # Yield results
-        yield output_ids, output_logprobs
+        if return_meta:
+            yield output_ids, output_logprobs, meta
+        else:
+            yield output_ids, output_logprobs
         
         # Update input_ids for next iteration
         input_ids = torch.cat([input_ids, output_ids], dim=1)

@@ -41,6 +41,13 @@ local small_llamas = [
   '/mnt/workspace0/A24738/AcceleratedUnbiasedWatermark-main/model-weights/JackFram__llama-68m',
 ];
 
+local large_qwens = [
+  '/mnt/workspace0/A24738/model-weights/Qwen2.5-7B-Instruct',
+];
+local small_qwens = [
+  '/mnt/workspace0/A24738/model-weights/Qwen2.5-0.5B-Instruct',
+];
+
 local DefaultConfig = BaseConfig {
   device: 'cuda:0',
   max_length: 32,
@@ -105,6 +112,21 @@ local Exp3_Config_Template = Exp2_Config_Template {
   task: 'oeg_scan_n',
   ds_name: 'oeg',
 };
+local Exp1_RaceSharpness_Config = DefaultConfig {
+  data_folder: 'extra_exp1_data',
+  task: 'summarization_scan_n',
+  model_str: large_qwens[0],
+  ref_model_str: small_qwens[0],
+  ds_name: 'summarization',
+  ds_cut_len: 200,
+  ns: [1, 2, 3, 4, 5, 6, 7, 8],
+  top_k: 0,
+  top_p: 1.0,
+  methods: ['ersd', 'ersd_wm', 'ersd_nocc', 'ersd_nocc_wm'],
+  reweights: ['deltagumbel'],
+  seeds: [1],
+  repartition_size: 50,
+};
 local configs = [
                   // Debug_Config,
                   // Exp1_Verify_Config,
@@ -114,6 +136,9 @@ local configs = [
                     model_str: model_str,
                   }
                   for model_str in large_llamas
+                ]
+                + [
+                  Exp1_RaceSharpness_Config
                 ]
 ;
 configs

@@ -18,6 +18,10 @@ def estimate_fpass(config):
         + len(config["reweights"])  # basic_uwm
         + len(config["ns"]) * len(config["reweights"])  # mc_uwm_strength
         + len(config["ns"]) * len(config["reweights"])  # mc_uwm_speed
+        + len(config["ns"])  # ersd
+        + len(config["ns"])  # ersd_wm
+        + len(config["ns"])  # ersd_nocc
+        + len(config["ns"])  # ersd_nocc_wm
     )
     n_fm2 = len(config["seeds"])
     return config["ds_cut_len"] * n_fm1 * n_fm2
@@ -107,6 +111,20 @@ def run(config):
             ds.extend(
                 [
                     {**d, "method": "ersd_wm", "n": n, "reweight": "ersd"}
+                    for n in config["ns"]
+                ]
+            )
+        if "ersd_nocc" in config["methods"]:
+            ds.extend(
+                [
+                    {**d, "method": "ersd_nocc", "n": n, "reweight": "none"}
+                    for n in config["ns"]
+                ]
+            )
+        if "ersd_nocc_wm" in config["methods"]:
+            ds.extend(
+                [
+                    {**d, "method": "ersd_nocc_wm", "n": n, "reweight": "ersd"}
                     for n in config["ns"]
                 ]
             )

@@ -26,6 +26,7 @@ from .basic_watermark import gen_n_token_uwm
 from .ersd import (
     log,
     exponential_sample,
+    sample_exponential_noise,
 )
 import torch.nn.functional as F
 import os
@@ -241,6 +242,8 @@ def gen_ersd_wm(
     process_logits_kwargs={},
     nonce: bytes = None,
     debug_iter=None,
+    coupled: bool = True,
+    return_meta: bool = False,
 ) -> tuple[
     LongTensor,
     FloatTensor,
@@ -346,6 +349,9 @@ def gen_ersd_wm(
     context_codes = []
     skipped_flags = []
     original_seq_len = input_ids.shape[1]
+    accepted_draft_len = 0
+    target_gaps = []
+    accept_indicators = []
     do_debug = _ersd_wm_debug_enabled()
     max_debug_steps, max_debug_iters = _ersd_wm_debug_limits()
     debug_active = do_debug and (debug_iter is not None) and (debug_iter < max_debug_iters)
@@ -363,17 +369,32 @@ def gen_ersd_wm(
         prefix_tokens = _ids[:, :prefix_len]
         cc_step = cc_extractor.extract(prefix_tokens)[0]
         t = prefix_len + 1
-        exp_noise_k = sample_seeded_exponential_noise(
-            cc_step,
-            t,
-            "race",
-            private_key,
-            vocab_size,
-            device,
-            nonce=nonce,
-        )[0, :]  # [vocab_size]
+        if coupled:
+            exp_noise_k = sample_seeded_exponential_noise(
+                cc_step,
+                t,
+                "race",
+                private_key,
+                vocab_size,
+                device,
+                nonce=nonce,
+            )[0, :]  # [vocab_size]
+        else:
+            exp_noise_k = sample_exponential_noise((1, vocab_size), device)[0, :]
         
         # Compute x1^next_k = arg min_i (e_{n+1,race}(i) / P(i|x:n||x̃1...x̃k-1))
+        ratios = torch.where(
+            target_probs_before > 0,
+            exp_noise_k / target_probs_before,
+            torch.full_like(target_probs_before, float("inf")),
+        )
+        if ratios.numel() >= 2:
+            top2 = torch.topk(-ratios, k=2)
+            min1 = -top2.values[0]
+            min2 = -top2.values[1]
+            target_gaps.append(float((min2 - min1).item()))
+        else:
+            target_gaps.append(float("nan"))
         x1_next_k = exponential_sample(
             target_probs_before.unsqueeze(0),
             exp_noise_k.unsqueeze(0),
@@ -427,6 +448,8 @@ def gen_ersd_wm(
         # Check if x̃k = x1^next_k (acceptance condition)
         if draft_token_k == x1_next_k:
             accepted_tokens.append(draft_token_k)
+            accepted_draft_len += 1
+            accept_indicators.append(1)
             # Use context code from draft generation (all draft tokens share c_n)
             context_codes.append(ref_context_codes[0, k])
             skipped_flags.append(False)
@@ -486,6 +509,7 @@ def gen_ersd_wm(
             accepted_tokens.append(x1_next_k)
             context_codes.append(cc_reject[0])
             skipped_flags.append(skipped_reject[0])
+            accept_indicators.append(0)
             break
     
     # Build output tensors
@@ -555,7 +579,28 @@ def gen_ersd_wm(
     past_key_values = output.past_key_values
     cache_len_needed = original_seq_len + accept_count - 1
     past_key_values = truncate_cache(past_key_values, cache_len_needed)
-    
+    verify_ops = accepted_draft_len if accepted_draft_len == n else accepted_draft_len + 1
+    if return_meta:
+        meta = {
+            "accepted_draft_len": accepted_draft_len,
+            "target_gaps": target_gaps,
+            "accept_indicators": accept_indicators,
+            "verify_ops": verify_ops,
+            "draft_len": n,
+        }
+        return (
+            output_ids,
+            output_logprobs,
+            poverlaps,
+            context_codes,
+            time_steps,
+            tags,
+            watermark_code,
+            skipped,
+            past_key_values,
+            got_eos,
+            meta,
+        )
     return (
         output_ids,
         output_logprobs,
@@ -582,6 +627,8 @@ def ersd_wm_sample_generator(
     past_key_values=None,
     ref_past_key_values=None,
     nonce: bytes = None,
+    coupled: bool = True,
+    return_meta: bool = False,
     **kwargs,
 ):
     """
@@ -625,7 +672,7 @@ def ersd_wm_sample_generator(
         )
         
         # Step 2: Verify draft tokens using target model
-        output_ids, output_logprobs, poverlaps, context_codes, time_steps, tags, watermark_code, skipped, past_key_values, got_eos = gen_ersd_wm(
+        output_ids, output_logprobs, poverlaps, context_codes, time_steps, tags, watermark_code, skipped, past_key_values, got_eos, meta = gen_ersd_wm(
             reweight,
             cc_extractor,
             cch,
@@ -640,6 +687,8 @@ def ersd_wm_sample_generator(
             nonce=nonce,
             **kwargs,
             debug_iter=debug_iter,
+            coupled=coupled,
+            return_meta=True,
         )
         
         # Step 3: Fix reference model cache
@@ -648,12 +697,15 @@ def ersd_wm_sample_generator(
         )
         
         # Yield results with ERSD watermark metadata
-        yield output_ids, output_logprobs, {
+        step_meta = {
             "context_codes": context_codes,
             "time_steps": time_steps,
             "tags": tags,
             "skipped": skipped,
         }
+        if return_meta:
+            step_meta.update(meta)
+        yield output_ids, output_logprobs, step_meta
         
         # Update input_ids for next iteration
         input_ids = torch.cat([input_ids, output_ids], dim=1)
