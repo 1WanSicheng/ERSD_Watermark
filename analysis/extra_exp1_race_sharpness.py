@@ -11,13 +11,46 @@ def _flatten_gap(df):
     return df.explode("target_gaps").filter(pl.col("target_gaps").is_not_null())
 
 
-def _summary_table(df):
+def _gap_accept_pairs(df):
+    records = []
+    for row in df.iter_rows(named=True):
+        gaps = row.get("target_gaps") or []
+        accs = row.get("accept_indicators") or []
+        m = min(len(gaps), len(accs))
+        for i in range(m):
+            g = gaps[i]
+            if g is None or not np.isfinite(g):
+                continue
+            records.append(
+                {
+                    "method": row["method"],
+                    "n": row["n"],
+                    "gap": float(g),
+                    "accept": int(accs[i]),
+                }
+            )
+    if not records:
+        return pl.DataFrame({"method": [], "n": [], "gap": [], "accept": []})
+    return pl.DataFrame(records)
+
+
+def _summary_table(df, pair_df):
     rows = []
     for (method, n), g in df.group_by(["method", "n"]):
         vals = g["target_gaps"].to_list()
         vals = [v for v in vals if np.isfinite(v)]
         if not vals:
             continue
+        corr_gap_accept = float("nan")
+        corr_gap_reject = float("nan")
+        pair = pair_df.filter((pl.col("method") == method) & (pl.col("n") == n))
+        if pair.height > 1:
+            gaps = pair["gap"].to_list()
+            accepts = pair["accept"].to_list()
+            if len(set(accepts)) > 1:
+                corr_gap_accept = float(np.corrcoef(gaps, accepts)[0, 1])
+                rejects = [1 - a for a in accepts]
+                corr_gap_reject = float(np.corrcoef(gaps, rejects)[0, 1])
         mean = float(np.mean(vals))
         median = float(np.median(vals))
         row = {
@@ -25,6 +58,8 @@ def _summary_table(df):
             "n": n,
             "gap_mean": mean,
             "gap_median": median,
+            "corr_gap_accept": corr_gap_accept,
+            "corr_gap_reject": corr_gap_reject,
         }
         for tau in TAUS:
             row[f"p_gap_gt_{tau}"] = float(np.mean(np.array(vals) > tau))
@@ -34,11 +69,14 @@ def _summary_table(df):
 
 
 def _write_table(rows, out_path):
-    headers = ["method", "n", "gap_mean", "gap_median"] + [f"p_gap_gt_{t}" for t in TAUS]
-    lines = ["	".join(headers)]
+    headers = (
+        ["method", "n", "gap_mean", "gap_median", "corr_gap_accept", "corr_gap_reject"]
+        + [f"p_gap_gt_{t}" for t in TAUS]
+    )
+    lines = ["\t".join(headers)]
     for r in rows:
         line = [str(r[h]) for h in headers]
-        lines.append("	".join(line))
+        lines.append("\t".join(line))
     with open(out_path, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
 
@@ -94,9 +132,10 @@ def main():
     )
     ds = pl.read_parquet(os.path.join(folder, "*"))
     ds = ds.filter(pl.col("method").is_in(METHODS))
+    pair_df = _gap_accept_pairs(ds)
     ds = _flatten_gap(ds)
 
-    rows = _summary_table(ds)
+    rows = _summary_table(ds, pair_df)
     out_table = os.path.join(repo_root, "logs", "exp1_gap_summary.txt")
     os.makedirs(os.path.dirname(out_table), exist_ok=True)
     _write_table(rows, out_table)
