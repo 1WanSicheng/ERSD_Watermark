@@ -1,0 +1,3 @@
+run_utc: 2026-03-06T08:01:36.462666
+analysis: python -m analysis.extra_exp4_gap_acceptance
+source_data: extra_exp1_data (reused from exp1 run)
