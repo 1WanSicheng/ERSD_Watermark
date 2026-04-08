@@ -1,0 +1,16 @@
+ERSD_WM temperature invariance experiment
+dataset_size=100
+n=4
+max_length=32
+target_temperature=1.0
+log_p_threshold=-4.605170 (p=0.01)
+
+temperature	gamma_tpr	u_tpr	gamma_mean_logp	u_mean_logp	mean_aatps	mean_accept_len	mean_verify_ops
+0.70	0.410000	0.120000	-4.848221	-2.286689	2.617812	1.743619	31.080000
+1.30	0.410000	0.150000	-4.914090	-2.476922	2.079766	1.161692	32.310000
+
+delta_mean_aatps	-0.538045
+delta_mean_accept_len	-0.581928
+delta_mean_verify_ops	1.230000
+delta_gamma_tpr	0.000000
+delta_u_tpr	0.030000

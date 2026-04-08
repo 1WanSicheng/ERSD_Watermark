@@ -249,6 +249,8 @@ class Worker:
 
         warpers = []
         temperature = self.param.get("temperature", 1.0)
+        draft_temperature = self.param.get("draft_temperature", None)
+        target_temperature = self.param.get("target_temperature", None)
         top_k = self.param.get("top_k", 0)
         top_p = self.param.get("top_p", 0.0)
         if temperature is not None and temperature != 1.0:
@@ -259,11 +261,44 @@ class Worker:
             warpers.append(TopPLogitsWarper(top_p))
         logits_warper = LogitsProcessorList(warpers) if warpers else None
 
+        def build_logits_warper(local_temperature):
+            local_warpers = []
+            if local_temperature is not None and local_temperature != 1.0:
+                local_warpers.append(TemperatureLogitsWarper(local_temperature))
+            if top_k is not None and top_k > 0:
+                local_warpers.append(TopKLogitsWarper(top_k))
+            if top_p is not None and top_p > 0.0:
+                local_warpers.append(TopPLogitsWarper(top_p))
+            return LogitsProcessorList(local_warpers) if local_warpers else None
+
         gen_kwargs = {}
         if d["method"] in ["ersd", "ersd_nocc", "ersd_cc", "ersd_wm", "ersd_nocc_wm"]:
             gen_kwargs["return_meta"] = True
         if d["method"] in ["ersd_nocc", "ersd_nocc_wm"]:
             gen_kwargs["coupled"] = False
+        use_split_temperature = (
+            d["method"] in ["ersd_wm", "ersd_nocc_wm"]
+            and (draft_temperature is not None or target_temperature is not None)
+        )
+        if use_split_temperature:
+            gen_kwargs["draft_process_logits_kwargs"] = {
+                "logits_processor": transformers.LogitsProcessorList(
+                    ([self.max_length_lp] if "max_length" in d else [])
+                    + ([self.stop_words_lp] if "stop_words" in d else [])
+                ),
+                "logits_warper": build_logits_warper(
+                    temperature if draft_temperature is None else draft_temperature
+                ),
+            }
+            gen_kwargs["target_process_logits_kwargs"] = {
+                "logits_processor": transformers.LogitsProcessorList(
+                    ([self.max_length_lp] if "max_length" in d else [])
+                    + ([self.stop_words_lp] if "stop_words" in d else [])
+                ),
+                "logits_warper": build_logits_warper(
+                    temperature if target_temperature is None else target_temperature
+                ),
+            }
         gen = generator(
             model=self.model,
             input_ids=input_ids,

@@ -28,7 +28,9 @@ TOP_P = float(os.environ.get("ERSD_TEMP_TOP_P", "1.0"))
 TEMPERATURES = [
     float(x) for x in os.environ.get("ERSD_TEMP_LIST", "0.7,1.3").split(",") if x
 ]
+TARGET_TEMPERATURE = float(os.environ.get("ERSD_TARGET_TEMP", "1.0"))
 LOG_P_THRESHOLD = math.log(0.01)
+OUT_PREFIX = os.environ.get("ERSD_TEMP_OUT_PREFIX", "ersd_wm_temp_invariance")
 
 
 @dataclass
@@ -59,7 +61,9 @@ def _make_worker(temperature: float) -> Worker:
             "print_output": False,
             "assert_cch": True,
             "assert_log_p_values": True,
-            "temperature": temperature,
+            "temperature": TARGET_TEMPERATURE,
+            "draft_temperature": temperature,
+            "target_temperature": TARGET_TEMPERATURE,
             "top_k": TOP_K,
             "top_p": TOP_P,
         }
@@ -129,6 +133,7 @@ def _write_summary(results: list[RunResult], out_path: str):
         f"dataset_size={DATASET_SIZE}",
         f"n={N}",
         f"max_length={MAX_LENGTH}",
+        f"target_temperature={TARGET_TEMPERATURE}",
         f"log_p_threshold={LOG_P_THRESHOLD:.6f} (p=0.01)",
         "",
         "temperature\tgamma_tpr\tu_tpr\tgamma_mean_logp\tu_mean_logp\tmean_aatps\tmean_accept_len\tmean_verify_ops",
@@ -180,11 +185,11 @@ def main():
         results.append(_run_temperature(prompts, temperature))
     _write_summary(
         results,
-        os.path.join(LOG_DIR, "ersd_wm_temp_invariance_summary.txt"),
+        os.path.join(LOG_DIR, f"{OUT_PREFIX}_summary.txt"),
     )
     _plot_tpr(
         results,
-        os.path.join(LOG_DIR, "ersd_wm_temp_invariance_tpr.png"),
+        os.path.join(LOG_DIR, f"{OUT_PREFIX}_tpr.png"),
     )
 
 

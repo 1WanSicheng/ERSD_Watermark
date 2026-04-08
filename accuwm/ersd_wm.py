@@ -653,6 +653,12 @@ def ersd_wm_sample_generator(
     """
     model.eval()
     ref_model.eval()
+    draft_process_logits_kwargs = kwargs.pop("draft_process_logits_kwargs", None)
+    target_process_logits_kwargs = kwargs.pop("target_process_logits_kwargs", None)
+    if draft_process_logits_kwargs is None:
+        draft_process_logits_kwargs = kwargs
+    if target_process_logits_kwargs is None:
+        target_process_logits_kwargs = kwargs
 
     debug_iter = 0
     while True:
@@ -668,7 +674,7 @@ def ersd_wm_sample_generator(
             past_key_values=ref_past_key_values,
             max_vocab_size=model.config.vocab_size,
             nonce=nonce,
-            **kwargs,
+            process_logits_kwargs=draft_process_logits_kwargs,
         )
         
         # Step 2: Verify draft tokens using target model
@@ -685,7 +691,7 @@ def ersd_wm_sample_generator(
             ref_context_codes,
             past_key_values=past_key_values,
             nonce=nonce,
-            **kwargs,
+            process_logits_kwargs=target_process_logits_kwargs,
             debug_iter=debug_iter,
             coupled=coupled,
             return_meta=True,
