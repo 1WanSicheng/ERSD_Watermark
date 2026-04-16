@@ -1,3 +1,0 @@
-run_utc: 2026-03-06T07:29:47.756687
-command: python -m experiments.run_extra_exp2
-analysis: python -m analysis.extra_exp2_acceptance_dynamics

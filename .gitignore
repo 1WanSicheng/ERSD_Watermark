@@ -1,8 +1,7 @@
 .venv/
 data_root/
-logs/*
-!logs/*.txt
-!logs/*.png
+logs/
+model/
 __pycache__/
 *.pyc
 *.pyo

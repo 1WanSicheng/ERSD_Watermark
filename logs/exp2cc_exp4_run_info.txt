@@ -1,3 +1,0 @@
-run_utc: 2026-03-06T18:46:56.400418+00:00
-command: python -m experiments.run_extra_exp2cc_exp4
-analysis: python -m analysis.extra_exp2cc_exp4_gap_accept
