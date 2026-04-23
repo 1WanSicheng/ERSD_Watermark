@@ -45,6 +45,23 @@ def get_summarization_ds(ds_cut_len=None):
     return ds
 
 
+def get_gsm8k_chat_prompts(ds_cut_len=None):
+    ds = load_dataset("openai/gsm8k", "main")["train"]
+    if ds_cut_len is not None:
+        ds = ds.select(range(0, ds_cut_len))
+
+    def create_prompt(d, idx):
+        return {
+            "idx": idx,
+            "prompt": [
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": f"{d['question']}"},
+            ],
+        }
+
+    return ds.map(create_prompt, with_indices=True, remove_columns=ds.column_names)
+
+
 def get_oeg_ds(ds_cut_len=None):
     cnn_daily = load_dataset("cnn_dailymail", "3.0.0").shuffle(seed=42)
     ds = cnn_daily["test"]
