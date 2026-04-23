@@ -18,6 +18,7 @@ reference measure `mu` is the counting measure on the vocabulary.
 
 from __future__ import annotations
 
+import hashlib
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Callable
@@ -190,14 +191,17 @@ class SharedPFRSource:
     label: bytes
     private_key: bytes
 
-    def exponential_noise(
-        self,
-        vocab_size: int,
-        device,
-    ) -> FloatTensor:
-        rng = uwm.lm.get_rng(self.label, self.private_key)
-        uniform_noise = rng.random(vocab_size).astype(np.float32)
-        uniform_noise = torch.from_numpy(uniform_noise).unsqueeze(0).to(device)
+    def seed(self) -> int:
+        digest = hashlib.sha256(self.label + self.private_key).digest()
+        return int.from_bytes(digest, "big") % (2**32 - 1)
+
+    def uniform_noise(self, shape, device) -> FloatTensor:
+        generator = torch.Generator(device=device)
+        generator.manual_seed(self.seed())
+        return torch.rand(shape, device=device, dtype=torch.float32, generator=generator)
+
+    def exponential_noise(self, vocab_size: int, device) -> FloatTensor:
+        uniform_noise = self.uniform_noise((1, vocab_size), device=device)
         return -_safe_log(uniform_noise)
 
 

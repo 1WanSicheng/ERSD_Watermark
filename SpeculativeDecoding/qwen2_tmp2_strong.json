@@ -1,0 +1,46 @@
+{
+    "draft_model": "model-weights/Qwen2.5-0.5B-Instruct",
+    "target_model": "model-weights/Qwen2.5-7B-Instruct",
+    "datasets": ["openai/gsm8k", "openai/openai_humaneval",
+                 "facebook/natural_reasoning", "ucinlp/drop", 
+                 "google-research-datasets/mbpp"],
+    "num_test_prompts": 200,
+    "gen_length": 128,
+    "configurations": [
+        {
+            "name": "strong_20_10",
+            "strategy": "strong_multi_draft", "max_draft_len": 5, "max_num_drafts": 2,
+            "temperature": [2.0, 2.0, 1.0]
+        },
+        {
+            "name": "strong_15_10",
+            "strategy": "strong_multi_draft", "max_draft_len": 5, "max_num_drafts": 2,
+            "temperature": [2.0, 1.5, 1.0]
+        },
+        {
+            "name": "strong_10_10",
+            "strategy": "strong_multi_draft", "max_draft_len": 5, "max_num_drafts": 2,
+            "temperature": [2.0, 1.0, 1.0]
+        },
+        {
+            "name": "strong_05_10",
+            "strategy": "strong_multi_draft", "max_draft_len": 5, "max_num_drafts": 2,
+            "temperature": [2.0, 0.5, 1.0]
+        },
+        {
+            "name": "strong_10_20",
+            "strategy": "strong_multi_draft", "max_draft_len": 5, "max_num_drafts": 2,
+            "temperature": [2.0, 1.0, 2.0]
+        },
+        {
+            "name": "strong_10_15",
+            "strategy": "strong_multi_draft", "max_draft_len": 5, "max_num_drafts": 2,
+            "temperature": [2.0, 1.0, 1.5]
+        },
+        {
+            "name": "strong_10_05",
+            "strategy": "strong_multi_draft", "max_draft_len": 5, "max_num_drafts": 2,
+            "temperature": [2.0, 1.0, 0.5]
+        }
+    ]
+}
