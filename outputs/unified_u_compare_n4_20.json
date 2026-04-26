@@ -1,0 +1,584 @@
+{
+  "metric_convention": {
+    "primary_metrics": [
+      "AATPS",
+      "ANLPPT_U"
+    ],
+    "notes": {
+      "AATPS": "Average accepted tokens per decoding step",
+      "ANLPPT_U": "Primary unified watermark metric based on U-score style detection"
+    }
+  },
+  "samples": 20,
+  "n": 4,
+  "max_length": 32,
+  "elapsed_sec": 117.75580004043877,
+  "summary": {
+    "pfr_prefix": {
+      "num_samples": 20,
+      "AATPS_mean": 2.5168984919449313,
+      "AATPS_std": 0.45781745616506303,
+      "ANLPPT_U_mean": 0.009399042587747559,
+      "ANLPPT_U_std": 0.018343361685425382,
+      "detector_u": "PFR_Aaronson_U"
+    },
+    "mc_uwm_speed": {
+      "num_samples": 20,
+      "AATPS_mean": 2.5236320258688685,
+      "AATPS_std": 0.45640613375885175,
+      "ANLPPT_U_mean": 0.01868974790467332,
+      "ANLPPT_U_std": 0.02132443826238197,
+      "detector_u": "DeltaGumbel_U"
+    },
+    "mc_uwm_strength": {
+      "num_samples": 20,
+      "AATPS_mean": 2.432126586863429,
+      "AATPS_std": 0.32566757289307074,
+      "ANLPPT_U_mean": 0.05415359923926986,
+      "ANLPPT_U_std": 0.06408949251054356,
+      "detector_u": "DeltaGumbel_U"
+    }
+  },
+  "rows": [
+    {
+      "method": "pfr_prefix",
+      "num_tokens": 32,
+      "num_steps": 16,
+      "AATPS": 2.0,
+      "detector_u": "PFR_Aaronson_U",
+      "ANLPPT_U": 0.027328136844875617,
+      "sample_idx": 0
+    },
+    {
+      "method": "mc_uwm_speed",
+      "num_tokens": 34,
+      "num_steps": 14,
+      "AATPS": 2.4285714285714284,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.010815051084179239,
+      "sample_idx": 0
+    },
+    {
+      "method": "mc_uwm_strength",
+      "num_tokens": 34,
+      "num_steps": 14,
+      "AATPS": 2.4285714285714284,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.008940409603850286,
+      "sample_idx": 0
+    },
+    {
+      "method": "pfr_prefix",
+      "num_tokens": 32,
+      "num_steps": 15,
+      "AATPS": 2.1333333333333333,
+      "detector_u": "PFR_Aaronson_U",
+      "ANLPPT_U": 0.01863938139230925,
+      "sample_idx": 1
+    },
+    {
+      "method": "mc_uwm_speed",
+      "num_tokens": 34,
+      "num_steps": 12,
+      "AATPS": 2.8333333333333335,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.03525855085938934,
+      "sample_idx": 1
+    },
+    {
+      "method": "mc_uwm_strength",
+      "num_tokens": 34,
+      "num_steps": 15,
+      "AATPS": 2.2666666666666666,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.10107221956714807,
+      "sample_idx": 1
+    },
+    {
+      "method": "pfr_prefix",
+      "num_tokens": 32,
+      "num_steps": 11,
+      "AATPS": 2.909090909090909,
+      "detector_u": "PFR_Aaronson_U",
+      "ANLPPT_U": 0.003049194758821039,
+      "sample_idx": 2
+    },
+    {
+      "method": "mc_uwm_speed",
+      "num_tokens": 34,
+      "num_steps": 10,
+      "AATPS": 3.4,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.027436308264593534,
+      "sample_idx": 2
+    },
+    {
+      "method": "mc_uwm_strength",
+      "num_tokens": 34,
+      "num_steps": 11,
+      "AATPS": 3.090909090909091,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.051309947552701574,
+      "sample_idx": 2
+    },
+    {
+      "method": "pfr_prefix",
+      "num_tokens": 32,
+      "num_steps": 11,
+      "AATPS": 2.909090909090909,
+      "detector_u": "PFR_Aaronson_U",
+      "ANLPPT_U": -0.0,
+      "sample_idx": 3
+    },
+    {
+      "method": "mc_uwm_speed",
+      "num_tokens": 34,
+      "num_steps": 11,
+      "AATPS": 3.090909090909091,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.006978833678869478,
+      "sample_idx": 3
+    },
+    {
+      "method": "mc_uwm_strength",
+      "num_tokens": 34,
+      "num_steps": 13,
+      "AATPS": 2.6153846153846154,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.04133033958105581,
+      "sample_idx": 3
+    },
+    {
+      "method": "pfr_prefix",
+      "num_tokens": 32,
+      "num_steps": 11,
+      "AATPS": 2.909090909090909,
+      "detector_u": "PFR_Aaronson_U",
+      "ANLPPT_U": 0.0020580870370996707,
+      "sample_idx": 4
+    },
+    {
+      "method": "mc_uwm_speed",
+      "num_tokens": 34,
+      "num_steps": 13,
+      "AATPS": 2.6153846153846154,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.001054813238388408,
+      "sample_idx": 4
+    },
+    {
+      "method": "mc_uwm_strength",
+      "num_tokens": 34,
+      "num_steps": 12,
+      "AATPS": 2.8333333333333335,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.017571048211822315,
+      "sample_idx": 4
+    },
+    {
+      "method": "pfr_prefix",
+      "num_tokens": 32,
+      "num_steps": 12,
+      "AATPS": 2.6666666666666665,
+      "detector_u": "PFR_Aaronson_U",
+      "ANLPPT_U": -0.0,
+      "sample_idx": 5
+    },
+    {
+      "method": "mc_uwm_speed",
+      "num_tokens": 34,
+      "num_steps": 12,
+      "AATPS": 2.8333333333333335,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.013597645168456518,
+      "sample_idx": 5
+    },
+    {
+      "method": "mc_uwm_strength",
+      "num_tokens": 34,
+      "num_steps": 13,
+      "AATPS": 2.6153846153846154,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.07979302505192565,
+      "sample_idx": 5
+    },
+    {
+      "method": "pfr_prefix",
+      "num_tokens": 32,
+      "num_steps": 11,
+      "AATPS": 2.909090909090909,
+      "detector_u": "PFR_Aaronson_U",
+      "ANLPPT_U": -0.0,
+      "sample_idx": 6
+    },
+    {
+      "method": "mc_uwm_speed",
+      "num_tokens": 34,
+      "num_steps": 17,
+      "AATPS": 2.0,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": -0.0,
+      "sample_idx": 6
+    },
+    {
+      "method": "mc_uwm_strength",
+      "num_tokens": 34,
+      "num_steps": 14,
+      "AATPS": 2.4285714285714284,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.04816254671518572,
+      "sample_idx": 6
+    },
+    {
+      "method": "pfr_prefix",
+      "num_tokens": 32,
+      "num_steps": 12,
+      "AATPS": 2.6666666666666665,
+      "detector_u": "PFR_Aaronson_U",
+      "ANLPPT_U": -0.0,
+      "sample_idx": 7
+    },
+    {
+      "method": "mc_uwm_speed",
+      "num_tokens": 34,
+      "num_steps": 16,
+      "AATPS": 2.125,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": -0.0,
+      "sample_idx": 7
+    },
+    {
+      "method": "mc_uwm_strength",
+      "num_tokens": 34,
+      "num_steps": 17,
+      "AATPS": 2.0,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.00078270130621165,
+      "sample_idx": 7
+    },
+    {
+      "method": "pfr_prefix",
+      "num_tokens": 32,
+      "num_steps": 13,
+      "AATPS": 2.4615384615384617,
+      "detector_u": "PFR_Aaronson_U",
+      "ANLPPT_U": -0.0,
+      "sample_idx": 8
+    },
+    {
+      "method": "mc_uwm_speed",
+      "num_tokens": 34,
+      "num_steps": 13,
+      "AATPS": 2.6153846153846154,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.07029469077016814,
+      "sample_idx": 8
+    },
+    {
+      "method": "mc_uwm_strength",
+      "num_tokens": 34,
+      "num_steps": 13,
+      "AATPS": 2.6153846153846154,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.11491478840006764,
+      "sample_idx": 8
+    },
+    {
+      "method": "pfr_prefix",
+      "num_tokens": 32,
+      "num_steps": 9,
+      "AATPS": 3.5555555555555554,
+      "detector_u": "PFR_Aaronson_U",
+      "ANLPPT_U": -0.0,
+      "sample_idx": 9
+    },
+    {
+      "method": "mc_uwm_speed",
+      "num_tokens": 34,
+      "num_steps": 11,
+      "AATPS": 3.090909090909091,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.006508725402898846,
+      "sample_idx": 9
+    },
+    {
+      "method": "mc_uwm_strength",
+      "num_tokens": 34,
+      "num_steps": 15,
+      "AATPS": 2.2666666666666666,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.001989059440405075,
+      "sample_idx": 9
+    },
+    {
+      "method": "pfr_prefix",
+      "num_tokens": 32,
+      "num_steps": 13,
+      "AATPS": 2.4615384615384617,
+      "detector_u": "PFR_Aaronson_U",
+      "ANLPPT_U": -0.0,
+      "sample_idx": 10
+    },
+    {
+      "method": "mc_uwm_speed",
+      "num_tokens": 34,
+      "num_steps": 14,
+      "AATPS": 2.4285714285714284,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": -0.0,
+      "sample_idx": 10
+    },
+    {
+      "method": "mc_uwm_strength",
+      "num_tokens": 34,
+      "num_steps": 13,
+      "AATPS": 2.6153846153846154,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": -0.0,
+      "sample_idx": 10
+    },
+    {
+      "method": "pfr_prefix",
+      "num_tokens": 32,
+      "num_steps": 13,
+      "AATPS": 2.4615384615384617,
+      "detector_u": "PFR_Aaronson_U",
+      "ANLPPT_U": 0.07391176346673001,
+      "sample_idx": 11
+    },
+    {
+      "method": "mc_uwm_speed",
+      "num_tokens": 34,
+      "num_steps": 16,
+      "AATPS": 2.125,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": -0.0,
+      "sample_idx": 11
+    },
+    {
+      "method": "mc_uwm_strength",
+      "num_tokens": 34,
+      "num_steps": 12,
+      "AATPS": 2.8333333333333335,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.018555299035777628,
+      "sample_idx": 11
+    },
+    {
+      "method": "pfr_prefix",
+      "num_tokens": 32,
+      "num_steps": 10,
+      "AATPS": 3.2,
+      "detector_u": "PFR_Aaronson_U",
+      "ANLPPT_U": -0.0,
+      "sample_idx": 12
+    },
+    {
+      "method": "mc_uwm_speed",
+      "num_tokens": 34,
+      "num_steps": 14,
+      "AATPS": 2.4285714285714284,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.039528371763300485,
+      "sample_idx": 12
+    },
+    {
+      "method": "mc_uwm_strength",
+      "num_tokens": 34,
+      "num_steps": 17,
+      "AATPS": 2.0,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.09040673756799811,
+      "sample_idx": 12
+    },
+    {
+      "method": "pfr_prefix",
+      "num_tokens": 32,
+      "num_steps": 12,
+      "AATPS": 2.6666666666666665,
+      "detector_u": "PFR_Aaronson_U",
+      "ANLPPT_U": -0.0,
+      "sample_idx": 13
+    },
+    {
+      "method": "mc_uwm_speed",
+      "num_tokens": 34,
+      "num_steps": 20,
+      "AATPS": 1.7,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.0018009428413136436,
+      "sample_idx": 13
+    },
+    {
+      "method": "mc_uwm_strength",
+      "num_tokens": 34,
+      "num_steps": 15,
+      "AATPS": 2.2666666666666666,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.0019133157806160705,
+      "sample_idx": 13
+    },
+    {
+      "method": "pfr_prefix",
+      "num_tokens": 32,
+      "num_steps": 15,
+      "AATPS": 2.1333333333333333,
+      "detector_u": "PFR_Aaronson_U",
+      "ANLPPT_U": 0.0032223898578945254,
+      "sample_idx": 14
+    },
+    {
+      "method": "mc_uwm_speed",
+      "num_tokens": 34,
+      "num_steps": 17,
+      "AATPS": 2.0,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.016888737478030547,
+      "sample_idx": 14
+    },
+    {
+      "method": "mc_uwm_strength",
+      "num_tokens": 34,
+      "num_steps": 18,
+      "AATPS": 1.8888888888888888,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.27720772581111985,
+      "sample_idx": 14
+    },
+    {
+      "method": "pfr_prefix",
+      "num_tokens": 32,
+      "num_steps": 15,
+      "AATPS": 2.1333333333333333,
+      "detector_u": "PFR_Aaronson_U",
+      "ANLPPT_U": -0.0,
+      "sample_idx": 15
+    },
+    {
+      "method": "mc_uwm_speed",
+      "num_tokens": 34,
+      "num_steps": 13,
+      "AATPS": 2.6153846153846154,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.011020409458309122,
+      "sample_idx": 15
+    },
+    {
+      "method": "mc_uwm_strength",
+      "num_tokens": 34,
+      "num_steps": 13,
+      "AATPS": 2.6153846153846154,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": -0.0,
+      "sample_idx": 15
+    },
+    {
+      "method": "pfr_prefix",
+      "num_tokens": 32,
+      "num_steps": 17,
+      "AATPS": 1.8823529411764706,
+      "detector_u": "PFR_Aaronson_U",
+      "ANLPPT_U": -0.0,
+      "sample_idx": 16
+    },
+    {
+      "method": "mc_uwm_speed",
+      "num_tokens": 34,
+      "num_steps": 12,
+      "AATPS": 2.8333333333333335,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.0723070942749664,
+      "sample_idx": 16
+    },
+    {
+      "method": "mc_uwm_strength",
+      "num_tokens": 34,
+      "num_steps": 13,
+      "AATPS": 2.6153846153846154,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.11996378070086333,
+      "sample_idx": 16
+    },
+    {
+      "method": "pfr_prefix",
+      "num_tokens": 32,
+      "num_steps": 19,
+      "AATPS": 1.6842105263157894,
+      "detector_u": "PFR_Aaronson_U",
+      "ANLPPT_U": 0.0005378030319272004,
+      "sample_idx": 17
+    },
+    {
+      "method": "mc_uwm_speed",
+      "num_tokens": 34,
+      "num_steps": 19,
+      "AATPS": 1.7894736842105263,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.024378818202931862,
+      "sample_idx": 17
+    },
+    {
+      "method": "mc_uwm_strength",
+      "num_tokens": 34,
+      "num_steps": 19,
+      "AATPS": 1.7894736842105263,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.0376594939072844,
+      "sample_idx": 17
+    },
+    {
+      "method": "pfr_prefix",
+      "num_tokens": 32,
+      "num_steps": 13,
+      "AATPS": 2.4615384615384617,
+      "detector_u": "PFR_Aaronson_U",
+      "ANLPPT_U": 0.020654050343275665,
+      "sample_idx": 18
+    },
+    {
+      "method": "mc_uwm_speed",
+      "num_tokens": 34,
+      "num_steps": 11,
+      "AATPS": 3.090909090909091,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.030394208771849618,
+      "sample_idx": 18
+    },
+    {
+      "method": "mc_uwm_strength",
+      "num_tokens": 34,
+      "num_steps": 14,
+      "AATPS": 2.4285714285714284,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.02505636666263572,
+      "sample_idx": 18
+    },
+    {
+      "method": "pfr_prefix",
+      "num_tokens": 32,
+      "num_steps": 15,
+      "AATPS": 2.1333333333333333,
+      "detector_u": "PFR_Aaronson_U",
+      "ANLPPT_U": 0.03858004502201817,
+      "sample_idx": 19
+    },
+    {
+      "method": "mc_uwm_speed",
+      "num_tokens": 34,
+      "num_steps": 14,
+      "AATPS": 2.4285714285714284,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.005531756835821189,
+      "sample_idx": 19
+    },
+    {
+      "method": "mc_uwm_strength",
+      "num_tokens": 34,
+      "num_steps": 14,
+      "AATPS": 2.4285714285714284,
+      "detector_u": "DeltaGumbel_U",
+      "ANLPPT_U": 0.04644317988872804,
+      "sample_idx": 19
+    }
+  ]
+}

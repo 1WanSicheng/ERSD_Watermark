@@ -1,0 +1,39 @@
+{
+  "source_csv": "outputs/gsm8k_b8_multidraft_2026-04-23-1233_gsm8k.csv",
+  "dataset": "openai/gsm8k train",
+  "num_test_prompts": 200,
+  "gen_length": 128,
+  "lookahead": 4,
+  "drafts": 8,
+  "seed": 2155929800,
+  "summary": {
+    "invariant_4_8": {
+      "num_samples": 200,
+      "BE_mean": 4.771600656429634,
+      "BE_std": 0.19227290749170867,
+      "token_rate_mean": 41.64470162821204,
+      "token_rate_std": 1.5923974458389494,
+      "token_rate_global": 41.58147748039284,
+      "num_invocations_mean": 27.29,
+      "num_invocations_total": 5458,
+      "avg_generation_time_mean": 0.08005801693927449,
+      "avg_verification_time_mean": 0.0344612519534895,
+      "total_time_total": 625.2543578390032,
+      "num_tokens_total_est": 25999.0
+    },
+    "strong_4_8": {
+      "num_samples": 200,
+      "BE_mean": 4.753204007198184,
+      "BE_std": 0.1833596180457555,
+      "token_rate_mean": 41.61324901185353,
+      "token_rate_std": 1.5358452401374905,
+      "token_rate_global": 41.551885684965086,
+      "num_invocations_mean": 27.37,
+      "num_invocations_total": 5474,
+      "avg_generation_time_mean": 0.07996665375151711,
+      "avg_verification_time_mean": 0.034199781963873015,
+      "total_time_total": 625.1701835375279,
+      "num_tokens_total_est": 25977.0
+    }
+  }
+}

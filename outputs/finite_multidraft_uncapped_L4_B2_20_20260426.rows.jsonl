@@ -1,0 +1,1 @@
+{"sample_idx": 0, "method": "finite_multi_draft_pfr", "lookahead": 4, "num_drafts": 2, "error": "RuntimeError('finite MPFR did not terminate within max_proposals; increase max_proposals or check w_lower')", "total_time": 10.014742776751518}

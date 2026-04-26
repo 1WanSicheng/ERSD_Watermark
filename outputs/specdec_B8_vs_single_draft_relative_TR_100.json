@@ -1,0 +1,65 @@
+{
+  "samples": 100,
+  "lookahead": 4,
+  "max_length": 32,
+  "target_model": "model/Qwen2.5-7B-Instruct",
+  "draft_model": "model/Qwen2.5-0.5B-Instruct",
+  "baseline": "SpeculativeDecoding SingleDraftStrategy B=1",
+  "TR_definition": "(token_rate - token_rate_single_draft) / token_rate_single_draft * 100%",
+  "baseline_summary": {
+    "num_samples": 100,
+    "num_tokens_total": 3351,
+    "BE_mean": 2.6542354173604172,
+    "BE_std": 0.4557527130604889,
+    "acceptance_rate_mean": 2.6542354173604172,
+    "TR_mean": 37.053847298092535,
+    "TR_std": 6.392988147193599,
+    "TR_global": 35.9163589496072,
+    "token_rate_mean": 37.053847298092535,
+    "token_rate_std": 6.392988147193599,
+    "num_invocations_mean": 13.0,
+    "num_invocations_total": 1300,
+    "avg_generation_time_mean": 0.05002925123657032,
+    "avg_verification_time_mean": 0.021861214478926746,
+    "total_time_total": 93.30010329559445,
+    "elapsed_sec_total": 93.32136263884604
+  },
+  "rows": [
+    {
+      "strategy": "single_draft",
+      "B": 1,
+      "BE_mean": 2.6542354173604172,
+      "token_rate_mean": 37.053847298092535,
+      "token_rate_global": 35.9163589496072,
+      "TR_percent_mean_vs_single_draft": 0.0,
+      "TR_percent_global_vs_single_draft": 0.0,
+      "num_tokens_total": 3351,
+      "num_invocations_total": 1300,
+      "source": "outputs/specdec_single_draft_B1_100.json"
+    },
+    {
+      "strategy": "invariant_multi_draft",
+      "B": 8,
+      "BE_mean": 3.4355843045843044,
+      "token_rate_mean": 35.59518130763122,
+      "token_rate_global": 35.19587946747363,
+      "TR_percent_mean_vs_single_draft": -3.936611436665586,
+      "TR_percent_global_vs_single_draft": -2.005992542686316,
+      "num_tokens_total": 3374,
+      "num_invocations_total": 996,
+      "source": "outputs/specdec_B8_100.json"
+    },
+    {
+      "strategy": "strong_multi_draft",
+      "B": 8,
+      "BE_mean": 3.4193767343767343,
+      "token_rate_mean": 35.660156532649765,
+      "token_rate_global": 35.11890295016583,
+      "TR_percent_mean_vs_single_draft": -3.761257918052992,
+      "TR_percent_global_vs_single_draft": -2.2203141486592406,
+      "num_tokens_total": 3362,
+      "num_invocations_total": 1007,
+      "source": "outputs/specdec_B8_100.json"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "samples": 20,
+  "dataset": "gsm8k",
+  "lookahead": 4,
+  "max_length": 32,
+  "target_model": "/mnt/workspace0/A24738/AcceleratedUnbiasedWatermark-main/model/Qwen2.5-7B-Instruct",
+  "draft_model": "/mnt/workspace0/A24738/AcceleratedUnbiasedWatermark-main/model/Qwen2.5-0.5B-Instruct",
+  "target_device": "physical cuda:2",
+  "draft_device": "physical cuda:3",
+  "proposal": "uniform",
+  "max_proposals": 1000000,
+  "allow_incomplete": false,
+  "partial": true,
+  "summary": {
+    "num_samples": 1,
+    "num_tokens_total": 32,
+    "AATPS_mean": 3.2,
+    "AATPS_std": 0.0,
+    "token_rate_mean": 0.09346932592465548,
+    "token_rate_std": 0.0,
+    "token_rate_global": 0.09346932592465548,
+    "num_invocations_mean": 10.0,
+    "num_invocations_total": 10,
+    "total_time_total": 342.35830507427454,
+    "accepted_draft_mean": 2.3
+  },
+  "rows": [
+    {
+      "sample_idx": 0,
+      "method": "pfr_mpfr_firstarrival_uniform",
+      "lookahead": 4,
+      "num_tokens": 32,
+      "num_invocations": 10,
+      "AATPS": 3.2,
+      "token_rate": 0.09346932592465548,
+      "TR": 0.09346932592465548,
+      "total_time": 342.35830507427454,
+      "accepted_draft_mean": 2.3
+    }
+  ]
+}

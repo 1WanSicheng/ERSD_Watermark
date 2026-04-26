@@ -9,12 +9,12 @@ import torch
 import transformers
 
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from accuwm.active_set_multi_draft_pfr import active_set_multi_draft_pfr_sample_generator
-from experiments.run_multi_draft_pfr_aatps import encode_prompt, load_model
+from experiments.archive.run_multi_draft_pfr_aatps import encode_prompt, load_model
 from experiments.tasks import get_gsm8k_chat_prompts, get_summarization_ds
 
 
@@ -30,6 +30,9 @@ def run_prompt(
     lookahead,
     num_drafts,
     max_length,
+    proposal,
+    max_proposals,
+    allow_incomplete,
 ):
     input_ids = encode_prompt(tokenizer, prompt, target.device)
     gen = active_set_multi_draft_pfr_sample_generator(
@@ -41,6 +44,9 @@ def run_prompt(
         max_length=max_length,
         private_key=b"1234",
         return_meta=True,
+        proposal=proposal,
+        max_proposals=max_proposals,
+        allow_incomplete=allow_incomplete,
     )
 
     block_lens = []
@@ -148,6 +154,9 @@ def main():
     parser.add_argument("--lookahead", type=int, default=4)
     parser.add_argument("--draft-counts", type=int, nargs="*", default=[8])
     parser.add_argument("--max-length", type=int, default=32)
+    parser.add_argument("--proposal", choices=["uniform", "model"], default="model")
+    parser.add_argument("--max-proposals", type=int, default=100_000)
+    parser.add_argument("--allow-incomplete", action="store_true")
     parser.add_argument("--target-model", type=Path, default=DEFAULT_TARGET_MODEL)
     parser.add_argument("--draft-model", type=Path, default=DEFAULT_DRAFT_MODEL)
     parser.add_argument("--target-device", default="cuda:0" if torch.cuda.is_available() else "cpu")
@@ -176,6 +185,9 @@ def main():
                 lookahead=args.lookahead,
                 num_drafts=args.draft_counts[0],
                 max_length=args.max_length,
+                proposal=args.proposal,
+                max_proposals=args.max_proposals,
+                allow_incomplete=args.allow_incomplete,
             )
 
     results = {}
@@ -195,6 +207,9 @@ def main():
                 lookahead=args.lookahead,
                 num_drafts=num_drafts,
                 max_length=args.max_length,
+                proposal=args.proposal,
+                max_proposals=args.max_proposals,
+                allow_incomplete=args.allow_incomplete,
             )
             row = {
                 "sample_idx": idx,
@@ -236,6 +251,9 @@ def main():
                                 "lookahead": args.lookahead,
                                 "draft_counts": args.draft_counts,
                                 "max_length": args.max_length,
+                                "proposal": args.proposal,
+                                "max_proposals": args.max_proposals,
+                                "allow_incomplete": args.allow_incomplete,
                                 "target_model": str(args.target_model),
                                 "draft_model": str(args.draft_model),
                                 "target_device": args.target_device,
@@ -266,6 +284,9 @@ def main():
         "lookahead": args.lookahead,
         "draft_counts": args.draft_counts,
         "max_length": args.max_length,
+        "proposal": args.proposal,
+        "max_proposals": args.max_proposals,
+        "allow_incomplete": args.allow_incomplete,
         "target_model": str(args.target_model),
         "draft_model": str(args.draft_model),
         "target_device": args.target_device,

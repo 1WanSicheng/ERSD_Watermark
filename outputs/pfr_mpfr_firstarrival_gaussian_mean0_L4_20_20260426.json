@@ -1,0 +1,38 @@
+{
+  "samples": 20,
+  "dataset": "gsm8k",
+  "lookahead": 4,
+  "max_length": 32,
+  "target_model": "/mnt/workspace0/A24738/AcceleratedUnbiasedWatermark-main/model/Qwen2.5-7B-Instruct",
+  "draft_model": "/mnt/workspace0/A24738/AcceleratedUnbiasedWatermark-main/model/Qwen2.5-0.5B-Instruct",
+  "target_device": "physical cuda:2",
+  "draft_device": "physical cuda:3",
+  "proposal": "discrete_gaussian",
+  "gaussian_mean": 0.0,
+  "gaussian_sigma": "vocab/6",
+  "max_proposals": 100000,
+  "allow_incomplete": false,
+  "partial": true,
+  "summary": {
+    "num_samples": 0,
+    "num_tokens_total": 0,
+    "AATPS_mean": 0.0,
+    "AATPS_std": 0.0,
+    "token_rate_mean": 0.0,
+    "token_rate_std": 0.0,
+    "token_rate_global": 0.0,
+    "num_invocations_mean": 0.0,
+    "num_invocations_total": 0,
+    "total_time_total": 0.0,
+    "accepted_draft_mean": 0.0
+  },
+  "rows": [
+    {
+      "sample_idx": 0,
+      "method": "pfr_mpfr_firstarrival_gaussian_mean0",
+      "lookahead": 4,
+      "error": "RuntimeError('finite MPFR did not terminate within max_proposals; increase max_proposals or check w_lower')",
+      "total_time": 4.2299809996038675
+    }
+  ]
+}

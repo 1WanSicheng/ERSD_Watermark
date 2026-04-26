@@ -32,6 +32,7 @@ def run_prompt(
     max_length,
     max_proposals,
     allow_incomplete,
+    proposal,
 ):
     input_ids = encode_prompt(tokenizer, prompt, target.device)
     gen = finite_multi_draft_pfr_sample_generator(
@@ -45,6 +46,7 @@ def run_prompt(
         return_meta=True,
         max_proposals=max_proposals,
         allow_incomplete=allow_incomplete,
+        proposal=proposal,
     )
 
     block_lens = []
@@ -107,6 +109,7 @@ def main():
     parser.add_argument("--draft-device", default=None)
     parser.add_argument("--max-proposals", type=int, default=100_000)
     parser.add_argument("--allow-incomplete", action="store_true")
+    parser.add_argument("--proposal", choices=["uniform", "model"], default="uniform")
     parser.add_argument("--output", type=Path, default=None)
     parser.add_argument("--rows-output", type=Path, default=None)
     parser.add_argument("--progress-every", type=int, default=10)
@@ -133,6 +136,7 @@ def main():
                 args.max_length,
                 args.max_proposals,
                 args.allow_incomplete,
+                args.proposal,
             )
 
     results = {}
@@ -155,6 +159,7 @@ def main():
                 args.max_length,
                 args.max_proposals,
                 args.allow_incomplete,
+                args.proposal,
             )
             row = {
                 "sample_idx": idx,
@@ -201,6 +206,7 @@ def main():
         "draft_device": draft_device,
         "max_proposals": args.max_proposals,
         "allow_incomplete": args.allow_incomplete,
+        "proposal": args.proposal,
         "results": results,
         "rows": all_rows,
     }

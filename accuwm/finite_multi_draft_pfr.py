@@ -285,6 +285,47 @@ def finite_mpfr_tokens_from_uniform_proposal(
     )
 
 
+def finite_mpfr_tokens_from_model_proposal(
+    target_logprobs: FloatTensor,
+    source: SharedPFRSource,
+    num_samples: int,
+    **kwargs,
+) -> LongTensor | FiniteMPFRResult:
+    target_logprobs = _as_1d_logprobs(target_logprobs, "target_logprobs")
+    return finite_mpfr_tokens_from_logprobs(
+        target_logprobs,
+        target_logprobs,
+        source,
+        num_samples,
+        **kwargs,
+    )
+
+
+def finite_mpfr_tokens_from_proposal(
+    target_logprobs: FloatTensor,
+    source: SharedPFRSource,
+    num_samples: int,
+    *,
+    proposal: str = "uniform",
+    **kwargs,
+) -> LongTensor | FiniteMPFRResult:
+    if proposal == "uniform":
+        return finite_mpfr_tokens_from_uniform_proposal(
+            target_logprobs,
+            source=source,
+            num_samples=num_samples,
+            **kwargs,
+        )
+    if proposal == "model":
+        return finite_mpfr_tokens_from_model_proposal(
+            target_logprobs,
+            source=source,
+            num_samples=num_samples,
+            **kwargs,
+        )
+    raise ValueError(f"unknown finite MPFR proposal: {proposal}")
+
+
 @torch.no_grad()
 def build_finite_multi_draft_tree(
     ref_model,
@@ -298,6 +339,7 @@ def build_finite_multi_draft_tree(
     process_logits_kwargs: dict | None = None,
     max_proposals: int = 100_000,
     allow_incomplete: bool = False,
+    proposal: str = "uniform",
 ) -> tuple[
     list[list[ContextKey]],
     dict[ContextKey, int],
@@ -347,10 +389,11 @@ def build_finite_multi_draft_tree(
             past_by_context[context] = _select_cache_row(output.past_key_values, row)
             source = context_cache.source(context)
             sources[context] = source
-            draft_tokens = finite_mpfr_tokens_from_uniform_proposal(
+            draft_tokens = finite_mpfr_tokens_from_proposal(
                 logprobs[row],
                 source=source,
                 num_samples=multiplicities[context],
+                proposal=proposal,
                 max_proposals=max_proposals,
                 allow_incomplete=allow_incomplete,
             )
@@ -381,6 +424,7 @@ def evaluate_finite_target_context(
     process_logits_kwargs: dict | None = None,
     max_proposals: int = 100_000,
     allow_incomplete: bool = False,
+    proposal: str = "uniform",
 ) -> tuple[int, FloatTensor, SharedPFRSource, any]:
     if process_logits_kwargs is None:
         process_logits_kwargs = {}
@@ -404,10 +448,11 @@ def evaluate_finite_target_context(
     )
     logprobs = F.log_softmax(logits, dim=-1)
     source = context_cache.source(context)
-    tokens = finite_mpfr_tokens_from_uniform_proposal(
+    tokens = finite_mpfr_tokens_from_proposal(
         logprobs[0],
         source=source,
         num_samples=1,
+        proposal=proposal,
         max_proposals=max_proposals,
         allow_incomplete=allow_incomplete,
     )
@@ -430,6 +475,7 @@ def finite_multi_draft_pfr_block(
     process_logits_kwargs: dict | None = None,
     max_proposals: int = 100_000,
     allow_incomplete: bool = False,
+    proposal: str = "uniform",
 ) -> FiniteMultiDraftBlock:
     if process_logits_kwargs is None:
         process_logits_kwargs = {}
@@ -470,6 +516,7 @@ def finite_multi_draft_pfr_block(
         process_logits_kwargs=process_logits_kwargs,
         max_proposals=max_proposals,
         allow_incomplete=allow_incomplete,
+        proposal=proposal,
     )
     winners: dict[ContextKey, int] = {}
     logprobs_by_context: dict[ContextKey, FloatTensor] = {}
@@ -495,6 +542,7 @@ def finite_multi_draft_pfr_block(
                 process_logits_kwargs=process_logits_kwargs,
                 max_proposals=max_proposals,
                 allow_incomplete=allow_incomplete,
+                proposal=proposal,
             )
             winners[current] = token
             logprobs_by_context[current] = logprobs
@@ -530,6 +578,7 @@ def finite_multi_draft_pfr_block(
             process_logits_kwargs=process_logits_kwargs,
             max_proposals=max_proposals,
             allow_incomplete=allow_incomplete,
+            proposal=proposal,
         )
         if current in draft_past_by_context:
             draft_past_for_next = draft_past_by_context[current]
@@ -575,6 +624,7 @@ def finite_multi_draft_pfr_generator(
     return_meta: bool = False,
     max_proposals: int = 100_000,
     allow_incomplete: bool = False,
+    proposal: str = "uniform",
 ):
     if process_logits_kwargs is None:
         process_logits_kwargs = {}
@@ -608,6 +658,7 @@ def finite_multi_draft_pfr_generator(
             process_logits_kwargs=process_logits_kwargs,
             max_proposals=max_proposals,
             allow_incomplete=allow_incomplete,
+            proposal=proposal,
         )
         meta = {
             "accepted_count": block.accepted_count,
@@ -644,6 +695,7 @@ def finite_multi_draft_pfr_sample_generator(
     return_meta: bool = False,
     max_proposals: int = 100_000,
     allow_incomplete: bool = False,
+    proposal: str = "uniform",
 ):
     if B is not None:
         num_drafts = B
@@ -660,4 +712,5 @@ def finite_multi_draft_pfr_sample_generator(
         return_meta=return_meta,
         max_proposals=max_proposals,
         allow_incomplete=allow_incomplete,
+        proposal=proposal,
     )

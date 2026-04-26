@@ -11,7 +11,7 @@ import transformers
 from transformers import DynamicCache
 
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 SPECDEC = ROOT / "SpeculativeDecoding"
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -23,7 +23,7 @@ from generator import InvariantGenerator, SpeculativeGenerator
 import strategy as spec_strategy
 from strategy import InvariantMultiDraftStrategy, SingleDraftStrategy, StrongMultiDraftStrategy
 
-from experiments.run_multi_draft_pfr_aatps import load_model
+from experiments.archive.run_multi_draft_pfr_aatps import load_model
 from experiments.tasks import get_gsm8k_chat_prompts, get_summarization_ds
 
 

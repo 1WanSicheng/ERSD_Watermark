@@ -1,0 +1,67 @@
+{
+  "samples": 1,
+  "dataset": "gsm8k",
+  "warmup": 0,
+  "lookahead": 4,
+  "draft_counts": [
+    1
+  ],
+  "max_length": 128,
+  "target_model": "model/Qwen2.5-7B-Instruct",
+  "draft_model": "model/Qwen2.5-0.5B-Instruct",
+  "target_device": "cuda:0",
+  "draft_device": "cuda:0",
+  "finite_mpfr": true,
+  "finite_mpfr_max_proposals": 2000,
+  "finite_mpfr_allow_incomplete": true,
+  "results": {
+    "1": {
+      "summary": {
+        "num_samples": 1,
+        "num_tokens_total": 128,
+        "AATPS_mean": 4.266666666666667,
+        "AATPS_std": 0.0,
+        "BE_mean": 4.266666666666667,
+        "BE_std": 0.0,
+        "block_efficiency_mean": 4.266666666666667,
+        "block_efficiency_std": 0.0,
+        "acceptance_rate_mean": 4.266666666666667,
+        "accepted_draft_mean": 3.3,
+        "draft_tree_size_mean": 4.0,
+        "target_context_count_mean": 4.266666666666667,
+        "num_invocations_mean": 30.0,
+        "num_invocations_total": 30,
+        "tokens_per_sec_mean": 10.159272307899847,
+        "token_rate_mean": 10.159272307899847,
+        "token_rate_std": 0.0,
+        "TR_mean": 10.159272307899847,
+        "TR_std": 0.0,
+        "TR_global": 10.159272307899847,
+        "elapsed_sec_total": 12.599327601492405,
+        "total_time_total": 12.599327601492405
+      },
+      "rows": [
+        {
+          "sample_idx": 0,
+          "lookahead": 4,
+          "num_drafts": 1,
+          "num_steps": 30,
+          "num_invocations": 30,
+          "num_tokens": 128,
+          "AATPS": 4.266666666666667,
+          "BE": 4.266666666666667,
+          "block_efficiency": 4.266666666666667,
+          "acceptance_rate": 4.266666666666667,
+          "accepted_draft_mean": 3.3,
+          "draft_tree_size_mean": 4.0,
+          "target_context_count_mean": 4.266666666666667,
+          "elapsed_sec": 12.599327601492405,
+          "total_time": 12.599327601492405,
+          "tokens_per_sec": 10.159272307899847,
+          "token_rate": 10.159272307899847,
+          "TR": 10.159272307899847
+        }
+      ]
+    }
+  }
+}

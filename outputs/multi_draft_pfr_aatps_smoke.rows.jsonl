@@ -1,0 +1,1 @@
+{"sample_idx": 0, "lookahead": 4, "num_drafts": 2, "num_steps": 4, "num_tokens": 8, "AATPS": 2.0, "accepted_draft_mean": 1.25, "draft_tree_size_mean": 6.0, "target_context_count_mean": 6.0, "elapsed_sec": 1.6840662211179733, "tokens_per_sec": 4.750407020627236}

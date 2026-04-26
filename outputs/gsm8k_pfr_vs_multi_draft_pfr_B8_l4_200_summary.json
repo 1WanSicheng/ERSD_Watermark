@@ -1,0 +1,49 @@
+{
+  "dataset": "openai/gsm8k train",
+  "samples": 200,
+  "warmup": 10,
+  "lookahead": 4,
+  "max_length": 128,
+  "target_model": "model/Qwen2.5-7B-Instruct",
+  "draft_model": "model/Qwen2.5-0.5B-Instruct",
+  "baseline": "pfr_single B=1",
+  "TR_definition": "(token_rate - token_rate_pfr_single) / token_rate_pfr_single * 100%",
+  "rows": [
+    {
+      "method": "pfr_single",
+      "B": 1,
+      "BE_mean": 4.090782164256013,
+      "BE_std": 0.36035606237696466,
+      "token_rate_mean": 44.05140921359813,
+      "token_rate_global": 43.701087899000555,
+      "TR_percent_mean_vs_pfr_single": 0.0,
+      "TR_percent_global_vs_pfr_single": 0.0,
+      "num_tokens_total": 25600,
+      "num_invocations_mean": 31.545,
+      "num_invocations_total": 6309,
+      "accepted_draft_mean": 3.1155195361309196,
+      "draft_tree_size_mean": null,
+      "target_context_count_mean": null,
+      "total_time_total": 585.7977737113833,
+      "source": "outputs/gsm8k_pfr_l4_200.json"
+    },
+    {
+      "method": "multi_draft_pfr",
+      "B": 8,
+      "BE_mean": 4.716981811744882,
+      "BE_std": 0.175352160608535,
+      "token_rate_mean": 17.60749775268204,
+      "token_rate_global": 17.452954371013554,
+      "TR_percent_mean_vs_pfr_single": -60.029660646482064,
+      "TR_percent_global_vs_pfr_single": -60.06288353427306,
+      "num_tokens_total": 25600,
+      "num_invocations_mean": 27.175,
+      "num_invocations_total": 5435,
+      "accepted_draft_mean": 3.7473044894997063,
+      "draft_tree_size_mean": 6.475889822748833,
+      "target_context_count_mean": 6.475889822748833,
+      "total_time_total": 1466.8003740683198,
+      "source": "outputs/gsm8k_multi_draft_pfr_B8_l4_200.json"
+    }
+  ]
+}

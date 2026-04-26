@@ -1,0 +1,1 @@
+{"sample_idx": 0, "method": "pfr_mpfr_firstarrival_uniform", "lookahead": 4, "num_tokens": 32, "num_invocations": 10, "AATPS": 3.2, "token_rate": 0.09346932592465548, "TR": 0.09346932592465548, "total_time": 342.35830507427454, "accepted_draft_mean": 2.3}

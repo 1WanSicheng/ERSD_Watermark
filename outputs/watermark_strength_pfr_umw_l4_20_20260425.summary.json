@@ -1,0 +1,35 @@
+{
+  "pfr_prefix": {
+    "num_samples": 20,
+    "AATPS_mean": 2.261108210282567,
+    "AATPS_std": 0.1989825333918744,
+    "ANLPPT_U_mean": 0.09680007471976645,
+    "ANLPPT_U_std": 0.059451429390737685,
+    "ANLPPT_Aux_mean": 0.15434149172460276,
+    "ANLPPT_Aux_std": 0.08315666020160892,
+    "detector_u": "PFR_Aaronson_U",
+    "detector_aux": "PFR_Aaronson_Gamma"
+  },
+  "mc_uwm_speed": {
+    "num_samples": 20,
+    "AATPS_mean": 2.4647863991684136,
+    "AATPS_std": 0.26412702931589693,
+    "ANLPPT_U_mean": 0.02370330910914038,
+    "ANLPPT_U_std": 0.01875095482560566,
+    "ANLPPT_Aux_mean": 0.06621206430288462,
+    "ANLPPT_Aux_std": 0.07402156672418826,
+    "detector_u": "DeltaGumbel_U",
+    "detector_aux": "RobustLLR"
+  },
+  "mc_uwm_strength": {
+    "num_samples": 20,
+    "AATPS_mean": 2.3385810011431145,
+    "AATPS_std": 0.2631655285759651,
+    "ANLPPT_U_mean": 0.08696614522883359,
+    "ANLPPT_U_std": 0.06345230228912677,
+    "ANLPPT_Aux_mean": 0.6521754807692308,
+    "ANLPPT_Aux_std": 0.25087084221506567,
+    "detector_u": "DeltaGumbel_U",
+    "detector_aux": "RobustLLR"
+  }
+}

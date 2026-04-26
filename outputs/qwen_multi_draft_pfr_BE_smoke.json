@@ -1,0 +1,137 @@
+{
+  "samples": 2,
+  "lookahead": 4,
+  "draft_counts": [
+    1,
+    2
+  ],
+  "max_length": 32,
+  "target_model": "model/Qwen2.5-7B-Instruct",
+  "draft_model": "model/Qwen2.5-0.5B-Instruct",
+  "target_device": "cuda:0",
+  "draft_device": "cuda:0",
+  "results": {
+    "1": {
+      "summary": {
+        "num_samples": 2,
+        "AATPS_mean": 2.1196581196581197,
+        "AATPS_std": 0.341880341880342,
+        "BE_mean": 2.1196581196581197,
+        "BE_std": 0.341880341880342,
+        "block_efficiency_mean": 2.1196581196581197,
+        "block_efficiency_std": 0.341880341880342,
+        "acceptance_rate_mean": 2.1196581196581197,
+        "accepted_draft_mean": 1.1196581196581197,
+        "draft_tree_size_mean": 3.717948717948718,
+        "target_context_count_mean": 3.717948717948718,
+        "num_invocations_mean": 15.5,
+        "num_invocations_total": 31,
+        "tokens_per_sec_mean": 9.448111169274807,
+        "token_rate_mean": 9.448111169274807,
+        "elapsed_sec_total": 7.181675238534808,
+        "total_time_total": 7.181675238534808
+      },
+      "rows": [
+        {
+          "sample_idx": 0,
+          "lookahead": 4,
+          "num_drafts": 1,
+          "num_steps": 18,
+          "num_invocations": 18,
+          "num_tokens": 32,
+          "AATPS": 1.7777777777777777,
+          "BE": 1.7777777777777777,
+          "block_efficiency": 1.7777777777777777,
+          "acceptance_rate": 1.7777777777777777,
+          "accepted_draft_mean": 0.7777777777777778,
+          "draft_tree_size_mean": 3.6666666666666665,
+          "target_context_count_mean": 3.6666666666666665,
+          "elapsed_sec": 4.446544226258993,
+          "total_time": 4.446544226258993,
+          "tokens_per_sec": 7.196599959812506,
+          "token_rate": 7.196599959812506
+        },
+        {
+          "sample_idx": 1,
+          "lookahead": 4,
+          "num_drafts": 1,
+          "num_steps": 13,
+          "num_invocations": 13,
+          "num_tokens": 32,
+          "AATPS": 2.4615384615384617,
+          "BE": 2.4615384615384617,
+          "block_efficiency": 2.4615384615384617,
+          "acceptance_rate": 2.4615384615384617,
+          "accepted_draft_mean": 1.4615384615384615,
+          "draft_tree_size_mean": 3.769230769230769,
+          "target_context_count_mean": 3.769230769230769,
+          "elapsed_sec": 2.735131012275815,
+          "total_time": 2.735131012275815,
+          "tokens_per_sec": 11.699622378737105,
+          "token_rate": 11.699622378737105
+        }
+      ]
+    },
+    "2": {
+      "summary": {
+        "num_samples": 2,
+        "AATPS_mean": 2.6853146853146854,
+        "AATPS_std": 0.22377622377622375,
+        "BE_mean": 2.6853146853146854,
+        "BE_std": 0.22377622377622375,
+        "block_efficiency_mean": 2.6853146853146854,
+        "block_efficiency_std": 0.22377622377622375,
+        "acceptance_rate_mean": 2.6853146853146854,
+        "accepted_draft_mean": 1.6853146853146854,
+        "draft_tree_size_mean": 5.923076923076923,
+        "target_context_count_mean": 5.923076923076923,
+        "num_invocations_mean": 12.0,
+        "num_invocations_total": 24,
+        "tokens_per_sec_mean": 9.864554377213675,
+        "token_rate_mean": 9.864554377213675,
+        "elapsed_sec_total": 6.546684863045812,
+        "total_time_total": 6.546684863045812
+      },
+      "rows": [
+        {
+          "sample_idx": 0,
+          "lookahead": 4,
+          "num_drafts": 2,
+          "num_steps": 13,
+          "num_invocations": 13,
+          "num_tokens": 32,
+          "AATPS": 2.4615384615384617,
+          "BE": 2.4615384615384617,
+          "block_efficiency": 2.4615384615384617,
+          "acceptance_rate": 2.4615384615384617,
+          "accepted_draft_mean": 1.4615384615384615,
+          "draft_tree_size_mean": 5.846153846153846,
+          "target_context_count_mean": 5.846153846153846,
+          "elapsed_sec": 3.5835870150476694,
+          "total_time": 3.5835870150476694,
+          "tokens_per_sec": 8.929600387999601,
+          "token_rate": 8.929600387999601
+        },
+        {
+          "sample_idx": 1,
+          "lookahead": 4,
+          "num_drafts": 2,
+          "num_steps": 11,
+          "num_invocations": 11,
+          "num_tokens": 32,
+          "AATPS": 2.909090909090909,
+          "BE": 2.909090909090909,
+          "block_efficiency": 2.909090909090909,
+          "acceptance_rate": 2.909090909090909,
+          "accepted_draft_mean": 1.9090909090909092,
+          "draft_tree_size_mean": 6.0,
+          "target_context_count_mean": 6.0,
+          "elapsed_sec": 2.9630978479981422,
+          "total_time": 2.9630978479981422,
+          "tokens_per_sec": 10.79950836642775,
+          "token_rate": 10.79950836642775
+        }
+      ]
+    }
+  }
+}
