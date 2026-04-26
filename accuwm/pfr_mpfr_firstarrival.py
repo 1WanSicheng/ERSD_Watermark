@@ -24,6 +24,7 @@ from .pfr import (
     PFRSourceFactory,
     RepeatedContextMaskingLabeler,
     SharedPFRSource,
+    _clone_cache,
     build_default_labeler,
 )
 from .utils import cache_len, process_logits, truncate_cache
@@ -413,7 +414,7 @@ def pfr_mpfr_firstarrival_generator(
             lookahead=block_len,
             labeler=draft_labeler,
             source_factory=source_factory,
-            past_key_values=ref_past_key_values,
+            past_key_values=_clone_cache(ref_past_key_values),
             process_logits_kwargs=process_logits_kwargs,
             max_vocab_size=model.config.vocab_size,
             proposal=proposal,
@@ -458,10 +459,9 @@ def pfr_mpfr_firstarrival_generator(
         input_ids = torch.cat([input_ids.to(model.device), verify_block.output_ids], dim=1)
         past_key_values = verify_block.target_past_key_values
 
-        ref_update_out = ref_model(
-            verify_block.output_ids.to(ref_model.device),
-            past_key_values=ref_past_key_values,
-        )
+        ref_cached_n = cache_len(ref_past_key_values)
+        ref_update_ids = input_ids[:, ref_cached_n:].to(ref_model.device)
+        ref_update_out = ref_model(ref_update_ids, past_key_values=ref_past_key_values)
         ref_past_key_values = truncate_cache(
             ref_update_out.past_key_values,
             input_ids.shape[1] - 1,

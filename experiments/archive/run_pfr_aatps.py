@@ -14,7 +14,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from accuwm.pfr import pfr_sample_generator
-from experiments.run_multi_draft_pfr_aatps import load_model
+from experiments.archive.run_multi_draft_pfr_aatps import load_model
 from experiments.tasks import get_gsm8k_chat_prompts, get_summarization_ds
 
 

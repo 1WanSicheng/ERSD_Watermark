@@ -26,8 +26,17 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from torch import FloatTensor, LongTensor
+from torch.utils._pytree import tree_map
 
-from .utils import cache_len, process_logits, truncate_cache
+from .utils import (
+    cache_is_dynamic,
+    cache_is_legacy,
+    cache_len,
+    dynamic_cache_from_legacy,
+    dynamic_cache_to_legacy,
+    process_logits,
+    truncate_cache,
+)
 
 
 def _safe_log(x: FloatTensor, eps: float = 1e-20) -> FloatTensor:
@@ -55,6 +64,18 @@ def _noise_to_winner(probs: FloatTensor, exp_noise: FloatTensor) -> LongTensor:
         torch.full_like(probs, float("inf")),
     )
     return ratios.argmin(dim=-1)
+
+
+def _clone_cache(past_key_values):
+    if past_key_values is None:
+        return None
+    if cache_is_legacy(past_key_values):
+        return tree_map(lambda x: x.clone(), past_key_values)
+    if cache_is_dynamic(past_key_values):
+        legacy_cache = dynamic_cache_to_legacy(past_key_values)
+        cloned = tree_map(lambda x: x.clone(), legacy_cache)
+        return dynamic_cache_from_legacy(cloned)
+    return past_key_values
 
 
 @dataclass(frozen=True)
@@ -222,17 +243,18 @@ class SharedPFRSource:
     label: bytes
     private_key: bytes
 
+    def seed(self) -> int:
+        return _get_seed(self.label, self.private_key)
+
     def numpy_rng(self):
         return _get_rng(self.label, self.private_key)
 
     def uniform_noise(self, shape, device) -> FloatTensor:
-        rng = self.numpy_rng()
-        uniform_noise = rng.random(shape).astype(np.float32)
-        return torch.from_numpy(uniform_noise).to(device)
+        generator = torch.Generator(device=device)
+        generator.manual_seed(self.seed())
+        return torch.rand(shape, device=device, dtype=torch.float32, generator=generator)
 
     def exponential_noise(self, vocab_size: int, device) -> FloatTensor:
-        # Keep generation-side keyed randomness aligned with the detector,
-        # which reconstructs tokenwise uniforms from the same keyed hash.
         uniform_noise = self.uniform_noise((1, vocab_size), device)
         return -_safe_log(uniform_noise)
 
@@ -479,7 +501,7 @@ def pfr_speculative_generator(
             lookahead=block_len,
             labeler=draft_labeler,
             source_factory=source_factory,
-            past_key_values=ref_past_key_values,
+            past_key_values=_clone_cache(ref_past_key_values),
             process_logits_kwargs=process_logits_kwargs,
             max_vocab_size=model.config.vocab_size,
         )
@@ -507,11 +529,14 @@ def pfr_speculative_generator(
         input_ids = torch.cat([input_ids, verify_block.output_ids], dim=1)
         past_key_values = verify_block.target_past_key_values
 
-        # Rebuild the draft cache on the true emitted sequence so the next block
-        # starts from a consistent state.
+        # Rebuild/update the draft cache on the true emitted sequence so the
+        # next block starts from a consistent state.  The first update must
+        # include the prompt because no draft-model cache exists yet.
+        ref_cached_n = cache_len(ref_past_key_values)
+        ref_update_ids = input_ids[:, ref_cached_n:].to(ref_model.device)
         ref_update_out = ref_model(
-            verify_block.output_ids.to(ref_model.device),
-            past_key_values=draft_block.draft_past_key_values,
+            ref_update_ids,
+            past_key_values=ref_past_key_values,
         )
         ref_past_key_values = truncate_cache(
             ref_update_out.past_key_values,

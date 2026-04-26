@@ -14,7 +14,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from accuwm.finite_multi_draft_pfr import finite_multi_draft_pfr_sample_generator
-from experiments.run_multi_draft_pfr_aatps import aggregate, encode_prompt, load_model, load_prompts
+from experiments.archive.run_multi_draft_pfr_aatps import aggregate, encode_prompt, load_model, load_prompts
 
 
 DEFAULT_TARGET_MODEL = ROOT / "model" / "Qwen2.5-7B-Instruct"
