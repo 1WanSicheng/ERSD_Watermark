@@ -6,10 +6,6 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
-!experiments/archive/__pycache__/
-!experiments/archive/__pycache__/*.pyc
-!unbiased_watermark/scores/__pycache__/
-!unbiased_watermark/scores/__pycache__/*.pyc
 *.parquet
 *.pt
 *.pth
