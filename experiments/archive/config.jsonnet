@@ -35,10 +35,10 @@ local BaseConfig = {
   repartition_size: UnImplementedError(),  // bool
 };
 local large_llamas = [
-  '/mnt/workspace0/A24738/AcceleratedUnbiasedWatermark-main/model-weights/huggyllama__llama-7b',
+  '/mnt/workspace0/A24738/AcceleratedUnbiasedWatermark-main/model/huggyllama__llama-7b',
 ];
 local small_llamas = [
-  '/mnt/workspace0/A24738/AcceleratedUnbiasedWatermark-main/model-weights/JackFram__llama-68m',
+  '/mnt/workspace0/A24738/AcceleratedUnbiasedWatermark-main/model/JackFram__llama-68m',
 ];
 
 local large_qwens = [

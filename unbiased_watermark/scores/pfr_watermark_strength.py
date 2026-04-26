@@ -6,7 +6,7 @@ surprisal of the keyed PFR winner together with the average target entropy:
 
     WS_hat = (1/M) sum_t -log P(y_t^* | c_t)
     H_hat  = (1/M) sum_t H(P(. | c_t))
-    Delta  = H_hat - WS_hat
+    ratio  = WS_hat / H_hat
 
 where y_t^* is the recovered target-side PFR winner under the same
 context-keyed source Pi_t = G(k, Lambda(c_t)).
@@ -59,7 +59,7 @@ def compute_pfr_watermark_strength_from_sequence(
         Dict with:
             - WS_PFR_hat
             - H_P_hat
-            - Delta_WS
+            - ratio
             - num_scored
             - masked_ratio
             - ws_sum
@@ -75,7 +75,7 @@ def compute_pfr_watermark_strength_from_sequence(
         return {
             "WS_PFR_hat": 0.0,
             "H_P_hat": 0.0,
-            "Delta_WS": 0.0,
+            "ratio": 0.0,
             "num_scored": 0,
             "masked_ratio": 0.0,
             "ws_sum": 0.0,
@@ -97,19 +97,20 @@ def compute_pfr_watermark_strength_from_sequence(
         if skip_repeats and label_info.masked:
             continue
 
-        logits = next_logits[:, pos - 1, :]
-        logits = pfr.process_logits(context, logits, **process_logits_kwargs)
+        raw_logits = next_logits[:, pos - 1, :]
+        entropy_logprobs = F.log_softmax(raw_logits, dim=-1)
+        entropy_probs = entropy_logprobs.exp()
+        entropy = -(entropy_probs * entropy_logprobs).sum(dim=-1)
+        entropy_terms.append(float(entropy.item()))
+
+        logits = pfr.process_logits(context, raw_logits, **process_logits_kwargs)
         logprobs = F.log_softmax(logits, dim=-1)
-        probs = logprobs.exp()
 
         source = source_factory.build(label_info.source_label)
         winner, _, _ = pfr.pfr_win_from_logits(logits, source, target_model.device)
 
         winner_logprob = logprobs.gather(-1, winner.unsqueeze(-1)).squeeze(-1)
         ws_terms.append(float((-winner_logprob).item()))
-
-        entropy = -(probs * logprobs).sum(dim=-1)
-        entropy_terms.append(float(entropy.item()))
 
     m = len(ws_terms)
     ws_sum = float(np.sum(ws_terms)) if ws_terms else 0.0
@@ -119,7 +120,7 @@ def compute_pfr_watermark_strength_from_sequence(
     return {
         "WS_PFR_hat": ws_hat,
         "H_P_hat": h_hat,
-        "Delta_WS": float(h_hat - ws_hat),
+        "ratio": float(ws_hat / h_hat) if h_hat > 0.0 else 0.0,
         "num_scored": m,
         "masked_ratio": float(np.mean(masked)) if masked else 0.0,
         "ws_sum": ws_sum,

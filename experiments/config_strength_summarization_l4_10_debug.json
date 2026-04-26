@@ -1,0 +1,20 @@
+{
+  "dataset": "summarization",
+  "samples": 10,
+  "lookahead": 4,
+  "max_length": 128,
+  "seed": 1,
+  "private_key": "1234",
+  "target_model": "model/Qwen2.5-7B-Instruct",
+  "draft_model": "model/Qwen2.5-0.5B-Instruct",
+  "target_device": "cuda:2",
+  "draft_device": "cuda:2",
+  "progress_every": 2,
+  "output": "outputs/strength_summarization_l4_10_debug.json",
+  "rows_output": "outputs/strength_summarization_l4_10_debug.rows.jsonl",
+  "algorithms": [
+    {"name": "uwm_speed", "type": "uwm_speed", "reweight": "deltagumbel"},
+    {"name": "uwm_strength", "type": "uwm_strength", "reweight": "deltagumbel"},
+    {"name": "pfr", "type": "pfr", "labeler_mode": "prefix"}
+  ]
+}

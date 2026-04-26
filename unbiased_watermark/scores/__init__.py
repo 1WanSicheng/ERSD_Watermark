@@ -35,8 +35,9 @@ from .deltagumbel_X import *
 from .gamma_U import *
 from .llr import *
 from .robust_llr import RobustLLRScore
-from .ersd_aaronson import (
-    ERSD_Aaronson_Score,
-    ERSD_Aaronson_Gamma_Score,
-    ERSD_Aaronson_U_Score,
+
+from .pfr_aaronson import (
+    PFR_Aaronson_Score,
+    PFR_Aaronson_Gamma_Score,
+    PFR_Aaronson_U_Score,
 )

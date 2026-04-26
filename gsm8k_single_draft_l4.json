@@ -1,0 +1,16 @@
+{
+    "draft_model": "model/Qwen2.5-0.5B-Instruct",
+    "target_model": "model/Qwen2.5-7B-Instruct",
+    "datasets": ["openai/gsm8k"],
+    "num_test_prompts": 200,
+    "gen_length": 128,
+    "configurations": [
+        {
+            "name": "single_draft_4_1",
+            "strategy": "single_draft",
+            "max_draft_len": 4,
+            "max_num_drafts": 1,
+            "temperature": [1.0, 1.0]
+        }
+    ]
+}

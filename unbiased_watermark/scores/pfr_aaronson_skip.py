@@ -9,8 +9,7 @@ the UWM family. It is intended for apples-to-apples detector comparisons.
 import numpy as np
 from torch import LongTensor
 
-from .ersd_aaronson import _log_gamma_tail_p_value
-from .pfr_aaronson import _uniform_for_token
+from .pfr_aaronson import _log_gamma_tail_p_value, _uniform_for_token
 
 
 def compute_pfr_aaronson_skip_from_sequence(

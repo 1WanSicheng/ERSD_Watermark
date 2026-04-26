@@ -93,10 +93,6 @@ scores = {
             safe_ln([(0, a) for a in np.linspace(0, 0.9, 10)]).tolist()
         ),
     ],
-    "ersd": [
-        uwm.scores.ERSD_Aaronson_Gamma_Score,
-        uwm.scores.ERSD_Aaronson_U_Score,
-    ],
 }
 score_strs = {
     "deltagumbel": [
@@ -109,10 +105,6 @@ score_strs = {
         "Gamma_U",
         "LLR",
         "RobustLLR",
-    ],
-    "ersd": [
-        "ERSD_Aaronson_Gamma",
-        "ERSD_Aaronson_U",
     ],
 }
 
@@ -203,16 +195,8 @@ class Worker:
             generator = partial(
                 accuwm.mc_watermark.mc_uwm_sample_generator, reweight_in_mc=False
             )
-        elif d["method"] == "ersd":
-            generator = accuwm.ersd.ersd_sample_generator
-        elif d["method"] == "ersd_nocc":
-            generator = accuwm.ersd.ersd_sample_generator
-        elif d["method"] == "ersd_cc":
-            generator = accuwm.ersd.ersd_sample_generator
-        elif d["method"] == "ersd_wm":
-            generator = accuwm.ersd_wm.ersd_wm_sample_generator
-        elif d["method"] == "ersd_nocc_wm":
-            generator = accuwm.ersd_wm.ersd_wm_sample_generator
+        elif d["method"].startswith("ersd"):
+            raise ValueError("ERSD methods have been removed from this worker")
         else:
             raise ValueError(f"unknown sampling method {d['method']}")
         if ("mc" in d["method"] or d["method"] in ["ersd", "ersd_nocc", "ersd_cc", "ersd_wm", "ersd_nocc_wm"]):
@@ -463,35 +447,7 @@ class Worker:
                     rejected_positions.append(int(val) + 1)
             r["rejected_positions"] = rejected_positions
         log_p_values = []
-        if d["method"] in ["ersd_wm", "ersd_nocc_wm"]:
-            out_ids = torch.tensor(output_ids).unsqueeze(0).to(input_ids.device)
-            context_codes = np.concatenate(ersd_wm_meta["context_codes"], axis=0)[
-                None, :
-            ]
-            time_steps = np.concatenate(ersd_wm_meta["time_steps"], axis=0)[None, :]
-            tags = np.concatenate(ersd_wm_meta["tags"], axis=0)[None, :]
-            skipped = np.concatenate(ersd_wm_meta["skipped"], axis=0)[None, :]
-            base_score = uwm.scores.ERSD_Aaronson_Score.from_watermarkcode(
-                None,
-                out_ids,
-                skipped=skipped,
-                context_codes=context_codes,
-                time_steps=time_steps,
-                tags=tags,
-                private_key=bytes(d["seed"]) + d["private_key"],
-                vocab_size=output_logprobs.shape[-1],
-            )
-            gamma_score = uwm.scores.ERSD_Aaronson_Gamma_Score(
-                scores=base_score.scores,
-                skipped=base_score.skipped,
-            )
-            u_score = uwm.scores.ERSD_Aaronson_U_Score(
-                scores=base_score.scores,
-                skipped=base_score.skipped,
-            )
-            log_p_values.append(gamma_score.get_log_p_value())
-            log_p_values.append(u_score.get_log_p_value())
-        elif "uwm" in d["method"]:
+        if "uwm" in d["method"]:
             out_ids = torch.tensor(output_ids).unsqueeze(0).to(input_ids.device)
             # out_ids: (batch_size, seq_len)
             # verify score

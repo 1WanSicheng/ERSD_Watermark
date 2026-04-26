@@ -1,20 +1,40 @@
 import numpy as np
 import os
 import time
+from typing import Any
 import torch
 from torch import FloatTensor, LongTensor
 from torch.utils._pytree import tree_map
 import torch.nn.functional as F
 from transformers.cache_utils import DynamicCache
 
-import unbiased_watermark as uwm
-from unbiased_watermark import (
-    AbstractWatermarkCode,
-    AbstractReweight,
-    AbstractContextCodeExtractor,
-    ContextCodeHistory,
-    step_watermark,
-)
+
+AbstractWatermarkCode = Any
+AbstractReweight = Any
+AbstractContextCodeExtractor = Any
+ContextCodeHistory = Any
+
+
+class _UnbiasedWatermarkProxy:
+    def __getattr__(self, name):
+        if name in {
+            "AbstractWatermarkCode",
+            "AbstractReweight",
+            "AbstractContextCodeExtractor",
+        }:
+            return Any
+        import unbiased_watermark as _uwm
+
+        return getattr(_uwm, name)
+
+
+uwm = _UnbiasedWatermarkProxy()
+
+
+def step_watermark(*args, **kwargs):
+    from unbiased_watermark import step_watermark as _step_watermark
+
+    return _step_watermark(*args, **kwargs)
 
 
 def process_logits(input_ids, logits, logits_processor=None, logits_warper=None):
@@ -34,7 +54,17 @@ def cache_is_legacy(past_key_values):
 
 
 def cache_is_dynamic(past_key_values):
-    return hasattr(past_key_values, "key_cache")
+    return isinstance(past_key_values, DynamicCache) or hasattr(past_key_values, "key_cache")
+
+
+def dynamic_cache_to_legacy(past_key_values):
+    if hasattr(past_key_values, "to_legacy_cache"):
+        return past_key_values.to_legacy_cache()
+    return tuple(zip(past_key_values.key_cache, past_key_values.value_cache))
+
+
+def dynamic_cache_from_legacy(legacy_cache):
+    return DynamicCache.from_legacy_cache(tuple(legacy_cache))
 
 
 def cache_len(past_key_values):
@@ -43,6 +73,8 @@ def cache_len(past_key_values):
     if cache_is_legacy(past_key_values):
         return past_key_values[0][0].shape[2]
     if cache_is_dynamic(past_key_values):
+        if hasattr(past_key_values, "get_seq_length"):
+            return past_key_values.get_seq_length()
         return past_key_values.key_cache[0].shape[2]
     return 0
 
@@ -57,14 +89,12 @@ def truncate_cache(past_key_values, new_len):
     if cache_is_legacy(past_key_values):
         return tree_map(lambda x: x[:, :, :new_len, :], past_key_values)
     if cache_is_dynamic(past_key_values):
-        for i in range(len(past_key_values.key_cache)):
-            past_key_values.key_cache[i] = past_key_values.key_cache[i][
-                :, :, :new_len, :
-            ]
-            past_key_values.value_cache[i] = past_key_values.value_cache[i][
-                :, :, :new_len, :
-            ]
-        return past_key_values
+        if hasattr(past_key_values, "crop"):
+            past_key_values.crop(new_len)
+            return past_key_values
+        legacy_cache = dynamic_cache_to_legacy(past_key_values)
+        legacy_cache = tree_map(lambda x: x[:, :, :new_len, :], legacy_cache)
+        return dynamic_cache_from_legacy(legacy_cache)
     return None
 
 

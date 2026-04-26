@@ -189,8 +189,8 @@ def main():
 
 
 def test_worker():
-    model_str = "huggyllama/llama-7b"
-    ref_model_str = "JackFram/llama-68m"
+    model_str = "/mnt/workspace0/A24738/AcceleratedUnbiasedWatermark-main/model/huggyllama__llama-7b"
+    ref_model_str = "/mnt/workspace0/A24738/AcceleratedUnbiasedWatermark-main/model/JackFram__llama-68m"
     import numpy as np
 
     np.seterr(all="raise")

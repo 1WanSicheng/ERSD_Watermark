@@ -10,18 +10,69 @@ null tail probability.
 
 import numpy as np
 import torch
+import math
 from torch import LongTensor
 
-from .ersd_aaronson import (
-    ERSD_Aaronson_Score,
-    _log_gamma_tail_p_value,
-    _log_e_minus1_over_lambda,
-    _solve_u_chernoff_lambda,
-)
+from .additivescore import TokenwiseAdditiveScore
 from ..lm import get_rng
 
 
-class PFR_Aaronson_Score(ERSD_Aaronson_Score):
+def _log_gamma_tail_p_value(shape: int, score: float) -> float:
+    if shape <= 0:
+        return 0.0
+    if score <= 0:
+        return 0.0
+    terms = np.array(
+        [k * np.log(score) - math.lgamma(k + 1) for k in range(shape)],
+        dtype=np.float64,
+    )
+    max_term = float(terms.max())
+    return float(-score + max_term + np.log(np.exp(terms - max_term).sum()))
+
+
+def _log_e_minus1_over_lambda(lam: float) -> float:
+    if lam == 0:
+        return 0.0
+    if lam > 50:
+        return lam - np.log(lam)
+    return float(np.log(np.expm1(lam)) - np.log(lam))
+
+
+def _u_chernoff_derivative(lam: float) -> float:
+    if lam == 0:
+        return 0.5
+    if lam > 50:
+        return 1.0 - 1.0 / lam
+    return float(np.exp(lam) / np.expm1(lam) - 1.0 / lam)
+
+
+def _solve_u_chernoff_lambda(mean_u: float) -> float:
+    if not 0.5 < mean_u < 1.0:
+        return 0.0
+    lo = 0.0
+    hi = 2.0
+    while _u_chernoff_derivative(hi) < mean_u:
+        hi *= 2.0
+        if hi > 1e6:
+            return hi
+    for _ in range(80):
+        mid = 0.5 * (lo + hi)
+        if _u_chernoff_derivative(mid) < mean_u:
+            lo = mid
+        else:
+            hi = mid
+    return 0.5 * (lo + hi)
+
+
+class PFR_Aaronson_Score(TokenwiseAdditiveScore):
+    def get_per_token_log_MGF(self, t: float) -> float:
+        if t >= 1:
+            return np.inf
+        return -np.log(1 - t)
+
+    def get_per_token_mu(self) -> float:
+        return 1.0
+
     @classmethod
     def score_from_watermarkcode(
         cls,

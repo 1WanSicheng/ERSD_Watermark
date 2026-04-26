@@ -17,18 +17,15 @@ reference measure `mu` is the counting measure on the vocabulary.
 """
 
 from __future__ import annotations
-
-import hashlib
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Callable
+import hashlib
 
 import numpy as np
 import torch
 import torch.nn.functional as F
 from torch import FloatTensor, LongTensor
-
-import unbiased_watermark as uwm
 
 from .utils import cache_len, process_logits, truncate_cache
 
@@ -73,6 +70,29 @@ class AbstractLabeler(ABC):
         """Return a deterministic byte label for `context`."""
 
 
+class AbstractContextCodeExtractor(ABC):
+    @abstractmethod
+    def extract(self, context: LongTensor) -> np.ndarray:
+        """Return context-code bytes used to initialize the keyed source."""
+
+
+def _peel_ndarray(a, last_n_dim=1):
+    ra = np.empty(a.shape[:-last_n_dim], dtype=object)
+    for index in np.ndindex(ra.shape):
+        ra[index] = a[index].copy()
+    return ra
+
+
+@dataclass(frozen=True)
+class PrevN_ContextCodeExtractor(AbstractContextCodeExtractor):
+    n: int
+
+    def extract(self, context: LongTensor) -> np.ndarray:
+        c = context[..., -self.n :].detach().cpu().numpy()
+        c = _peel_ndarray(c, last_n_dim=1)
+        return np.vectorize(lambda x: x.tobytes())(c)
+
+
 @dataclass(frozen=True)
 class PrefixLabeler(AbstractLabeler):
     include_length: bool = True
@@ -88,7 +108,7 @@ class PrefixLabeler(AbstractLabeler):
 
 @dataclass(frozen=True)
 class ContextCodeLabeler(AbstractLabeler):
-    cc_extractor: uwm.AbstractContextCodeExtractor
+    cc_extractor: AbstractContextCodeExtractor
 
     def label(self, context: LongTensor) -> bytes:
         cc = self.cc_extractor.extract(context)
@@ -155,7 +175,7 @@ class RepeatedContextMaskingLabeler:
 
 def build_default_labeler(
     mode: str = "context_code",
-    cc_extractor: uwm.AbstractContextCodeExtractor | None = None,
+    cc_extractor: AbstractContextCodeExtractor | None = None,
     mask_transform: Callable[[bytes], bytes] | None = None,
 ) -> RepeatedContextMaskingLabeler:
     """
@@ -176,7 +196,7 @@ def build_default_labeler(
         base_labeler: AbstractLabeler = PrefixLabeler()
     elif mode == "context_code":
         if cc_extractor is None:
-            cc_extractor = uwm.lm.PrevN_ContextCodeExtractor(n=3)
+            cc_extractor = PrevN_ContextCodeExtractor(n=3)
         base_labeler = ContextCodeLabeler(cc_extractor=cc_extractor)
     else:
         raise ValueError(f"unknown labeler mode: {mode}")
@@ -186,22 +206,34 @@ def build_default_labeler(
     )
 
 
+def _get_seed(*bs: bytes) -> int:
+    m = hashlib.sha256()
+    for b in bs:
+        m.update(b)
+    return int.from_bytes(m.digest(), "big") % (2**32 - 1)
+
+
+def _get_rng(*bs: bytes):
+    return np.random.default_rng(_get_seed(*bs))
+
+
 @dataclass(frozen=True)
 class SharedPFRSource:
     label: bytes
     private_key: bytes
 
-    def seed(self) -> int:
-        digest = hashlib.sha256(self.label + self.private_key).digest()
-        return int.from_bytes(digest, "big") % (2**32 - 1)
+    def numpy_rng(self):
+        return _get_rng(self.label, self.private_key)
 
     def uniform_noise(self, shape, device) -> FloatTensor:
-        generator = torch.Generator(device=device)
-        generator.manual_seed(self.seed())
-        return torch.rand(shape, device=device, dtype=torch.float32, generator=generator)
+        rng = self.numpy_rng()
+        uniform_noise = rng.random(shape).astype(np.float32)
+        return torch.from_numpy(uniform_noise).to(device)
 
     def exponential_noise(self, vocab_size: int, device) -> FloatTensor:
-        uniform_noise = self.uniform_noise((1, vocab_size), device=device)
+        # Keep generation-side keyed randomness aligned with the detector,
+        # which reconstructs tokenwise uniforms from the same keyed hash.
+        uniform_noise = self.uniform_noise((1, vocab_size), device)
         return -_safe_log(uniform_noise)
 
 
@@ -499,7 +531,7 @@ def pfr_sample_generator(
     private_key: bytes,
     labeler: RepeatedContextMaskingLabeler | None = None,
     labeler_mode: str = "context_code",
-    cc_extractor: uwm.AbstractContextCodeExtractor | None = None,
+    cc_extractor: AbstractContextCodeExtractor | None = None,
     process_logits_kwargs: dict | None = None,
 ):
     """

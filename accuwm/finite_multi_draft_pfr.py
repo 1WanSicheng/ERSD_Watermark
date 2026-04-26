@@ -1,49 +1,48 @@
 """
-Watermarkable multi-draft speculative sampling with shared PFR sources.
+Watermarkable multi-draft speculative sampling with finite MPFR races.
 
-This module implements the simplified multi-draft algorithm where each context
-owns a keyed Poisson race source.  Draft branches are generated from the first
-``B`` arrivals of the draft-model race, then target-model winners are evaluated
-on every internal context and the realized target path is followed until the
-first rejection.
-
-The implementation intentionally keeps the branching logic explicit.  It does
-not try to maintain KV caches across speculative branches; contexts at the same
-tree depth are evaluated as a batch instead.
+This module follows the same speculative structure as ``multi_draft_pfr.py``:
+draft branches come from the draft model ``Q`` and target-model winners verify
+the realized path.  The difference is only the implementation of the abstract
+``MPFR(P, source, B)`` primitive.  Here MPFR is implemented by the finite
+proposal algorithm with a fixed public uniform proposal distribution; the model
+distribution is the target distribution inside that primitive.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Iterable
+import math
 
 import torch
 import torch.nn.functional as F
 from torch import FloatTensor, LongTensor
-from torch.utils._pytree import tree_map
 
-from .pfr import (
-    AbstractLabeler,
-    PFRSourceFactory,
-    PrefixLabeler,
-    SharedPFRSource,
-    _safe_log,
+from .multi_draft_pfr import (
+    ContextKey,
+    _advance_cache,
+    _batch_from_keys,
+    _context_key,
+    _new_context_cache,
+    _repeat_cache,
+    _select_cache_row,
 )
-from .utils import (
-    cache_is_dynamic,
-    cache_is_legacy,
-    cache_len,
-    dynamic_cache_from_legacy,
-    dynamic_cache_to_legacy,
-    process_logits,
-)
+from .pfr import AbstractLabeler, PFRSourceFactory, PrefixLabeler, SharedPFRSource
+from .utils import cache_len, process_logits
 
 
-ContextKey = tuple[int, ...]
+@dataclass(frozen=True)
+class FiniteMPFRResult:
+    tokens: LongTensor
+    scores: FloatTensor
+    proposal_indices: LongTensor
+    num_proposals: int
+    w_lower: float
+    terminated: bool
 
 
 @dataclass
-class MultiDraftBlock:
+class FiniteMultiDraftBlock:
     output_ids: LongTensor
     output_logprobs: FloatTensor
     accepted_count: int
@@ -54,186 +53,251 @@ class MultiDraftBlock:
     got_eos: bool
 
 
-def _context_key(ids: LongTensor) -> ContextKey:
-    return tuple(int(x) for x in ids[0].detach().cpu().tolist())
+def _safe_log(x: FloatTensor, eps: float = 1e-20) -> FloatTensor:
+    return torch.log(x.clamp(min=eps))
 
 
-def _batch_from_keys(keys: Iterable[ContextKey], device) -> LongTensor:
-    key_list = list(keys)
-    if not key_list:
-        raise ValueError("cannot build an empty context batch")
-    return torch.tensor(key_list, device=device, dtype=torch.long)
-
-
-def _prefix_label_from_key(key: ContextKey, include_length: bool = True) -> bytes:
-    payload = b"".join(int(token).to_bytes(4, "little", signed=True) for token in key)
-    if not include_length:
-        return payload
-    return len(key).to_bytes(8, byteorder="big", signed=False) + payload
-
-
-@dataclass
-class ContextRuntimeCache:
-    labeler: AbstractLabeler
-    source_factory: PFRSourceFactory
-    device: torch.device
-    ids_by_key: dict[ContextKey, LongTensor]
-    label_by_key: dict[ContextKey, bytes]
-    source_by_key: dict[ContextKey, SharedPFRSource]
-
-    def ids(self, key: ContextKey) -> LongTensor:
-        ids = self.ids_by_key.get(key)
-        if ids is None:
-            ids = torch.tensor([key], device=self.device, dtype=torch.long)
-            self.ids_by_key[key] = ids
-        return ids
-
-    def label(self, key: ContextKey) -> bytes:
-        label = self.label_by_key.get(key)
-        if label is None:
-            if isinstance(self.labeler, PrefixLabeler):
-                label = _prefix_label_from_key(
-                    key,
-                    include_length=self.labeler.include_length,
-                )
-            else:
-                label = self.labeler.label(self.ids(key))
-            self.label_by_key[key] = label
-        return label
-
-    def source(self, key: ContextKey) -> SharedPFRSource:
-        source = self.source_by_key.get(key)
-        if source is None:
-            source = self.source_factory.build(self.label(key))
-            self.source_by_key[key] = source
-        return source
-
-
-def _repeat_cache(past_key_values, batch_size: int):
-    if past_key_values is None:
-        return None
-    if cache_is_legacy(past_key_values):
-        return tree_map(lambda x: x.repeat((batch_size, 1, 1, 1)), past_key_values)
-    if cache_is_dynamic(past_key_values):
-        legacy_cache = dynamic_cache_to_legacy(past_key_values)
-        repeated = tree_map(lambda x: x.repeat((batch_size, 1, 1, 1)), legacy_cache)
-        return dynamic_cache_from_legacy(repeated)
-    return None
-
-
-def _select_cache_row(past_key_values, row: int):
-    if past_key_values is None:
-        return None
-    if cache_is_legacy(past_key_values):
-        return tree_map(lambda x: x[row : row + 1], past_key_values)
-    if cache_is_dynamic(past_key_values):
-        legacy_cache = dynamic_cache_to_legacy(past_key_values)
-        selected = tree_map(lambda x: x[row : row + 1], legacy_cache)
-        return dynamic_cache_from_legacy(selected)
-    return None
-
-
-@torch.no_grad()
-def _advance_cache(model, past_key_values, token_id: int):
-    token = torch.tensor([[token_id]], device=model.device, dtype=torch.long)
-    output = model(
-        token,
-        past_key_values=past_key_values,
-        use_cache=True,
-        return_dict=True,
-        output_attentions=False,
-        output_hidden_states=False,
-    )
-    return output.past_key_values
-
-
-def _new_context_cache(
-    labeler: AbstractLabeler,
-    source_factory: PFRSourceFactory,
-    device,
-    label_by_key: dict[ContextKey, bytes] | None = None,
-    source_by_key: dict[ContextKey, SharedPFRSource] | None = None,
-) -> ContextRuntimeCache:
-    return ContextRuntimeCache(
-        labeler=labeler,
-        source_factory=source_factory,
-        device=torch.device(device),
-        ids_by_key={},
-        label_by_key=label_by_key if label_by_key is not None else {},
-        source_by_key=source_by_key if source_by_key is not None else {},
-    )
-
-
-def ms_pfr_tokens_from_logprobs(
-    logprobs: FloatTensor,
-    source: SharedPFRSource,
-    num_samples: int,
-    device,
-) -> LongTensor:
-    """
-    Return the token ids for the first ``num_samples`` arrivals in a shared
-    Poisson race.
-
-    For each vocabulary item ``v`` with probability ``p_v``, the arrival process
-    has rate ``p_v``.  The kth arrival time for that item is the cumulative sum
-    of kth independent ``Exp(1)`` noises divided by ``p_v``.  Taking the first
-    global arrivals can therefore produce repeated token ids, which are later
-    collapsed into branch multiplicities.
-    """
-    if num_samples <= 0:
-        return torch.empty((0,), device=device, dtype=torch.long)
-
+def _as_1d_logprobs(logprobs: FloatTensor, name: str) -> FloatTensor:
     if logprobs.dim() == 2:
         if logprobs.shape[0] != 1:
-            raise ValueError("batched MS-PFR is handled by the caller")
+            raise ValueError(f"{name} must be unbatched or have batch size 1")
         logprobs = logprobs[0]
-    probs = logprobs.exp()
-    vocab_size = probs.shape[-1]
+    if logprobs.dim() != 1:
+        raise ValueError(f"{name} must be a 1D log-probability vector")
+    return logprobs
 
-    uniform_noise = source.uniform_noise((num_samples, vocab_size), device=device)
-    exp_interarrival = -_safe_log(uniform_noise)
-    arrival_times = torch.cumsum(exp_interarrival, dim=0)
-    arrival_times = torch.where(
-        probs.unsqueeze(0) > 0,
-        arrival_times / probs.unsqueeze(0),
-        torch.full_like(arrival_times, float("inf")),
+
+def _support_checked_ratio_and_bound(
+    target_logprobs: FloatTensor,
+    proposal_logprobs: FloatTensor,
+    w_lower: float | None,
+) -> tuple[FloatTensor, float]:
+    target_logprobs = target_logprobs.float()
+    proposal_logprobs = proposal_logprobs.float()
+    target_positive = torch.isfinite(target_logprobs)
+    proposal_positive = torch.isfinite(proposal_logprobs)
+    if bool((target_positive & ~proposal_positive).any().item()):
+        raise ValueError("finite MPFR requires P to be absolutely continuous with respect to Q")
+
+    ratio = torch.zeros_like(target_logprobs)
+    ratio[proposal_positive] = torch.exp(
+        target_logprobs[proposal_positive] - proposal_logprobs[proposal_positive]
     )
 
-    flat_winners = torch.topk(
-        arrival_times.flatten(),
-        k=num_samples,
-        largest=False,
-        sorted=True,
-    ).indices
-    return (flat_winners % vocab_size).to(torch.long)
+    if w_lower is None:
+        active = target_positive & proposal_positive
+        if not bool(active.any().item()):
+            raise ValueError("target distribution has empty support")
+        log_inv_ratio = proposal_logprobs[active] - target_logprobs[active]
+        w_lower_value = math.exp(float(log_inv_ratio.min().item()))
+    else:
+        w_lower_value = float(w_lower)
+
+    if not math.isfinite(w_lower_value) or w_lower_value <= 0:
+        raise ValueError("w_lower must be finite and positive")
+    return ratio, w_lower_value
 
 
-def _single_ms_pfr_from_logits(
-    logits: FloatTensor,
+def finite_mpfr_tokens_from_logprobs(
+    target_logprobs: FloatTensor,
+    proposal_logprobs: FloatTensor,
     source: SharedPFRSource,
-    device,
-) -> tuple[int, FloatTensor]:
-    logprobs = F.log_softmax(logits, dim=-1)
-    token = ms_pfr_tokens_from_logprobs(
-        logprobs,
-        source=source,
-        num_samples=1,
-        device=device,
-    )[0]
-    return int(token.item()), logprobs
+    num_samples: int,
+    *,
+    w_lower: float | None = None,
+    max_proposals: int = 100_000,
+    allow_incomplete: bool = False,
+    return_result: bool = False,
+    chunk_size: int = 2048,
+) -> LongTensor | FiniteMPFRResult:
+    if num_samples <= 0:
+        empty_tokens = torch.empty((0,), device=target_logprobs.device, dtype=torch.long)
+        if return_result:
+            return FiniteMPFRResult(
+                tokens=empty_tokens,
+                scores=torch.empty((0,), device=target_logprobs.device),
+                proposal_indices=torch.empty((0,), device=target_logprobs.device, dtype=torch.long),
+                num_proposals=0,
+                w_lower=float(w_lower) if w_lower is not None else float("nan"),
+                terminated=True,
+            )
+        return empty_tokens
+    if max_proposals < num_samples:
+        raise ValueError("max_proposals must be at least num_samples")
+    if chunk_size <= 0:
+        raise ValueError("chunk_size must be positive")
+
+    device = target_logprobs.device
+    target_logprobs = _as_1d_logprobs(target_logprobs, "target_logprobs")
+    proposal_logprobs = _as_1d_logprobs(proposal_logprobs, "proposal_logprobs")
+    if target_logprobs.shape != proposal_logprobs.shape:
+        raise ValueError("target_logprobs and proposal_logprobs must have the same shape")
+
+    ratio, w_lower_value = _support_checked_ratio_and_bound(
+        target_logprobs,
+        proposal_logprobs,
+        w_lower,
+    )
+    proposal_probs = proposal_logprobs.exp()
+    proposal_probs = proposal_probs / proposal_probs.sum()
+    proposal_cdf = torch.cumsum(proposal_probs, dim=0)
+    proposal_cdf[-1] = 1.0
+
+    same_distribution = bool(torch.equal(target_logprobs, proposal_logprobs))
+    numpy_rng = source.numpy_rng()
+
+    def draw_uniforms(count: int) -> FloatTensor:
+        uniforms_np = numpy_rng.random((count, 2)).astype("float32")
+        return torch.from_numpy(uniforms_np).to(device=device)
+
+    if num_samples == 1 and same_distribution:
+        uniforms = draw_uniforms(1)
+        exp_interarrival = -_safe_log(uniforms[:, 0])
+        token = torch.searchsorted(proposal_cdf, uniforms[:, 1].contiguous(), right=False).long()
+        if not return_result:
+            return token
+        return FiniteMPFRResult(
+            tokens=token,
+            scores=exp_interarrival.to(dtype=target_logprobs.dtype),
+            proposal_indices=torch.ones((1,), device=device, dtype=torch.long),
+            num_proposals=1,
+            w_lower=w_lower_value,
+            terminated=True,
+        )
+
+    best_scores = torch.empty((0,), device=device, dtype=torch.float32)
+    best_indices = torch.empty((0,), device=device, dtype=torch.long)
+    best_tokens = torch.empty((0,), device=device, dtype=torch.long)
+    t = 0.0
+    used = 0
+    terminated = False
+
+    while used < max_proposals:
+        take = min(chunk_size, max_proposals - used)
+        uniforms = draw_uniforms(take)
+        exp_interarrivals = -_safe_log(uniforms[:, 0])
+        times = float(t) + torch.cumsum(exp_interarrivals, dim=0)
+        tokens = torch.searchsorted(proposal_cdf, uniforms[:, 1].contiguous(), right=False).long()
+        token_ratio = ratio[tokens]
+        scores = torch.where(
+            token_ratio > 0,
+            times / token_ratio,
+            torch.full_like(times, float("inf")),
+        )
+        indices = torch.arange(
+            used + 1,
+            used + take + 1,
+            device=device,
+            dtype=torch.long,
+        )
+
+        if best_scores.numel() > 0:
+            combined_scores = torch.cat([best_scores, scores])
+            combined_indices = torch.cat([best_indices, indices])
+            combined_tokens = torch.cat([best_tokens, tokens])
+        else:
+            combined_scores = scores
+            combined_indices = indices
+            combined_tokens = tokens
+
+        keep = min(num_samples, combined_scores.numel())
+        best_scores, best_pos = torch.topk(
+            combined_scores,
+            k=keep,
+            largest=False,
+            sorted=True,
+        )
+        best_indices = combined_indices[best_pos]
+        best_tokens = combined_tokens[best_pos]
+
+        used += take
+        t = float(times[-1].item())
+        if best_scores.numel() >= num_samples and float(best_scores[-1].item()) <= t * w_lower_value:
+            terminated = True
+            break
+
+    if not terminated and not allow_incomplete:
+        raise RuntimeError(
+            "finite MPFR did not terminate within max_proposals; "
+            "increase max_proposals or check w_lower"
+        )
+
+    tokens = best_tokens
+    scores_out = best_scores.to(dtype=target_logprobs.dtype)
+    indices_out = best_indices
+    if not return_result:
+        return tokens
+
+    return FiniteMPFRResult(
+        tokens=tokens,
+        scores=scores_out,
+        proposal_indices=indices_out,
+        num_proposals=used,
+        w_lower=w_lower_value,
+        terminated=terminated,
+    )
+
+
+def finite_mpfr_tokens_from_logits(
+    target_logits: FloatTensor,
+    proposal_logits: FloatTensor,
+    source: SharedPFRSource,
+    num_samples: int,
+    **kwargs,
+) -> LongTensor | FiniteMPFRResult:
+    return finite_mpfr_tokens_from_logprobs(
+        F.log_softmax(target_logits, dim=-1),
+        F.log_softmax(proposal_logits, dim=-1),
+        source,
+        num_samples,
+        **kwargs,
+    )
+
+
+def finite_mpfr_tokens_from_uniform_proposal(
+    target_logprobs: FloatTensor,
+    source: SharedPFRSource,
+    num_samples: int,
+    **kwargs,
+) -> LongTensor | FiniteMPFRResult:
+    target_logprobs = _as_1d_logprobs(target_logprobs, "target_logprobs")
+    target_probs = target_logprobs.float().exp()
+    target_mass = target_probs.sum()
+    if float(target_mass.item()) <= 0:
+        raise ValueError("target distribution has empty support")
+    target_probs = target_probs / target_mass
+    proposal_logprobs = torch.full(
+        target_probs.shape,
+        -math.log(target_probs.shape[-1]),
+        device=target_logprobs.device,
+        dtype=torch.float32,
+    )
+    kwargs.setdefault(
+        "w_lower",
+        float((1.0 / (target_probs.shape[-1] * target_probs.max())).item()),
+    )
+    return finite_mpfr_tokens_from_logprobs(
+        _safe_log(target_probs),
+        proposal_logprobs,
+        source,
+        num_samples,
+        **kwargs,
+    )
 
 
 @torch.no_grad()
-def build_multi_draft_tree(
+def build_finite_multi_draft_tree(
     ref_model,
     input_ids: LongTensor,
     root: ContextKey,
     lookahead: int,
     num_drafts: int,
-    context_cache: ContextRuntimeCache,
+    context_cache,
     past_key_values=None,
     max_vocab_size: int | None = None,
     process_logits_kwargs: dict | None = None,
+    max_proposals: int = 100_000,
+    allow_incomplete: bool = False,
 ) -> tuple[
     list[list[ContextKey]],
     dict[ContextKey, int],
@@ -283,11 +347,12 @@ def build_multi_draft_tree(
             past_by_context[context] = _select_cache_row(output.past_key_values, row)
             source = context_cache.source(context)
             sources[context] = source
-            draft_tokens = ms_pfr_tokens_from_logprobs(
+            draft_tokens = finite_mpfr_tokens_from_uniform_proposal(
                 logprobs[row],
                 source=source,
                 num_samples=multiplicities[context],
-                device=device,
+                max_proposals=max_proposals,
+                allow_incomplete=allow_incomplete,
             )
             token_counts: dict[int, int] = {}
             for token in draft_tokens.detach().cpu().tolist():
@@ -308,59 +373,14 @@ def build_multi_draft_tree(
 
 
 @torch.no_grad()
-def evaluate_target_contexts(
-    model,
-    levels: list[list[ContextKey]],
-    context_cache: ContextRuntimeCache,
-    past_key_values=None,
-    process_logits_kwargs: dict | None = None,
-) -> tuple[dict[ContextKey, int], dict[ContextKey, FloatTensor], dict[ContextKey, SharedPFRSource]]:
-    if process_logits_kwargs is None:
-        process_logits_kwargs = {}
-
-    device = model.device
-    winners: dict[ContextKey, int] = {}
-    logprobs_by_context: dict[ContextKey, FloatTensor] = {}
-    sources: dict[ContextKey, SharedPFRSource] = {}
-    cached_n = cache_len(past_key_values)
-
-    for level in levels[:-1]:
-        if not level:
-            continue
-        batch_ids = _batch_from_keys(level, device)
-        batch_past = _repeat_cache(past_key_values, batch_ids.shape[0])
-        input_tokens = batch_ids[:, cached_n:] if cached_n > 0 else batch_ids
-        output = model(
-            input_tokens,
-            past_key_values=batch_past,
-            use_cache=True,
-            return_dict=True,
-            output_attentions=False,
-            output_hidden_states=False,
-        )
-        logits = output.logits[:, -1, :]
-        logits = process_logits(batch_ids, logits, **process_logits_kwargs)
-        for row, context in enumerate(level):
-            source = context_cache.source(context)
-            token, logprobs = _single_ms_pfr_from_logits(
-                logits[row].unsqueeze(0),
-                source=source,
-                device=device,
-            )
-            winners[context] = token
-            logprobs_by_context[context] = logprobs
-            sources[context] = source
-
-    return winners, logprobs_by_context, sources
-
-
-@torch.no_grad()
-def evaluate_target_context(
+def evaluate_finite_target_context(
     model,
     context: ContextKey,
-    context_cache: ContextRuntimeCache,
+    context_cache,
     past_key_values=None,
     process_logits_kwargs: dict | None = None,
+    max_proposals: int = 100_000,
+    allow_incomplete: bool = False,
 ) -> tuple[int, FloatTensor, SharedPFRSource, any]:
     if process_logits_kwargs is None:
         process_logits_kwargs = {}
@@ -382,17 +402,20 @@ def evaluate_target_context(
         output.logits[:, -1, :],
         **process_logits_kwargs,
     )
+    logprobs = F.log_softmax(logits, dim=-1)
     source = context_cache.source(context)
-    token, logprobs = _single_ms_pfr_from_logits(
-        logits,
+    tokens = finite_mpfr_tokens_from_uniform_proposal(
+        logprobs[0],
         source=source,
-        device=device,
+        num_samples=1,
+        max_proposals=max_proposals,
+        allow_incomplete=allow_incomplete,
     )
-    return token, logprobs, source, output.past_key_values
+    return int(tokens[0].item()), logprobs, source, output.past_key_values
 
 
 @torch.no_grad()
-def multi_draft_pfr_block(
+def finite_multi_draft_pfr_block(
     model,
     ref_model,
     input_ids: LongTensor,
@@ -405,7 +428,9 @@ def multi_draft_pfr_block(
     past_key_values=None,
     ref_past_key_values=None,
     process_logits_kwargs: dict | None = None,
-) -> MultiDraftBlock:
+    max_proposals: int = 100_000,
+    allow_incomplete: bool = False,
+) -> FiniteMultiDraftBlock:
     if process_logits_kwargs is None:
         process_logits_kwargs = {}
     if input_ids.shape[0] != 1:
@@ -431,8 +456,9 @@ def multi_draft_pfr_block(
         label_by_key=shared_labels,
         source_by_key=shared_sources,
     )
+
     block_len = min(lookahead, max_new_tokens)
-    levels, _, draft_sets, draft_sources, draft_past_by_context = build_multi_draft_tree(
+    _levels, _, draft_sets, draft_sources, draft_past_by_context = build_finite_multi_draft_tree(
         ref_model=ref_model,
         input_ids=input_ids.to(ref_model.device),
         root=root,
@@ -442,6 +468,8 @@ def multi_draft_pfr_block(
         past_key_values=ref_past_key_values,
         max_vocab_size=model.config.vocab_size,
         process_logits_kwargs=process_logits_kwargs,
+        max_proposals=max_proposals,
+        allow_incomplete=allow_incomplete,
     )
     winners: dict[ContextKey, int] = {}
     logprobs_by_context: dict[ContextKey, FloatTensor] = {}
@@ -459,12 +487,14 @@ def multi_draft_pfr_block(
 
     for _ in range(block_len):
         if current not in winners:
-            token, logprobs, source, target_context_past = evaluate_target_context(
+            token, logprobs, source, target_context_past = evaluate_finite_target_context(
                 model=model,
                 context=current,
                 context_cache=target_context_cache,
                 past_key_values=past_key_values,
                 process_logits_kwargs=process_logits_kwargs,
+                max_proposals=max_proposals,
+                allow_incomplete=allow_incomplete,
             )
             winners[current] = token
             logprobs_by_context[current] = logprobs
@@ -492,12 +522,14 @@ def multi_draft_pfr_block(
             break
 
     if accepted and not got_eos and len(output_tokens) < max_new_tokens:
-        token, logprobs, bonus_source, target_past_for_next = evaluate_target_context(
+        token, logprobs, bonus_source, target_past_for_next = evaluate_finite_target_context(
             model=model,
             context=current,
             context_cache=target_context_cache,
             past_key_values=past_key_values,
             process_logits_kwargs=process_logits_kwargs,
+            max_proposals=max_proposals,
+            allow_incomplete=allow_incomplete,
         )
         if current in draft_past_by_context:
             draft_past_for_next = draft_past_by_context[current]
@@ -517,8 +549,7 @@ def multi_draft_pfr_block(
     output_logprobs_tensor = torch.stack(output_logprobs, dim=1)
     target_context_count = len(target_sources)
     draft_tree_size = len(draft_sources)
-
-    return MultiDraftBlock(
+    return FiniteMultiDraftBlock(
         output_ids=output_ids,
         output_logprobs=output_logprobs_tensor,
         accepted_count=accepted_count,
@@ -531,7 +562,7 @@ def multi_draft_pfr_block(
 
 
 @torch.no_grad()
-def multi_draft_pfr_generator(
+def finite_multi_draft_pfr_generator(
     model,
     ref_model,
     input_ids: LongTensor,
@@ -542,6 +573,8 @@ def multi_draft_pfr_generator(
     labeler: AbstractLabeler | None = None,
     process_logits_kwargs: dict | None = None,
     return_meta: bool = False,
+    max_proposals: int = 100_000,
+    allow_incomplete: bool = False,
 ):
     if process_logits_kwargs is None:
         process_logits_kwargs = {}
@@ -560,7 +593,7 @@ def multi_draft_pfr_generator(
     generated = 0
 
     while generated < max_length:
-        block = multi_draft_pfr_block(
+        block = finite_multi_draft_pfr_block(
             model=model,
             ref_model=ref_model,
             input_ids=input_ids,
@@ -573,6 +606,8 @@ def multi_draft_pfr_generator(
             past_key_values=past_key_values,
             ref_past_key_values=ref_past_key_values,
             process_logits_kwargs=process_logits_kwargs,
+            max_proposals=max_proposals,
+            allow_incomplete=allow_incomplete,
         )
         meta = {
             "accepted_count": block.accepted_count,
@@ -595,7 +630,7 @@ def multi_draft_pfr_generator(
             break
 
 
-def multi_draft_pfr_sample_generator(
+def finite_multi_draft_pfr_sample_generator(
     model,
     ref_model,
     input_ids: LongTensor,
@@ -607,18 +642,12 @@ def multi_draft_pfr_sample_generator(
     labeler: AbstractLabeler | None = None,
     process_logits_kwargs: dict | None = None,
     return_meta: bool = False,
+    max_proposals: int = 100_000,
+    allow_incomplete: bool = False,
 ):
-    """
-    Repository-style wrapper.
-
-    Args:
-        n: lookahead length ``L``.
-        num_drafts: number of drafts ``B`` launched at the root and propagated
-            as branch multiplicities.  ``B`` is accepted as an alias.
-    """
     if B is not None:
         num_drafts = B
-    yield from multi_draft_pfr_generator(
+    yield from finite_multi_draft_pfr_generator(
         model=model,
         ref_model=ref_model,
         input_ids=input_ids,
@@ -629,4 +658,6 @@ def multi_draft_pfr_sample_generator(
         labeler=labeler,
         process_logits_kwargs=process_logits_kwargs,
         return_meta=return_meta,
+        max_proposals=max_proposals,
+        allow_incomplete=allow_incomplete,
     )
