@@ -32,6 +32,8 @@ from .deltagumbel_G import *
 from .deltagumbel_C import *
 from .deltagumbel_A import *
 from .deltagumbel_X import *
+from .deltagumbel_Li import *
+from .deltagumbel_PL import *
 from .gamma_U import *
 from .llr import *
 from .robust_llr import RobustLLRScore

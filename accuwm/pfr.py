@@ -250,6 +250,12 @@ class SharedPFRSource:
         return _get_rng(self.label, self.private_key)
 
     def uniform_noise(self, shape, device) -> FloatTensor:
+        # Use torch.Generator on the model device so generation noise can be
+        # re-derived bit-exactly at detection time via the same primitive
+        # (unbiased_watermark.scores.pfr_aaronson._uniform_for_token).
+        # Numpy default_rng and torch.Generator(cuda) Philox produce
+        # DIFFERENT bit streams from the same seed, so the two ends MUST
+        # use the same RNG family or detection recovers garbage.
         generator = torch.Generator(device=device)
         generator.manual_seed(self.seed())
         return torch.rand(shape, device=device, dtype=torch.float32, generator=generator)
@@ -570,13 +576,21 @@ def pfr_sample_generator(
             mode=labeler_mode,
             cc_extractor=cc_extractor,
         )
-    yield from pfr_speculative_generator(
+    # Delegate to the shared B=1 PFR cached pipeline so pfr and
+    # pfr_no_watermark go through the SAME draft+verify+cache logic and
+    # only differ in noise source.  This makes AATPS structurally
+    # equivalent (only the noise sample differs) and keeps detection
+    # alignment trivial.
+    from .pfr_cached import pfr_cached_sample_generator
+    yield from pfr_cached_sample_generator(
         model=model,
         ref_model=ref_model,
         input_ids=input_ids,
-        lookahead=n,
+        n=n,
         max_length=max_length,
-        labeler=labeler,
         private_key=private_key,
+        watermark=True,
+        labeler=labeler,
         process_logits_kwargs=process_logits_kwargs,
+        return_meta=True,
     )

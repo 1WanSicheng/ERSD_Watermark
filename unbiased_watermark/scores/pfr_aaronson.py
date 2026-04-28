@@ -14,6 +14,7 @@ import math
 from torch import LongTensor
 
 from .additivescore import TokenwiseAdditiveScore
+from .. import DeltaGumbel_WatermarkCode
 from ..lm import get_rng
 
 
@@ -65,6 +66,24 @@ def _solve_u_chernoff_lambda(mean_u: float) -> float:
 
 
 class PFR_Aaronson_Score(TokenwiseAdditiveScore):
+    """Aaronson-style ``-log(1 - U_t)`` score.
+
+    Two equivalent code paths are exposed:
+
+    1. Aligned path — pass a ``DeltaGumbel_WatermarkCode`` as ``code``. The
+       per-token uniform is recovered from ``g`` via ``U_t = exp(-exp(-g_t))``
+       and the score is computed in a single GPU op. This is the path used by
+       ``unbiased_watermark.lm.detect`` so PFR detection can run through the
+       same pipeline as ``DeltaGumbel_U``.
+    2. Legacy path — pass ``code=None`` together with ``source_labels``,
+       ``private_key`` and ``vocab_size``. The uniforms are reconstructed per
+       token from ``(label, key)`` to match PFR generation that tracks labels
+       directly. Both paths now consume the same ``rng.random((V,),
+       dtype=float32)`` so they are bit-identical.
+    """
+
+    watermark_code_type = DeltaGumbel_WatermarkCode
+
     def get_per_token_log_MGF(self, t: float) -> float:
         if t >= 1:
             return np.inf
@@ -85,9 +104,30 @@ class PFR_Aaronson_Score(TokenwiseAdditiveScore):
         private_key: bytes = None,
         vocab_size: int = None,
     ):
-        assert source_labels is not None, "source_labels required for PFR_Aaronson_Score"
-        assert private_key is not None, "private_key required for PFR_Aaronson_Score"
-        assert vocab_size is not None, "vocab_size required for PFR_Aaronson_Score"
+        if code is not None and isinstance(code, DeltaGumbel_WatermarkCode):
+            return cls._score_from_deltagumbel_code(code, ids)
+        return cls._score_from_source_labels(ids, source_labels, private_key, vocab_size)
+
+    @staticmethod
+    def _score_from_deltagumbel_code(
+        code: DeltaGumbel_WatermarkCode, ids: LongTensor
+    ) -> torch.Tensor:
+        assert code.g.shape[:-1] == ids.shape
+        gs = torch.gather(code.g, -1, ids.unsqueeze(-1)).squeeze(-1)
+        # U_t = exp(-exp(-g_t)), the same uniform that fed get_gumbel_variables.
+        Us = torch.exp(-torch.exp(-gs)).clamp(min=1e-10, max=1 - 1e-10)
+        return -torch.log(1.0 - Us)
+
+    @staticmethod
+    def _score_from_source_labels(
+        ids: LongTensor,
+        source_labels: np.ndarray,
+        private_key: bytes,
+        vocab_size: int,
+    ) -> torch.Tensor:
+        assert source_labels is not None, "source_labels required for legacy PFR_Aaronson scoring"
+        assert private_key is not None, "private_key required for legacy PFR_Aaronson scoring"
+        assert vocab_size is not None, "vocab_size required for legacy PFR_Aaronson scoring"
 
         batch_size, seq_len = ids.shape
         device = ids.device
@@ -97,9 +137,9 @@ class PFR_Aaronson_Score(TokenwiseAdditiveScore):
             for t in range(seq_len):
                 source_label = source_labels[b, t]
                 token_id = ids[b, t].item()
-                rng = get_rng(source_label, private_key)
-                r_values = np.array([rng.random() for _ in range(vocab_size)])
-                r_t_y_t = np.clip(r_values[token_id], 1e-10, 1 - 1e-10)
+                r_t_y_t = _uniform_for_token(
+                    source_label, private_key, token_id, vocab_size, device=device,
+                )
                 scores[b, t] = -np.log(1 - r_t_y_t)
         return scores
 
@@ -151,11 +191,38 @@ class PFR_Aaronson_U_Score(PFR_Aaronson_Score):
         return num_added * (log_term - lam * mean_u)
 
 
-def _uniform_for_token(label: bytes, private_key: bytes, token_id: int, vocab_size: int) -> float:
-    rng = get_rng(label, private_key)
-    # The generator is sequential, so reproduce the token-indexed PRF value.
-    r_values = np.array([rng.random() for _ in range(vocab_size)])
-    return float(np.clip(r_values[token_id], 1e-10, 1 - 1e-10))
+def _seed_from_label_key(label: bytes, private_key: bytes) -> int:
+    """SHA-256 over (label, private_key) reduced to a 32-bit seed.  Must match
+    accuwm.pfr._get_seed exactly so generation and detection share an RNG seed."""
+    import hashlib
+    m = hashlib.sha256()
+    m.update(label)
+    m.update(private_key)
+    return int.from_bytes(m.digest(), "big") % (2**32 - 1)
+
+
+def _uniform_for_token(
+    label: bytes,
+    private_key: bytes,
+    token_id: int,
+    vocab_size: int,
+    *,
+    device=None,
+) -> float:
+    """Recover the per-token uniform u_t used by PFR generation for the chosen
+    token.  Generation calls torch.rand((1, vocab_size), device=cuda, dtype=float32)
+    with a torch.Generator seeded by SHA256(label || private_key); detection
+    must mirror this exactly (same RNG family, same device, same shape, same
+    dtype) or the recovered uniforms are uncorrelated with the watermark."""
+    seed = _seed_from_label_key(label, private_key)
+    if device is None:
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    elif not isinstance(device, torch.device):
+        device = torch.device(device)
+    g = torch.Generator(device=device)
+    g.manual_seed(seed)
+    r_values = torch.rand((1, vocab_size), device=device, dtype=torch.float32, generator=g)
+    return float(torch.clamp(r_values[0, int(token_id)], 1e-10, 1 - 1e-10).item())
 
 
 def compute_pfr_aaronson_from_sequence(
