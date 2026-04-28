@@ -1,18 +1,20 @@
 """
 No-watermark PFR speculative decoding baseline.
 
-This is a thin wrapper around accuwm.pfr_cached that runs the SAME
-single-draft + batched-verify + KV-cache reuse pipeline as accuwm.pfr but
-with FreshNoiseSourceFactory in place of the keyed PFRSourceFactory.  Only
-the noise source differs, so AATPS is structurally identical to pfr.py and
-only the watermark detector strength changes (no detectable signal here).
+Thin wrapper around the B=1 cached pipeline in :mod:`accuwm.pfr` that swaps
+the keyed ``PFRSourceFactory`` for ``FreshNoiseSourceFactory``.  Only the
+noise source differs, so AATPS is structurally identical to pfr; the
+watermark detector simply has no recoverable signal.
 """
 from __future__ import annotations
 
 from torch import LongTensor
 
-from .pfr import build_default_labeler
-from .pfr_cached import FreshNoiseSourceFactory, pfr_cached_sample_generator
+from .pfr import (
+    FreshNoiseSourceFactory,
+    build_default_labeler,
+    pfr_cached_sample_generator,
+)
 
 
 def pfr_no_watermark_generator(

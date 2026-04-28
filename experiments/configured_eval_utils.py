@@ -21,7 +21,6 @@ import unbiased_watermark as uwm
 
 from accuwm.mc import mc_sample_generator
 from accuwm.mc_watermark import mc_uwm_sample_generator
-from accuwm.multi_draft_pfr import multi_draft_pfr_sample_generator
 from accuwm.pfr import PrefixLabeler, build_default_labeler, pfr_sample_generator
 from accuwm.pfr_no_watermark import pfr_no_watermark_generator
 from unbiased_watermark.scores.pfr_aaronson import (
@@ -262,17 +261,13 @@ def build_generator(
             process_logits_kwargs=process_logits_kwargs,
         )
     if algo_type == "mspfr":
-        return multi_draft_pfr_sample_generator(
-            model=target,
-            ref_model=draft,
-            input_ids=input_ids,
-            n=lookahead,
-            B=int(spec.get("num_drafts", spec.get("B", 4))),
-            max_length=max_length,
-            private_key=private_key,
-            labeler=PrefixLabeler(),
-            return_meta=True,
-            process_logits_kwargs=process_logits_kwargs,
+        # The old in-tree multi-draft PFR generator has been retired.  Use
+        # the cached multi-draft variants under MPFR_spec/ instead
+        # (multi_draft_pfr_batched_cached or mpfr_batched_torchgen_cached).
+        raise NotImplementedError(
+            "'mspfr' algorithm has been removed; use the cached multi-draft "
+            "variants in MPFR_spec/multi_draft_pfr_batched_cached.py or "
+            "MPFR_spec/mpfr_batched_torchgen_cached.py"
         )
     if algo_type == "basic_speculative_decoding":
         return mc_sample_generator(

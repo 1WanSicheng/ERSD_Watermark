@@ -6,9 +6,10 @@ __all__ = [
     "finite_multi_draft_pfr",
     "mc",
     "mc_watermark",
-    "multi_draft_pfr",
+    "multi_draft_utils",
     "pfr",
     "pfr_mpfr_firstarrival",
+    "pfr_no_watermark",
 ]
 
 

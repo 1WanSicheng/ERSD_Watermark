@@ -46,7 +46,7 @@ from mpfr_direct_optimized import (
     process_logits_exact,
 )
 
-from accuwm.multi_draft_pfr import _repeat_cache, ms_pfr_tokens_from_logprobs
+from accuwm.multi_draft_utils import _repeat_cache, ms_pfr_tokens_from_logprobs
 from accuwm.pfr import PFRSourceFactory, SharedPFRSource
 from accuwm.utils import cache_len
 
