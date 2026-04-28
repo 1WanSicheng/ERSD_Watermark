@@ -1,0 +1,71 @@
+{
+  "draft_model": "Qwen/Qwen2.5-0.5B-Instruct",
+  "target_model": "Qwen/Qwen2.5-7B-Instruct",
+  "datasets": [
+    "openai/gsm8k",
+    "openai/openai_humaneval",
+    "facebook/natural_reasoning"
+  ],
+  "num_test_prompts": 200,
+  "gen_length": 128,
+  "top_k": 50,
+  "top_p": 1.0,
+  "configurations": [
+    {
+      "name": "list_identical_4_2",
+      "algorithm": "list_identical",
+      "max_draft_len": 4,
+      "max_num_drafts": 2,
+      "temperature": [1.0, 1.0, 1.0]
+    },
+    {
+      "name": "list_identical_4_4",
+      "algorithm": "list_identical",
+      "max_draft_len": 4,
+      "max_num_drafts": 4,
+      "temperature": [1.0, 1.0, 1.0, 1.0, 1.0]
+    },
+    {
+      "name": "list_identical_4_6",
+      "algorithm": "list_identical",
+      "max_draft_len": 4,
+      "max_num_drafts": 6,
+      "temperature": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+    },
+    {
+      "name": "list_identical_4_8",
+      "algorithm": "list_identical",
+      "max_draft_len": 4,
+      "max_num_drafts": 8,
+      "temperature": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+    },
+    {
+      "name": "mpfr_batched_direct_topk_4_2",
+      "algorithm": "mpfr_batched",
+      "max_draft_len": 4,
+      "max_num_drafts": 2,
+      "temperature": [1.0, 1.0, 1.0]
+    },
+    {
+      "name": "mpfr_batched_direct_topk_4_4",
+      "algorithm": "mpfr_batched",
+      "max_draft_len": 4,
+      "max_num_drafts": 4,
+      "temperature": [1.0, 1.0, 1.0, 1.0, 1.0]
+    },
+    {
+      "name": "mpfr_batched_direct_topk_4_6",
+      "algorithm": "mpfr_batched",
+      "max_draft_len": 4,
+      "max_num_drafts": 6,
+      "temperature": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+    },
+    {
+      "name": "mpfr_batched_direct_topk_4_8",
+      "algorithm": "mpfr_batched",
+      "max_draft_len": 4,
+      "max_num_drafts": 8,
+      "temperature": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+    }
+  ]
+}
