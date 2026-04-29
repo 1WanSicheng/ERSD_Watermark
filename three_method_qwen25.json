@@ -1,0 +1,125 @@
+{
+  "draft_model": "Qwen/Qwen2.5-0.5B-Instruct",
+  "target_model": "Qwen/Qwen2.5-7B-Instruct",
+  "datasets": [
+    "openai/gsm8k",
+    "openai/openai_humaneval",
+    "facebook/natural_reasoning"
+  ],
+  "num_test_prompts": 200,
+  "gen_length": 128,
+  "private_key": "1234",
+  "warmup": 10,
+  "top_k": 50,
+  "top_p": 1.0,
+  "configurations": [
+    {
+      "name": "ashish_strong_4_2",
+      "method": "ashish_strong",
+      "max_draft_len": 4,
+      "max_num_drafts": 2,
+      "temperature": [1.0, 1.0, 1.0],
+      "top_k": 50,
+      "top_p": 1.0
+    },
+    {
+      "name": "ashish_strong_4_4",
+      "method": "ashish_strong",
+      "max_draft_len": 4,
+      "max_num_drafts": 4,
+      "temperature": [1.0, 1.0, 1.0, 1.0, 1.0],
+      "top_k": 50,
+      "top_p": 1.0
+    },
+    {
+      "name": "ashish_strong_4_6",
+      "method": "ashish_strong",
+      "max_draft_len": 4,
+      "max_num_drafts": 6,
+      "temperature": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+      "top_k": 50,
+      "top_p": 1.0
+    },
+    {
+      "name": "ashish_strong_4_8",
+      "method": "ashish_strong",
+      "max_draft_len": 4,
+      "max_num_drafts": 8,
+      "temperature": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+      "top_k": 50,
+      "top_p": 1.0
+    },
+    {
+      "name": "mpfr_torchgen_cached_4_2",
+      "method": "mpfr_batched_torchgen_cached",
+      "max_draft_len": 4,
+      "max_num_drafts": 2,
+      "temperature": [1.0, 1.0, 1.0],
+      "top_k": 50,
+      "top_p": 1.0
+    },
+    {
+      "name": "mpfr_torchgen_cached_4_4",
+      "method": "mpfr_batched_torchgen_cached",
+      "max_draft_len": 4,
+      "max_num_drafts": 4,
+      "temperature": [1.0, 1.0, 1.0, 1.0, 1.0],
+      "top_k": 50,
+      "top_p": 1.0
+    },
+    {
+      "name": "mpfr_torchgen_cached_4_6",
+      "method": "mpfr_batched_torchgen_cached",
+      "max_draft_len": 4,
+      "max_num_drafts": 6,
+      "temperature": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+      "top_k": 50,
+      "top_p": 1.0
+    },
+    {
+      "name": "mpfr_torchgen_cached_4_8",
+      "method": "mpfr_batched_torchgen_cached",
+      "max_draft_len": 4,
+      "max_num_drafts": 8,
+      "temperature": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+      "top_k": 50,
+      "top_p": 1.0
+    },
+    {
+      "name": "multi_draft_pfr_cached_4_2",
+      "method": "multi_draft_pfr_batched_cached",
+      "max_draft_len": 4,
+      "max_num_drafts": 2,
+      "temperature": [1.0, 1.0, 1.0],
+      "top_k": 50,
+      "top_p": 1.0
+    },
+    {
+      "name": "multi_draft_pfr_cached_4_4",
+      "method": "multi_draft_pfr_batched_cached",
+      "max_draft_len": 4,
+      "max_num_drafts": 4,
+      "temperature": [1.0, 1.0, 1.0, 1.0, 1.0],
+      "top_k": 50,
+      "top_p": 1.0
+    },
+    {
+      "name": "multi_draft_pfr_cached_4_6",
+      "method": "multi_draft_pfr_batched_cached",
+      "max_draft_len": 4,
+      "max_num_drafts": 6,
+      "temperature": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+      "top_k": 50,
+      "top_p": 1.0
+    },
+    {
+      "name": "multi_draft_pfr_cached_4_8",
+      "method": "multi_draft_pfr_batched_cached",
+      "max_draft_len": 4,
+      "max_num_drafts": 8,
+      "temperature": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+      "top_k": 50,
+      "top_p": 1.0
+    }
+  ]
+}
