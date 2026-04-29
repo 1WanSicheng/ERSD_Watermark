@@ -1,0 +1,32 @@
+{
+  "experiment": "single_draft",
+  "samples": 100,
+  "dataset": "cnn_dailymail",
+  "max_new_tokens": 128,
+  "lookaheads": [2, 4, 6, 8],
+  "private_key": "1234",
+  "process_logits": {
+    "top_k": 50,
+    "top_p": 1.0,
+    "temperature": 1.0
+  },
+  "decoders": [
+    "mc",
+    "basic_uwm",
+    "mc_uwm_speed",
+    "mc_uwm_strength",
+    "pfr",
+    "pfr_no_watermark"
+  ],
+  "metrics": {
+    "aatps": true,
+    "token_rate": true,
+    "anlppt": {
+      "variants": ["U", "Li", "PL"],
+      "li_delta": 0.5,
+      "pl_eps": 0.1
+    },
+    "kl_ratio_pfr_only": true
+  },
+  "output": "outputs/single_draft_n100_l2-4-6-8.json"
+}
