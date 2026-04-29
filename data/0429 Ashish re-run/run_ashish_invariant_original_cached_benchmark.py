@@ -1,15 +1,21 @@
 #!/usr/bin/env python3
 """
-Run the official Ashish/Rowan list-level invariant multi-draft baseline only.
+Run Ashish/Rowan's original InvariantMultiDraftStrategy with KV cache enabled.
 
-This runner imports InvariantMultiDraftStrategy from the uploaded
-SpeculativeDecoding/strategy.py and uses the same active-set invariant logic.
-The only compatibility change is that generate_draft/verify_draft are executed
-without Hugging Face KV-cache reuse, because the uploaded repository assumes an
-older tuple-style cache API while recent Transformers uses DynamicCache.
+This runner is intentionally narrow: it only evaluates the conditionally
+invariant multi-draft baseline from the uploaded SpeculativeDecoding folder.
+It calls the original class methods directly:
 
-Outputs use the same raw/summary schema as run_three_method_json_benchmark.py,
-so they can be compared with existing MPFR CSVs.
+    strategy.generate_draft(...)
+    strategy.verify_draft(...)
+
+The only compatibility change is a monkey patch for recent Hugging Face
+DynamicCache objects so that the uploaded original code, which expects
+old-style cache fields such as .key_cache/.value_cache and cache[0][0], can
+run without rewriting the algorithm.
+
+Outputs use the same raw/summary-style CSV schema as the previous benchmark
+scripts, so these rows can replace earlier incorrect Ashish rows.
 """
 
 from __future__ import annotations
@@ -17,15 +23,13 @@ from __future__ import annotations
 import argparse
 import csv
 import json
-import math
 import os
 import random
 import sys
-from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from time import perf_counter
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, List
 
 import numpy as np
 import pandas as pd
@@ -33,20 +37,6 @@ import torch
 from datasets import load_dataset
 from tqdm import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer
-
-
-# These are imported after adding SpeculativeDecoding/ to sys.path in main().
-OfficialInvariantMultiDraftStrategy = None
-DraftOutput = None
-VerifyOutput = None
-LogitsProcessor = None
-_gumbel_sample = None
-
-
-@dataclass
-class PromptRecord:
-    prompt: List[Dict[str, str]]
-    index: int
 
 
 def seed_everything(seed: int) -> None:
@@ -66,6 +56,101 @@ def model_device(model) -> torch.device:
     return next(model.parameters()).device
 
 
+def _get_layers(cache):
+    layers = getattr(cache, "layers", None)
+    if layers is not None:
+        return layers
+    # Older/alternative cache implementations may store lists directly.
+    for name in ("_layers", "cache", "_cache"):
+        layers = getattr(cache, name, None)
+        if layers is not None:
+            return layers
+    raise AttributeError("Could not find layers on DynamicCache object")
+
+
+def _get_layer_tensor(layer, kind: str):
+    # Newer DynamicLayer uses .keys/.values; older versions may use variants.
+    names = (
+        ("keys", "key_states", "key", "key_cache")
+        if kind == "key"
+        else ("values", "value_states", "value", "value_cache")
+    )
+    for name in names:
+        if hasattr(layer, name):
+            x = getattr(layer, name)
+            if x is not None:
+                return x
+    raise AttributeError(f"Could not find {kind} tensor on cache layer {type(layer)}")
+
+
+def _set_layer_tensor(layer, kind: str, value):
+    preferred = ("keys", "key_states", "key", "key_cache") if kind == "key" else ("values", "value_states", "value", "value_cache")
+    # Prefer writing back to an attribute that already exists.
+    for name in preferred:
+        if hasattr(layer, name):
+            try:
+                setattr(layer, name, value)
+                return
+            except Exception:
+                pass
+    # Last resort: use the common modern names.
+    setattr(layer, "keys" if kind == "key" else "values", value)
+
+
+class _CacheTensorList:
+    """Mutable list-like proxy exposing DynamicCache layer tensors."""
+
+    def __init__(self, cache, kind: str):
+        self.cache = cache
+        self.kind = kind
+
+    def __len__(self):
+        return len(_get_layers(self.cache))
+
+    def __getitem__(self, idx):
+        return _get_layer_tensor(_get_layers(self.cache)[idx], self.kind)
+
+    def __setitem__(self, idx, value):
+        _set_layer_tensor(_get_layers(self.cache)[idx], self.kind, value)
+
+    def __iter__(self):
+        for i in range(len(self)):
+            yield self[i]
+
+
+def patch_dynamic_cache_for_original_strategy() -> None:
+    """Expose legacy .key_cache/.value_cache/cache[i] API on DynamicCache.
+
+    The uploaded SpeculativeDecoding/strategy.py mutates .key_cache and
+    .value_cache directly. Recent Transformers versions wrap them inside
+    cache.layers. This patch does not change the algorithm; it only supplies
+    the old API expected by the original class methods.
+    """
+    try:
+        from transformers.cache_utils import DynamicCache
+    except Exception as e:
+        print(f"Warning: could not import DynamicCache for compatibility patch: {e}")
+        return
+
+    def _key_cache(self):
+        return _CacheTensorList(self, "key")
+
+    def _value_cache(self):
+        return _CacheTensorList(self, "value")
+
+    def _getitem(self, idx):
+        return (self.key_cache[idx], self.value_cache[idx])
+
+    def _len(self):
+        return len(_get_layers(self))
+
+    # Override even if properties exist; the proxy is compatible with assignment.
+    DynamicCache.key_cache = property(_key_cache)  # type: ignore[attr-defined]
+    DynamicCache.value_cache = property(_value_cache)  # type: ignore[attr-defined]
+    DynamicCache.__getitem__ = _getitem  # type: ignore[method-assign]
+    DynamicCache.__len__ = _len  # type: ignore[method-assign]
+
+
 def load_prompt_dataset(name: str):
     if name == "openai/gsm8k":
         return load_dataset(name, "main")["train"]
@@ -82,17 +167,13 @@ def load_prompt_dataset(name: str):
 
 def create_prompt(row: Dict[str, Any], dset_name: str) -> List[Dict[str, str]]:
     if dset_name == "openai/gsm8k":
-        question = row["question"]
-        user = f"{question}"
+        user = row["question"]
     elif dset_name == "openai/openai_humaneval":
-        question = row["prompt"]
-        user = f"Complete the code:\n{question}"
+        user = f"Complete the code:\n{row['prompt']}"
     elif dset_name == "facebook/natural_reasoning":
-        question = row["question"]
-        user = f"{question}"
+        user = row["question"]
     elif dset_name == "google-research-datasets/mbpp":
-        question = row["text"]
-        user = f"{question} Use Python."
+        user = f"{row['text']} Use Python."
     elif dset_name == "ucinlp/drop":
         user = f"{row['passage']}\n\n{row['question']}"
     else:
@@ -117,126 +198,17 @@ def input_ids_from_prompt(tokenizer, prompt: List[Dict[str, str]], device: torch
     return tokenizer(text, return_tensors="pt").input_ids.to(device)
 
 
-class CompatibleOfficialInvariantStrategy:
-    """Use the official InvariantMultiDraftStrategy identity and logic, with cache disabled.
-
-    The uploaded class is written for an older Transformers cache API. This wrapper
-    instantiates the official class and reuses its attributes. The draft/verify
-    code below is the same active-set invariant algorithm: at target verification
-    depth s, the Gumbel noise is maxed only over the currently active drafts.
-    """
-
-    def __init__(self, target, drafter, tokenizer, max_draft_len: int, max_num_drafts: int):
-        # Instantiate the official strategy class so the experiment is tied to the
-        # uploaded SpeculativeDecoding/strategy.py implementation and parameters.
-        if OfficialInvariantMultiDraftStrategy is None:
-            raise RuntimeError("OfficialInvariantMultiDraftStrategy was not imported")
-        self.official = OfficialInvariantMultiDraftStrategy(
-            target, drafter, tokenizer, max_draft_len, max_num_drafts
-        )
-        self.target = self.official.target
-        self.drafter = self.official.drafter
-        self.max_draft_len = self.official.max_draft_len
-        self.max_num_drafts = self.official.max_num_drafts
-        self.vocab_size = self.official.vocab_size
-
-    @torch.no_grad()
-    def generate_draft(self, input_ids, logits_processor, position: int, randomness: torch.Tensor):
-        batch_size = self.max_num_drafts
-        rn = randomness[position : (position + self.max_draft_len + 1), :, :]
-        draft_device = model_device(self.drafter)
-
-        input_ids = input_ids.to(draft_device).repeat((batch_size, 1))
-
-        # Same draft generation rule as the official method, but no KV cache.
-        for i in range(self.max_draft_len):
-            outputs = self.drafter(
-                input_ids=input_ids,
-                use_cache=False,
-                return_dict=True,
-                output_attentions=False,
-                output_hidden_states=False,
-            )
-            logits = outputs.logits[..., : self.vocab_size]
-            logits = logits_processor(logits[:, -1:])
-            draft_ids = _gumbel_sample(
-                logits,
-                rn[i, :, :].unsqueeze(0).permute(1, 0, 2).to(draft_device),
-            )
-            input_ids = torch.cat((input_ids, draft_ids), dim=-1)
-
-        return DraftOutput(sequences=input_ids, draft_probs=None, draft_past_key_values=None)
-
-    @torch.no_grad()
-    def verify_draft(self, input_ids, logits_processor, position: int, randomness: torch.Tensor):
-        batch_size, input_len = input_ids.shape
-        device = model_device(self.target)
-        input_ids = input_ids.to(device)
-        rn = randomness[position : (position + self.max_draft_len + 1), :, :].to(device)
-
-        outputs = self.target(
-            input_ids=input_ids,
-            use_cache=False,
-            return_dict=True,
-            output_attentions=False,
-            output_hidden_states=False,
-        )
-        logits = outputs.logits[..., : self.vocab_size]
-        logits = logits_processor(logits[:, (-self.max_draft_len - 1) :])
-        draft_ids = input_ids[:, -self.max_draft_len :]
-        assert logits.size(1) == draft_ids.size(1) + 1
-
-        rejected_mask = torch.zeros(batch_size, dtype=torch.bool, device=device)
-        alive_group_id = 0
-        depth = 0
-
-        for depth in range(self.max_draft_len):
-            # This is the defining official invariant rule: max over active drafts.
-            target_noise, _ = torch.max(rn[depth, ~rejected_mask, :], dim=0)
-            target_ids = _gumbel_sample(logits[:, depth], target_noise)
-
-            for k in range(batch_size):
-                if rejected_mask[k]:
-                    continue
-                if draft_ids[k, depth] == target_ids[k]:
-                    alive_group_id = k
-                    rejected_mask |= torch.ne(draft_ids[:, depth], draft_ids[k, depth])
-                    break
-                rejected_mask[k] = True
-
-            if torch.all(rejected_mask):
-                break
-        else:
-            depth = self.max_draft_len
-
-        if not torch.all(rejected_mask):
-            depth = self.max_draft_len
-
-        # Match the uploaded official InvariantMultiDraftStrategy: the final token
-        # is sampled from logits[alive_group_id, depth] with fresh Gumbel noise.
-        last_token = _gumbel_sample(logits[alive_group_id, depth]).unsqueeze(0)
-        output_prefix = input_ids[alive_group_id, : (input_len - self.max_draft_len + depth)]
-        new_input_ids = torch.cat((output_prefix, last_token)).unsqueeze(0)
-
-        return VerifyOutput(
-            sequences=new_input_ids,
-            target_past_key_values=None,
-            draft_past_key_values=None,
-            accept_count=depth + 1,
-        )
-
-
 @torch.no_grad()
-def run_one_prompt_official_invariant(
+def run_one_prompt_original_cached(
     *,
-    model,
-    ref_model,
+    strategy,
     tokenizer,
     input_ids: torch.Tensor,
     config: Dict[str, Any],
     gen_length: int,
+    LogitsProcessor,
 ) -> Dict[str, Any]:
-    device = model_device(model)
+    device = model_device(strategy.target)
     input_ids = input_ids.to(device)
     input_len = int(input_ids.size(-1))
 
@@ -245,8 +217,6 @@ def run_one_prompt_official_invariant(
     temperature = config.get("temperature", 1.0)
     top_k = int(config.get("top_k", 50))
     top_p = float(config.get("top_p", 1.0))
-
-    strategy = CompatibleOfficialInvariantStrategy(model, ref_model, tokenizer, L, B)
 
     if hasattr(temperature, "__len__") and not isinstance(temperature, (str, bytes)):
         target_temp = torch.tensor(temperature[0], device=device).reshape((1, 1, 1))
@@ -258,10 +228,11 @@ def run_one_prompt_official_invariant(
         target_logits_processor = LogitsProcessor(temp, top_p, top_k)
         draft_logits_processor = LogitsProcessor(temp, top_p, top_k)
 
-    # Same randomness shape as official InvariantGenerator.
     randomness = torch.empty((gen_length + L + 1, B, strategy.vocab_size), device=device)
     randomness.uniform_()
 
+    target_past_key_values = None
+    draft_past_key_values = None
     num_steps = 0
     accepted_tokens_total = 0
     attempted_draft_tokens_total = 0
@@ -270,6 +241,8 @@ def run_one_prompt_official_invariant(
     total_generation_time = 0.0
     total_verification_time = 0.0
 
+    if torch.cuda.is_available():
+        torch.cuda.synchronize(device)
     t0 = perf_counter()
     while input_ids.size(-1) < input_len + gen_length:
         position = int(input_ids.size(-1) - input_len)
@@ -277,21 +250,17 @@ def run_one_prompt_official_invariant(
         if remaining <= 0:
             break
 
-        # If only one token remains, this block still works, but keep L bounded.
-        block_L = min(L, max(1, remaining - 1)) if remaining > 1 else 1
-        if block_L != L:
-            # The official class has fixed L. For final short remainder, just use
-            # a one-step target sample by running the same strategy with L=1.
-            old_L = strategy.max_draft_len
-            strategy.max_draft_len = block_L
-        else:
-            old_L = L
-
+        # Original class assumes fixed max_draft_len. Stop when fewer than L+1
+        # target positions remain to avoid changing the original methods.
+        # This matches the common 128-token case unless the final block would
+        # overshoot. If it overshoots, generation can exceed gen_length slightly;
+        # truncate accounting below if needed.
         if torch.cuda.is_available():
             torch.cuda.synchronize(device)
         tg0 = perf_counter()
         draft_outputs = strategy.generate_draft(
             input_ids=input_ids,
+            past_key_values=draft_past_key_values,
             logits_processor=draft_logits_processor,
             position=position,
             randomness=randomness,
@@ -299,12 +268,16 @@ def run_one_prompt_official_invariant(
         if torch.cuda.is_available():
             torch.cuda.synchronize(device)
         tg1 = perf_counter()
+        draft_past_key_values = draft_outputs.draft_past_key_values
 
         if torch.cuda.is_available():
             torch.cuda.synchronize(device)
         tv0 = perf_counter()
         verify_outputs = strategy.verify_draft(
             input_ids=draft_outputs.sequences,
+            target_past_key_values=target_past_key_values,
+            draft_past_key_values=draft_past_key_values,
+            draft_probs=draft_outputs.draft_probs,
             logits_processor=target_logits_processor,
             position=position,
             randomness=randomness,
@@ -313,24 +286,28 @@ def run_one_prompt_official_invariant(
             torch.cuda.synchronize(device)
         tv1 = perf_counter()
 
-        if old_L != strategy.max_draft_len:
-            strategy.max_draft_len = old_L
-
-        emitted = int(verify_outputs.sequences.size(-1) - input_ids.size(-1))
+        old_len = int(input_ids.size(-1))
         input_ids = verify_outputs.sequences
-        accepted_draft = max(0, int(verify_outputs.accept_count) - 1)
+        emitted = int(input_ids.size(-1) - old_len)
+        draft_past_key_values = verify_outputs.draft_past_key_values
+        target_past_key_values = verify_outputs.target_past_key_values
 
+        accepted_draft = max(0, int(verify_outputs.accept_count) - 1)
         num_steps += 1
         accepted_tokens_total += accepted_draft
-        attempted_draft_tokens_total += block_L * B
+        attempted_draft_tokens_total += L * B
         target_forward_calls_total += 1
-        draft_forward_calls_total += block_L
+        draft_forward_calls_total += L
         total_generation_time += tg1 - tg0
         total_verification_time += tv1 - tv0
 
         eos = tokenizer.eos_token_id
-        if eos is not None and bool((input_ids[:, -emitted:] == int(eos)).any().item()):
+        if eos is not None and emitted > 0 and bool((input_ids[:, -emitted:] == int(eos)).any().item()):
             break
+
+        # Safety guard if an unexpected cache issue causes no progress.
+        if emitted <= 0:
+            raise RuntimeError("Original invariant strategy emitted no tokens; aborting to avoid infinite loop")
 
     if torch.cuda.is_available():
         torch.cuda.synchronize(device)
@@ -341,9 +318,7 @@ def run_one_prompt_official_invariant(
     token_rate = num_generated_tokens / total_time if total_time > 0 else float("nan")
     be = num_generated_tokens / num_steps if num_steps else float("nan")
     aatps = accepted_tokens_total / num_steps if num_steps else float("nan")
-    acceptance_fraction = (
-        accepted_tokens_total / attempted_draft_tokens_total if attempted_draft_tokens_total else float("nan")
-    )
+    acceptance_fraction = accepted_tokens_total / attempted_draft_tokens_total if attempted_draft_tokens_total else float("nan")
     normalized_aatps = aatps / L if L else float("nan")
 
     return {
@@ -371,24 +346,12 @@ def run_one_prompt_official_invariant(
 def summarize(raw_path: Path, summary_path: Path) -> None:
     df = pd.read_csv(raw_path)
     metric_cols = [
-        "num_generated_tokens",
-        "total_time",
-        "token_rate",
-        "num_steps",
-        "accepted_tokens_total",
-        "attempted_draft_tokens_total",
-        "aatps",
-        "be",
-        "tokens_per_step",
-        "acceptance_fraction",
-        "normalized_aatps",
-        "avg_block_time",
-        "target_forward_calls_total",
-        "draft_forward_calls_total",
-        "target_forward_calls_per_token",
-        "draft_forward_calls_per_token",
-        "avg_generation_time",
-        "avg_verification_time",
+        "num_generated_tokens", "total_time", "token_rate", "num_steps",
+        "accepted_tokens_total", "attempted_draft_tokens_total", "aatps", "be",
+        "tokens_per_step", "acceptance_fraction", "normalized_aatps", "avg_block_time",
+        "target_forward_calls_total", "draft_forward_calls_total",
+        "target_forward_calls_per_token", "draft_forward_calls_per_token",
+        "avg_generation_time", "avg_verification_time",
     ]
     grouped = df.groupby(["seed", "dataset", "method", "config_name"], dropna=False)[metric_cols]
     summary = grouped.agg(["mean", "std", "count"])
@@ -401,7 +364,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True)
     parser.add_argument("--seed", type=int, required=True)
-    parser.add_argument("--output_dir", default="outputs_ashish_invariant_official")
+    parser.add_argument("--output_dir", default="outputs_ashish_invariant_original_cached")
     parser.add_argument("--speculative_dir", default="SpeculativeDecoding")
     parser.add_argument("--warmup", type=int, default=None)
     parser.add_argument("--max_prompts", type=int, default=None)
@@ -413,79 +376,45 @@ def main() -> None:
         raise FileNotFoundError(f"SpeculativeDecoding folder not found: {spec_dir}")
     sys.path.insert(0, str(spec_dir))
 
-    global OfficialInvariantMultiDraftStrategy, DraftOutput, VerifyOutput, LogitsProcessor, _gumbel_sample
-    from strategy import InvariantMultiDraftStrategy as _OfficialInvariantMultiDraftStrategy  # type: ignore
-    from utils import DraftOutput as _DraftOutput, VerifyOutput as _VerifyOutput  # type: ignore
-    from utils import LogitsProcessor as _LogitsProcessor, gumbel_sample as __gumbel_sample  # type: ignore
+    patch_dynamic_cache_for_original_strategy()
 
-    OfficialInvariantMultiDraftStrategy = _OfficialInvariantMultiDraftStrategy
-    DraftOutput = _DraftOutput
-    VerifyOutput = _VerifyOutput
-    LogitsProcessor = _LogitsProcessor
-    _gumbel_sample = __gumbel_sample
+    # Import the original class and utilities after sys.path and cache patch.
+    from strategy import InvariantMultiDraftStrategy  # type: ignore
+    from utils import LogitsProcessor  # type: ignore
 
     seed_everything(args.seed)
 
     with open(args.config, "r") as f:
         cfg = json.load(f)
 
-    # Only run official Ashish invariant configs. This lets you use either a
-    # dedicated Ashish-only JSON or your larger three-method JSON.
-    configs = [c for c in cfg["configurations"] if c.get("method") in {"ashish_invariant", "ashish_invariant_official"}]
+    configs = [c for c in cfg["configurations"] if c.get("method") in {"ashish_invariant", "ashish_invariant_official", "ashish_invariant_original_cached"}]
     if not configs:
-        raise ValueError("No configurations with method='ashish_invariant' found in JSON")
+        raise ValueError("No Ashish invariant configurations found in JSON")
 
     dtype = {"bfloat16": torch.bfloat16, "float16": torch.float16, "float32": torch.float32}[args.dtype]
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
     tokenizer = AutoTokenizer.from_pretrained(cfg["target_model"])
-    model = AutoModelForCausalLM.from_pretrained(cfg["target_model"], device_map="auto", torch_dtype=dtype)
-    model.eval()
-    ref_model = AutoModelForCausalLM.from_pretrained(cfg["draft_model"], device_map="auto", torch_dtype=dtype)
-    ref_model.eval()
+    model = AutoModelForCausalLM.from_pretrained(cfg["target_model"], device_map="auto", torch_dtype=dtype).eval()
+    ref_model = AutoModelForCausalLM.from_pretrained(cfg["draft_model"], device_map="auto", torch_dtype=dtype).eval()
 
     gen_length = int(cfg.get("gen_length", 128))
     warmup = int(args.warmup if args.warmup is not None else cfg.get("warmup", 10))
-    max_prompts = args.max_prompts
-    if max_prompts is None:
-        max_prompts = int(cfg.get("num_test_prompts", 200))
+    max_prompts = int(args.max_prompts if args.max_prompts is not None else cfg.get("num_test_prompts", 200))
 
     out_dir = Path(args.output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now().strftime("%Y-%m-%d-%H%M%S")
-    raw_path = out_dir / f"ashish_invariant_official_raw_seed{args.seed}_{stamp}.csv"
-    summary_path = out_dir / f"ashish_invariant_official_summary_seed{args.seed}_{stamp}.csv"
+    raw_path = out_dir / f"ashish_invariant_original_cached_raw_seed{args.seed}_{stamp}.csv"
+    summary_path = out_dir / f"ashish_invariant_original_cached_summary_seed{args.seed}_{stamp}.csv"
 
     fieldnames = [
-        "seed",
-        "dataset",
-        "method",
-        "config_name",
-        "test_num",
-        "prompt_index",
-        "max_draft_len",
-        "max_num_drafts",
-        "temperature",
-        "top_k",
-        "top_p",
-        "num_generated_tokens",
-        "total_time",
-        "token_rate",
-        "num_steps",
-        "accepted_tokens_total",
-        "attempted_draft_tokens_total",
-        "aatps",
-        "be",
-        "tokens_per_step",
-        "acceptance_fraction",
-        "normalized_aatps",
-        "avg_block_time",
-        "target_forward_calls_total",
-        "draft_forward_calls_total",
-        "target_forward_calls_per_token",
-        "draft_forward_calls_per_token",
-        "avg_generation_time",
-        "avg_verification_time",
+        "seed", "dataset", "method", "config_name", "test_num", "prompt_index",
+        "max_draft_len", "max_num_drafts", "temperature", "top_k", "top_p",
+        "num_generated_tokens", "total_time", "token_rate", "num_steps",
+        "accepted_tokens_total", "attempted_draft_tokens_total", "aatps", "be",
+        "tokens_per_step", "acceptance_fraction", "normalized_aatps", "avg_block_time",
+        "target_forward_calls_total", "draft_forward_calls_total",
+        "target_forward_calls_per_token", "draft_forward_calls_per_token",
+        "avg_generation_time", "avg_verification_time",
     ]
 
     with raw_path.open("w", newline="") as f:
@@ -497,47 +426,51 @@ def main() -> None:
             n_test = min(max_prompts, len(dset))
             n_warm = min(warmup, len(dset))
 
-            for config in configs:
+            for config0 in configs:
+                config = dict(config0)
                 name = config["name"]
-                method = "ashish_invariant_official"
                 top_k = int(config.get("top_k", cfg.get("top_k", 50)))
                 top_p = float(config.get("top_p", cfg.get("top_p", 1.0)))
-                config = dict(config)
                 config["top_k"] = top_k
                 config["top_p"] = top_p
+                L = int(config["max_draft_len"])
+                B = int(config["max_num_drafts"])
+
+                # Recreate original strategy per config. This matches the original usage.
+                strategy = InvariantMultiDraftStrategy(model, ref_model, tokenizer, L, B)
 
                 for i in tqdm(range(n_warm), total=n_warm, desc=f"Warmup {dset_name.split('/')[-1]} | {name}"):
                     prompt = create_prompt(dset[i], dset_name)
                     input_ids = input_ids_from_prompt(tokenizer, prompt, model_device(model))
-                    _ = run_one_prompt_official_invariant(
-                        model=model,
-                        ref_model=ref_model,
+                    _ = run_one_prompt_original_cached(
+                        strategy=strategy,
                         tokenizer=tokenizer,
                         input_ids=input_ids,
                         config=config,
                         gen_length=gen_length,
+                        LogitsProcessor=LogitsProcessor,
                     )
 
                 for i in tqdm(range(n_test), total=n_test, desc=f"Test {dset_name.split('/')[-1]} | {name}"):
                     prompt = create_prompt(dset[i], dset_name)
                     input_ids = input_ids_from_prompt(tokenizer, prompt, model_device(model))
-                    stats = run_one_prompt_official_invariant(
-                        model=model,
-                        ref_model=ref_model,
+                    stats = run_one_prompt_original_cached(
+                        strategy=strategy,
                         tokenizer=tokenizer,
                         input_ids=input_ids,
                         config=config,
                         gen_length=gen_length,
+                        LogitsProcessor=LogitsProcessor,
                     )
                     row = {
                         "seed": args.seed,
                         "dataset": dset_name,
-                        "method": method,
-                        "config_name": name.replace("ashish_invariant", "ashish_invariant_official"),
+                        "method": "ashish_invariant_original_cached",
+                        "config_name": name.replace("ashish_invariant_official", "ashish_invariant_original_cached").replace("ashish_invariant", "ashish_invariant_original_cached"),
                         "test_num": i,
                         "prompt_index": i,
-                        "max_draft_len": int(config["max_draft_len"]),
-                        "max_num_drafts": int(config["max_num_drafts"]),
+                        "max_draft_len": L,
+                        "max_num_drafts": B,
                         "temperature": json.dumps(config.get("temperature", 1.0)),
                         "top_k": top_k,
                         "top_p": top_p,
