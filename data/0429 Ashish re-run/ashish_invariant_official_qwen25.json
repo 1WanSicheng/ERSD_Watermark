@@ -1,0 +1,52 @@
+{
+  "draft_model": "Qwen/Qwen2.5-0.5B-Instruct",
+  "target_model": "Qwen/Qwen2.5-7B-Instruct",
+  "datasets": [
+    "openai/gsm8k",
+    "openai/openai_humaneval",
+    "facebook/natural_reasoning"
+  ],
+  "num_test_prompts": 150,
+  "gen_length": 128,
+  "warmup": 10,
+  "top_k": 50,
+  "top_p": 1.0,
+  "configurations": [
+    {
+      "name": "ashish_invariant_4_2",
+      "method": "ashish_invariant",
+      "max_draft_len": 4,
+      "max_num_drafts": 2,
+      "temperature": [1.0, 1.0, 1.0],
+      "top_k": 50,
+      "top_p": 1.0
+    },
+    {
+      "name": "ashish_invariant_4_4",
+      "method": "ashish_invariant",
+      "max_draft_len": 4,
+      "max_num_drafts": 4,
+      "temperature": [1.0, 1.0, 1.0, 1.0, 1.0],
+      "top_k": 50,
+      "top_p": 1.0
+    },
+    {
+      "name": "ashish_invariant_4_6",
+      "method": "ashish_invariant",
+      "max_draft_len": 4,
+      "max_num_drafts": 6,
+      "temperature": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+      "top_k": 50,
+      "top_p": 1.0
+    },
+    {
+      "name": "ashish_invariant_4_8",
+      "method": "ashish_invariant",
+      "max_draft_len": 4,
+      "max_num_drafts": 8,
+      "temperature": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+      "top_k": 50,
+      "top_p": 1.0
+    }
+  ]
+}
