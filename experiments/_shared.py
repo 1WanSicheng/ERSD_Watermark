@@ -87,6 +87,22 @@ def resolve_path(value, default: Path | None = None) -> Path | None:
     return p
 
 
+def resolve_model_id(value, default):
+    """Resolve a model identifier: HF Hub ID (e.g. ``huggyllama/llama-7b``)
+    pass-through, or a Path for local directories.
+
+    A value is treated as a Hub ID iff it matches ``<org>/<name>`` (single ``/``,
+    no ``\\``), and ``ROOT/<value>`` does not exist on disk.
+    """
+    if value is None:
+        return default
+    if isinstance(value, str) and "\\" not in value and value.count("/") == 1:
+        candidate = ROOT / value
+        if not candidate.exists():
+            return value
+    return resolve_path(value, default)
+
+
 def private_key_from_str(value) -> bytes:
     if isinstance(value, bytes):
         return value
@@ -106,11 +122,12 @@ def seeded_private_key(seed: int, base_key: bytes) -> bytes:
 # ---------------------------------------------------------------------------
 
 
-def load_model(model_path: Path, device: str):
+def load_model(model_path, device: str):
+    is_local = isinstance(model_path, Path)
     kwargs = dict(
         pretrained_model_name_or_path=str(model_path),
         device_map=device,
-        local_files_only=True,
+        local_files_only=is_local,
         low_cpu_mem_usage=True,
     )
     if device.startswith("cuda"):
@@ -124,24 +141,40 @@ def load_models_and_tokenizer(config: dict, device: str | None = None):
     device = device or config.get(
         "device", "cuda:0" if torch.cuda.is_available() else "cpu"
     )
-    target_model = resolve_path(
+    target_model = resolve_model_id(
         config.get("target_model"), DEFAULT_TARGET_MODEL
     )
-    draft_model = resolve_path(
+    draft_model = resolve_model_id(
         config.get("draft_model"), DEFAULT_DRAFT_MODEL
     )
     target = load_model(target_model, device)
     draft = load_model(draft_model, device)
     tokenizer = AutoTokenizer.from_pretrained(
-        str(target_model), local_files_only=True
+        str(target_model), local_files_only=isinstance(target_model, Path)
     )
     return target, draft, tokenizer, device
 
 
-def encode_prompt(tokenizer, prompt, device):
-    return tokenizer.apply_chat_template(
-        prompt, add_generation_prompt=True, return_tensors="pt"
-    ).to(device)
+def encode_prompt(tokenizer, prompt, device, use_chat_template: bool = True):
+    """Encode a chat-style prompt to input_ids.
+
+    use_chat_template: when False, ignore any chat_template the tokenizer
+    carries and emit the last user message as plain text.  Required for base
+    models (e.g. huggyllama/llama-7b) whose tokenizer inherits a Llama-2-Chat
+    template — feeding them ``[INST] <<SYS>> ...`` tokens as prompt drives
+    them to generate chat-template artifacts in the output.
+    """
+    if use_chat_template and getattr(tokenizer, "chat_template", None):
+        return tokenizer.apply_chat_template(
+            prompt, add_generation_prompt=True, return_tensors="pt"
+        ).to(device)
+    user_msgs = [m["content"] for m in prompt if m["role"] == "user"]
+    text = (
+        user_msgs[-1]
+        if user_msgs
+        else "\n".join(m["content"] for m in prompt)
+    )
+    return tokenizer(text, return_tensors="pt").input_ids.to(device)
 
 
 def load_prompts(dataset: str, n: int) -> List[List[dict]]:
@@ -165,6 +198,22 @@ def load_prompts(dataset: str, n: int) -> List[List[dict]]:
                     "content": (
                         "Summarize the following article in 3-5 sentences:\n\n"
                         f"{row['article'][:1500]}"
+                    ),
+                },
+            ]
+            for row in ds
+        ]
+    if dataset == "eli5":
+        ds = load_dataset("sentence-transformers/eli5", split="train")
+        ds = ds.shuffle(seed=42).select(range(n))
+        return [
+            [
+                {"role": "system", "content": "You are a helpful assistant."},
+                {
+                    "role": "user",
+                    "content": (
+                        "Please explain like I'm five:\n\n"
+                        f"{row['question']}"
                     ),
                 },
             ]
@@ -364,6 +413,28 @@ def _rebuild_labels_for_prefix_scheme(in_ids, out_ids, label_fn) -> List[bytes]:
     return labels
 
 
+_DEFER_PREFIX_LABELS = "DEFER_PREFIX_LABELS"
+
+
+def finalize_labels(src_labels, masked_flags, out_ids):
+    """Resolve any deferred label-rebuild sentinel from a multi-draft decoder.
+
+    Decoders for the prefix-scheme PFR families return a sentinel tuple in place
+    of the per-token label list so the O(T) Python rebuild stays *outside* the
+    timing window measured for token_rate. Single-draft / non-PFR decoders return
+    plain lists (or None) and are passed through unchanged.
+    """
+    if (
+        isinstance(src_labels, tuple)
+        and len(src_labels) >= 3
+        and src_labels[0] == _DEFER_PREFIX_LABELS
+    ):
+        _, in_ids, label_fn = src_labels[:3]
+        labels = _rebuild_labels_for_prefix_scheme(in_ids, out_ids, label_fn)
+        return labels, [False] * len(labels)
+    return src_labels, masked_flags
+
+
 def _run_ms_pfr_cached(target, draft, input_ids, *, lookahead, max_length,
                       seed, base_key, plk, num_drafts: int, **_):
     pk = seeded_private_key(seed, base_key)
@@ -374,10 +445,8 @@ def _run_ms_pfr_cached(target, draft, input_ids, *, lookahead, max_length,
         process_logits_kwargs=plk,
     )
     out, blocks, _, _ = _drain(gen, max_length)
-    labels = _rebuild_labels_for_prefix_scheme(
-        input_ids, out, _prefix_labeler_label
-    )
-    return out, blocks, pk, "PFR", labels, [False] * len(labels)
+    sentinel = (_DEFER_PREFIX_LABELS, input_ids, _prefix_labeler_label)
+    return out, blocks, pk, "PFR", sentinel, None
 
 
 def _run_mpfr_torchgen_cached(target, draft, input_ids, *, lookahead,
@@ -391,10 +460,8 @@ def _run_mpfr_torchgen_cached(target, draft, input_ids, *, lookahead,
         process_logits_kwargs=plk,
     )
     out, blocks, _, _ = _drain(gen, max_length)
-    labels = _rebuild_labels_for_prefix_scheme(
-        input_ids, out, _mpfr_direct_label
-    )
-    return out, blocks, pk, "PFR", labels, [False] * len(labels)
+    sentinel = (_DEFER_PREFIX_LABELS, input_ids, _mpfr_direct_label)
+    return out, blocks, pk, "PFR", sentinel, None
 
 
 def _run_invariant_or_strong_multi(target, draft, input_ids, *,

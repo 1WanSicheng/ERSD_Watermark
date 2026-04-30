@@ -201,7 +201,7 @@ def multi_draft_pfr_batched_cached_block(
         label_by_key=shared_labels, source_by_key=shared_sources,
     )
 
-    levels, _, draft_sets, _draft_sources, _draft_past = build_multi_draft_tree(
+    levels, _, draft_sets, _draft_sources, draft_past_by_context = build_multi_draft_tree(
         ref_model=ref_model,
         input_ids=input_ids.to(ref_model.device),
         root=root,
@@ -290,6 +290,17 @@ def multi_draft_pfr_batched_cached_block(
         new_target_cache_repeated, alive_row_idx, new_cache_len
     )
 
+    # Pick the deepest cached draft ancestor of `current`. build_multi_draft_tree
+    # populates past_by_context for depths 0..block_len-1; if accepted_count
+    # reached block_len the realized prefix sits at the deepest level which has
+    # no entry, so fall back to its parent (next block re-encodes 1-2 tokens
+    # instead of the full prompt). Cache covers [0, len(ctx)) which is at most
+    # root_len + accepted_count, matching the next block's expected
+    # cache_len <= new_root_len - 1 = root_len + accepted_count.
+    draft_past_for_next = draft_past_by_context.get(current)
+    if draft_past_for_next is None and len(current) > root_len:
+        draft_past_for_next = draft_past_by_context.get(current[:-1])
+
     return MultiDraftBlock(
         output_ids=output_ids,
         output_logprobs=output_logprobs_tensor,
@@ -297,7 +308,7 @@ def multi_draft_pfr_batched_cached_block(
         draft_tree_size=sum(len(level) for level in levels),
         target_context_count=target_context_count,
         target_past_key_values=truncated_target_cache,
-        draft_past_key_values=None,
+        draft_past_key_values=draft_past_for_next,
         got_eos=got_eos,
     )
 
@@ -328,6 +339,7 @@ def multi_draft_pfr_batched_cached_generator(
     input_ids = input_ids.to(model.device)
     current_key = _context_key(input_ids)
     target_past_key_values = None
+    ref_past_key_values = None
     generated = 0
 
     while generated < max_length:
@@ -342,7 +354,7 @@ def multi_draft_pfr_batched_cached_generator(
             source_factory=source_factory,
             max_new_tokens=max_length - generated,
             target_past_key_values=target_past_key_values,
-            ref_past_key_values=None,
+            ref_past_key_values=ref_past_key_values,
             process_logits_kwargs=process_logits_kwargs,
         )
         meta = {
@@ -361,6 +373,7 @@ def multi_draft_pfr_batched_cached_generator(
         input_ids = torch.cat([input_ids, block.output_ids], dim=1)
         current_key = current_key + tuple(int(t) for t in block.output_ids[0].tolist())
         target_past_key_values = block.target_past_key_values
+        ref_past_key_values = block.draft_past_key_values
         generated += int(block.output_ids.shape[1])
         if block.got_eos:
             break

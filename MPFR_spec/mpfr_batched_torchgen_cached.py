@@ -46,7 +46,7 @@ from mpfr_direct_optimized import (
     process_logits_exact,
 )
 
-from accuwm.multi_draft_utils import _repeat_cache, ms_pfr_tokens_from_logprobs
+from accuwm.multi_draft_utils import _repeat_cache, _select_cache_row, ms_pfr_tokens_from_logprobs
 from accuwm.pfr import PFRSourceFactory, SharedPFRSource
 from accuwm.utils import cache_len
 
@@ -73,11 +73,20 @@ def build_draft_tree_torchgen(
     source_factory: PFRSourceFactory,
     process_logits_kwargs: Optional[Dict[str, Any]],
     max_vocab_size: Optional[int],
-) -> DraftTree:
+    past_key_values: Any = None,
+) -> Tuple[DraftTree, Dict[ContextKey, Any]]:
     """Build the multi-draft tree using the GPU torch.Generator MPFR primitive.
     Identical to mpfr_direct_optimized.build_draft_tree_direct except the
     sampler is ms_pfr_tokens_from_logprobs (GPU) instead of the CPU/blake2b
-    direct_finite primitive."""
+    direct_finite primitive.
+
+    If ``past_key_values`` is provided (covering [0, cached_n)), only the
+    suffix ``batch_ids[:, cached_n:]`` is fed to the draft model at each depth
+    and the draft KV cache is threaded across depths.  A ``past_by_context``
+    dict is returned mapping each prev-level context (depths 0..lookahead-1)
+    to a 1-row cache covering that context's full length, suitable for cross-
+    block reuse.
+    """
     if lookahead <= 0:
         raise ValueError("lookahead must be positive")
     if num_drafts <= 0:
@@ -91,8 +100,10 @@ def build_draft_tree_torchgen(
     levels: List[List[ContextKey]] = [[root]]
     multiplicities: Dict[ContextKey, int] = {root: int(num_drafts)}
     draft_sets: Dict[ContextKey, set[int]] = {}
+    past_by_context: Dict[ContextKey, Any] = {}
     draft_tree_size = 0
     draft_forward_calls = 0
+    cached_n = cache_len(past_key_values)
 
     for depth in range(1, lookahead + 1):
         prev_level = levels[depth - 1]
@@ -101,15 +112,30 @@ def build_draft_tree_torchgen(
             break
 
         batch_ids = _batch_from_contexts(prev_level, draft_device)
+        n_prev = batch_ids.shape[0]
+        # Match build_multi_draft_tree: the same cross-block cache (B-repeated)
+        # is fed at every depth and the suffix [cached_n:] is re-encoded.
+        if cached_n > 0:
+            batch_past = _repeat_cache(past_key_values, n_prev)
+            input_tokens = batch_ids[:, cached_n:]
+        else:
+            batch_past = None
+            input_tokens = batch_ids
         out = ref_model(
-            input_ids=batch_ids,
-            use_cache=False,
+            input_ids=input_tokens,
+            past_key_values=batch_past,
+            use_cache=True,
             return_dict=True,
             output_attentions=False,
             output_hidden_states=False,
         )
         draft_forward_calls += 1
         draft_tree_size += len(prev_level)
+
+        # Capture the per-row cache covering [0, len(prev_level_context)) for
+        # cross-block reuse.  Each prev_level context owns one row.
+        for row, context in enumerate(prev_level):
+            past_by_context[context] = _select_cache_row(out.past_key_values, row)
 
         logits = out.logits[:, -1, :]
         if max_vocab_size is not None and max_vocab_size < logits.shape[-1]:
@@ -144,13 +170,14 @@ def build_draft_tree_torchgen(
 
         levels.append(next_level)
 
-    return DraftTree(
+    tree = DraftTree(
         levels=levels,
         multiplicities=multiplicities,
         draft_sets=draft_sets,
         draft_tree_size=draft_tree_size,
         draft_forward_calls=draft_forward_calls,
     )
+    return tree, past_by_context
 
 
 @dataclass
@@ -165,6 +192,7 @@ class MPFRCachedBlock:
     draft_forward_calls: int
     got_eos: bool
     target_past_key_values: Any
+    draft_past_key_values: Any = None
 
 
 def _select_and_truncate_cache(cache: Any, batch_index: int, seq_len: int) -> Any:
@@ -270,6 +298,7 @@ def mpfr_batched_torchgen_cached_block(
     source_factory: PFRSourceFactory,
     max_new_tokens: int,
     target_past_key_values: Any = None,
+    ref_past_key_values: Any = None,
     process_logits_kwargs: Optional[Dict[str, Any]] = None,
 ) -> MPFRCachedBlock:
     device = _model_device(model)
@@ -279,7 +308,7 @@ def mpfr_batched_torchgen_cached_block(
     block_len = min(int(lookahead), int(max_new_tokens))
     max_vocab_size = getattr(model.config, "vocab_size", None)
 
-    draft_tree = build_draft_tree_torchgen(
+    draft_tree, draft_past_by_context = build_draft_tree_torchgen(
         ref_model=ref_model,
         root=root,
         lookahead=block_len,
@@ -287,6 +316,7 @@ def mpfr_batched_torchgen_cached_block(
         source_factory=source_factory,
         process_logits_kwargs=process_logits_kwargs,
         max_vocab_size=max_vocab_size,
+        past_key_values=ref_past_key_values,
     )
 
     leaves = draft_tree.levels[block_len]
@@ -362,6 +392,13 @@ def mpfr_batched_torchgen_cached_block(
         new_target_cache_repeated, alive_row_idx, new_cache_len
     )
 
+    # Same logic as ms_pfr_batched_cached: pick deepest cached draft ancestor
+    # of the realized prefix, falling back to its parent if accepted_count
+    # reached block_len (deepest level has no past_by_context entry).
+    draft_past_for_next = draft_past_by_context.get(current)
+    if draft_past_for_next is None and len(current) > root_len:
+        draft_past_for_next = draft_past_by_context.get(current[:-1])
+
     return MPFRCachedBlock(
         output_ids=output_ids,
         output_logprobs=output_logprobs_tensor,
@@ -373,6 +410,7 @@ def mpfr_batched_torchgen_cached_block(
         draft_forward_calls=draft_tree.draft_forward_calls,
         got_eos=got_eos,
         target_past_key_values=truncated_target_cache,
+        draft_past_key_values=draft_past_for_next,
     )
 
 
@@ -405,6 +443,7 @@ def finite_multi_draft_pfr_cached_generator(
     device = _model_device(model)
     input_ids = input_ids.to(device)
     target_past_key_values = None
+    ref_past_key_values = None
     generated = 0
 
     while generated < max_length:
@@ -420,6 +459,7 @@ def finite_multi_draft_pfr_cached_generator(
             source_factory=source_factory,
             max_new_tokens=remaining,
             target_past_key_values=target_past_key_values,
+            ref_past_key_values=ref_past_key_values,
             process_logits_kwargs=process_logits_kwargs,
         )
         meta = {
@@ -440,6 +480,7 @@ def finite_multi_draft_pfr_cached_generator(
 
         input_ids = torch.cat([input_ids, block.output_ids.to(device)], dim=1)
         target_past_key_values = block.target_past_key_values
+        ref_past_key_values = block.draft_past_key_values
         generated += int(block.output_ids.shape[-1])
         if block.got_eos:
             break

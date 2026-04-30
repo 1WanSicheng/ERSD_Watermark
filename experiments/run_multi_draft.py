@@ -71,9 +71,12 @@ def _decoder_uniforms(
 def run_one_prompt(
     *, decoder_name, decoder_fn, target, draft, tokenizer, prompt,
     lookahead, num_drafts, max_length, seed, base_key, plk, vocab_size,
-    metrics_cfg: dict, anlppt_applies: bool,
+    metrics_cfg: dict, anlppt_applies: bool, use_chat_template: bool = True,
 ) -> dict:
-    input_ids = S.encode_prompt(tokenizer, prompt, target.device)
+    input_ids = S.encode_prompt(
+        tokenizer, prompt, target.device,
+        use_chat_template=use_chat_template,
+    )
     torch.manual_seed(seed)
     S._sync()
     t0 = time.perf_counter()
@@ -147,6 +150,7 @@ def run_experiment(config: dict) -> dict:
     target, draft, tokenizer, device = S.load_models_and_tokenizer(config)
     vocab_size = int(target.config.vocab_size)
     prompts = S.load_prompts(dataset, samples)
+    use_chat_template = bool(config.get("use_chat_template", True))
 
     print(
         f"[multi_draft] dataset={dataset}  samples={samples}  "
@@ -172,6 +176,7 @@ def run_experiment(config: dict) -> dict:
                         base_key=base_key, plk=plk, vocab_size=vocab_size,
                         metrics_cfg=metrics_cfg,
                         anlppt_applies=anlppt_applies,
+                        use_chat_template=use_chat_template,
                     )
                     row["prompt_idx"] = idx
                     rows.append(row)

@@ -42,18 +42,57 @@ from mpfr_batched_torchgen_cached import (
     finite_multi_draft_pfr_cached_sample_generator as torchgen_cached_gen,
 )
 
+# SpeculativeDecoding cache-aware multi-draft strategies (no watermark).
+sys.path.insert(0, str(ROOT / "SpeculativeDecoding"))
+from strategy import InvariantMultiDraftStrategy  # noqa: E402
+from generator import InvariantGenerator  # noqa: E402
 
-def load_prompts(n: int):
+
+def load_prompts(n: int, dataset: str = "gsm8k"):
     from datasets import load_dataset
-    dset = load_dataset("openai/gsm8k", "main")["train"]
-    out = []
-    for i in range(n):
-        question = dset[i]["question"]
-        out.append([
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": question},
-        ])
-    return out
+    if dataset == "gsm8k":
+        dset = load_dataset("openai/gsm8k", "main")["train"]
+        out = []
+        for i in range(n):
+            question = dset[i]["question"]
+            out.append([
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": question},
+            ])
+        return out
+    if dataset == "cnn_dailymail":
+        ds = load_dataset("cnn_dailymail", "3.0.0").shuffle(seed=42)["test"]
+        ds = ds.filter(lambda x: len(x["article"]) < 3000).select(range(n))
+        return [
+            [
+                {"role": "system", "content": "You are a helpful assistant."},
+                {
+                    "role": "user",
+                    "content": (
+                        "Summarize the following article in 3-5 sentences:\n\n"
+                        f"{row['article'][:1500]}"
+                    ),
+                },
+            ]
+            for row in ds
+        ]
+    if dataset == "eli5":
+        ds = load_dataset("sentence-transformers/eli5", split="train")
+        ds = ds.shuffle(seed=42).select(range(n))
+        return [
+            [
+                {"role": "system", "content": "You are a helpful assistant."},
+                {
+                    "role": "user",
+                    "content": (
+                        "Please explain like I'm five:\n\n"
+                        f"{row['question']}"
+                    ),
+                },
+            ]
+            for row in ds
+        ]
+    raise ValueError(f"unknown dataset: {dataset}")
 
 
 def encode_prompt(tokenizer, prompt, device):
@@ -92,11 +131,18 @@ METHODS = {
         "fn": ms_pfr_cached_gen,
         # accuwm.utils.process_logits expects a logits_warper callable.
         "use_warper": True,
+        "kind": "pfr_gen",
     },
     "mpfr_batched_torchgen_cached": {
         "fn": torchgen_cached_gen,
         # MPFR_spec.process_logits_exact takes raw scalars.
         "use_warper": False,
+        "kind": "pfr_gen",
+    },
+    "invariant_multi": {
+        "fn": None,  # constructed inline (strategy + generator)
+        "use_warper": False,
+        "kind": "invariant",
     },
 }
 
@@ -105,6 +151,12 @@ def _run(method_name, target, draft, tokenizer, prompts, lookahead, num_drafts,
          max_new_tokens, top_k, top_p, temperature):
     spec = METHODS[method_name]
     fn = spec["fn"]
+    kind = spec.get("kind", "pfr_gen")
+
+    if kind == "invariant":
+        return _run_invariant(target, draft, tokenizer, prompts,
+                              lookahead, num_drafts, max_new_tokens)
+
     if spec["use_warper"]:
         warper = _build_logits_warper(top_k, top_p, temperature)
         process_logits_kwargs = {"logits_warper": warper} if warper else {}
@@ -156,6 +208,49 @@ def _run(method_name, target, draft, tokenizer, prompts, lookahead, num_drafts,
     return rows
 
 
+def _run_invariant(target, draft, tokenizer, prompts, lookahead, num_drafts,
+                   max_new_tokens):
+    """Cache-aware invariant multi-draft (no watermark) baseline.
+
+    Timing window matches the PFR path: model loading and strategy/generator
+    construction happen outside; only the actual generate() call is timed.
+    """
+    eff_vocab = min(int(target.config.vocab_size), int(draft.config.vocab_size))
+
+    class _StubTok:
+        vocab_size = eff_vocab
+
+    eos = int(getattr(target.config, "eos_token_id", 0) or 0)
+
+    rows = []
+    for prompt in prompts:
+        input_ids = encode_prompt(tokenizer, prompt, target.device)
+        strategy = InvariantMultiDraftStrategy(
+            target=target, drafter=draft, tokenizer=_StubTok(),
+            max_draft_len=lookahead, max_num_drafts=num_drafts,
+        )
+        generator = InvariantGenerator(strategy)
+        _sync()
+        t0 = time.perf_counter()
+        out_full = generator(
+            input_ids=input_ids, eos_token_id=eos,
+            max_new_tokens=max_new_tokens, temperature=1.0,
+        )
+        _sync()
+        elapsed = time.perf_counter() - t0
+        n_tokens = int(out_full.sequences.shape[-1] - input_ids.shape[-1])
+        n_inv = int(out_full.num_invocations)
+        rows.append({
+            "tokens": int(n_tokens),
+            "blocks": int(n_inv),
+            "AATPS": float(n_tokens / max(n_inv, 1)),
+            "accepted_mean": float(max(n_tokens / max(n_inv, 1) - 1, 0.0)),
+            "token_rate": float(n_tokens / elapsed) if elapsed > 0 else 0.0,
+            "elapsed_sec": float(elapsed),
+        })
+    return rows
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--samples", type=int, default=5)
@@ -174,6 +269,8 @@ def main():
     parser.add_argument("--methods", nargs="+",
                         default=list(METHODS.keys()),
                         choices=list(METHODS.keys()))
+    parser.add_argument("--dataset", default="gsm8k",
+                        choices=["gsm8k", "cnn_dailymail", "eli5"])
     parser.add_argument("--output", type=Path, default=None)
     args = parser.parse_args()
 
@@ -193,10 +290,10 @@ def main():
         local_files_only=True, low_cpu_mem_usage=True,
     ).eval()
 
-    prompts_all = load_prompts(args.samples + args.warmup)
+    prompts_all = load_prompts(args.samples + args.warmup, dataset=args.dataset)
     warmup = prompts_all[: args.warmup]
     eval_prompts = prompts_all[args.warmup : args.warmup + args.samples]
-    print(f"warmup={len(warmup)}  eval={len(eval_prompts)}  "
+    print(f"dataset={args.dataset}  warmup={len(warmup)}  eval={len(eval_prompts)}  "
           f"lookahead={args.lookahead}  max_new_tokens={args.max_new_tokens}  "
           f"top_k={args.top_k}  top_p={args.top_p}  temperature={args.temperature}")
 
