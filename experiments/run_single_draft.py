@@ -91,6 +91,11 @@ def run_one_prompt(
     S._sync()
     elapsed = time.perf_counter() - t0
 
+    # Resolve any deferred label-rebuild sentinel from the decoder OUTSIDE
+    # the timing window (only multi-draft PFR decoders defer; single-draft
+    # decoders already return real labels and pass through unchanged).
+    src_labels, masked_flags = S.finalize_labels(src_labels, masked_flags, out_ids)
+
     n_tokens = int(out_ids.shape[-1])
     n_steps = max(len(block_lens), 1)
     aatps = n_tokens / n_steps
