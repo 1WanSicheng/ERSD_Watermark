@@ -98,13 +98,25 @@ def compute_pfr_watermark_strength_from_sequence(
             continue
 
         raw_logits = next_logits[:, pos - 1, :]
-        entropy_logprobs = F.log_softmax(raw_logits, dim=-1)
-        entropy_probs = entropy_logprobs.exp()
-        entropy = -(entropy_probs * entropy_logprobs).sum(dim=-1)
-        entropy_terms.append(float(entropy.item()))
 
+        # Both H(p) and -log p(winner) must be evaluated on the SAME
+        # distribution. Earlier this used un-truncated logits for entropy but
+        # process_logits-truncated logits for ws, so on diffuse base-model
+        # logits (e.g. llama-7b base, where top_k=50 strips ~18% of entropy)
+        # the ratio looked like 0.80 even though the PFR algorithm itself is
+        # unbiased on the truncated distribution actually being sampled from.
+        # Evaluate both on the post-process_logits distribution.
         logits = pfr.process_logits(context, raw_logits, **process_logits_kwargs)
         logprobs = F.log_softmax(logits, dim=-1)
+        # When top_k/top_p mask positions to -inf, the corresponding probs are
+        # 0 and the 0*-inf entropy term is undefined; replace -inf with 0 in
+        # the multiplicand (still gives 0 * 0 = 0, which is the correct limit).
+        finite_logprobs = torch.where(
+            torch.isfinite(logprobs), logprobs, torch.zeros_like(logprobs)
+        )
+        probs = logprobs.exp()
+        entropy = -(probs * finite_logprobs).sum(dim=-1)
+        entropy_terms.append(float(entropy.item()))
 
         source = source_factory.build(label_info.source_label)
         winner, _, _ = pfr.pfr_win_from_logits(logits, source, target_model.device)
