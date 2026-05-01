@@ -149,10 +149,51 @@ def load_models_and_tokenizer(config: dict, device: str | None = None):
     )
     target = load_model(target_model, device)
     draft = load_model(draft_model, device)
-    tokenizer = AutoTokenizer.from_pretrained(
-        str(target_model), local_files_only=isinstance(target_model, Path)
-    )
+    is_local = isinstance(target_model, Path)
+    try:
+        tokenizer = AutoTokenizer.from_pretrained(
+            str(target_model), local_files_only=is_local
+        )
+    except Exception:
+        # Fast tokenizer conversion can fail on SentencePiece-only repos
+        # (e.g. lmsys/vicuna-7b-v1.5 ships only tokenizer.model, no
+        # tokenizer.json). Fall back to the slow Python tokenizer.
+        tokenizer = AutoTokenizer.from_pretrained(
+            str(target_model), local_files_only=is_local, use_fast=False
+        )
+    _maybe_inject_chat_template(tokenizer, target_model)
     return target, draft, tokenizer, device
+
+
+# Vicuna v1.1+ chat format (used by lmsys/vicuna-* and FastChat):
+# {system_prompt} USER: {q1} ASSISTANT: {a1}</s>USER: {q2} ASSISTANT: ...
+# When the model ships without a chat_template attribute (vicuna repos
+# typically don't), apply_chat_template raises and our experiment silently
+# falls back to plain user-message text — defeating the whole point of
+# evaluating the model in instruction-following mode. Inject the template
+# explicitly for known repos.
+_VICUNA_CHAT_TEMPLATE = (
+    "{% for message in messages %}"
+    "{% if message['role'] == 'system' %}"
+    "{{ message['content'] + ' ' }}"
+    "{% elif message['role'] == 'user' %}"
+    "{{ 'USER: ' + message['content'] + ' ' }}"
+    "{% elif message['role'] == 'assistant' %}"
+    "{{ 'ASSISTANT: ' + message['content'] + eos_token }}"
+    "{% endif %}"
+    "{% endfor %}"
+    "{% if add_generation_prompt %}"
+    "{{ 'ASSISTANT:' }}"
+    "{% endif %}"
+)
+
+
+def _maybe_inject_chat_template(tokenizer, model_id) -> None:
+    if getattr(tokenizer, "chat_template", None):
+        return
+    name = str(model_id).lower()
+    if "vicuna" in name:
+        tokenizer.chat_template = _VICUNA_CHAT_TEMPLATE
 
 
 def encode_prompt(tokenizer, prompt, device, use_chat_template: bool = True):
