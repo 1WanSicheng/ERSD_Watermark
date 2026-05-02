@@ -244,6 +244,28 @@ def load_prompts(dataset: str, n: int) -> List[List[dict]]:
             ]
             for row in ds
         ]
+    if dataset == "cnn_paper_summarization":
+        # Paper-exact prompt format from improving_KL/experiments/tasks.py
+        # (Hu & Huang 2024, Table 1). On a base llama, this template lands
+        # the model in summarization mode (recognized as instruction-tuned
+        # demonstration) — much lower per-token entropy than the
+        # "Summarize the following article in 3-5 sentences:" prompt, which
+        # base models treat as plain text continuation.
+        ds = load_dataset("cnn_dailymail", "3.0.0").shuffle(seed=42)["test"]
+        ds = ds.filter(lambda x: len(x["article"]) < 3000).select(range(n))
+        return [
+            [
+                {
+                    "role": "user",
+                    "content": (
+                        "System:Summarize the following article.\n"
+                        f"INPUT:{row['article'][:1000]}\n"
+                        "OUTPUT:"
+                    ),
+                },
+            ]
+            for row in ds
+        ]
     if dataset == "eli5":
         ds = load_dataset("sentence-transformers/eli5", split="train")
         ds = ds.shuffle(seed=42).select(range(n))

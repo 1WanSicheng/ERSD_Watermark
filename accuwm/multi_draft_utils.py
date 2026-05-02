@@ -139,6 +139,34 @@ def _select_cache_row(past_key_values, row: int):
     return None
 
 
+def _gather_cache_rows(past_key_values, row_indices: torch.LongTensor):
+    """Gather rows of a B-batched KV cache by ``row_indices``.
+
+    Used inside the draft-tree builder to avoid re-encoding ``[cached_n:]``
+    suffixes at every depth: instead of re-feeding the cross-block cache
+    plus a growing suffix, we keep ``level_cache`` aligned with
+    ``prev_level`` and at each depth gather rows by their parents' indices
+    in the previous level.  Each subsequent forward then sees only the
+    1 new token per row, mirroring InvariantMultiDraftStrategy's pattern.
+
+    ``row_indices`` is a 1D LongTensor (length n_new_rows) on the same
+    device as the cache tensors.
+    """
+    if past_key_values is None:
+        return None
+    if cache_is_legacy(past_key_values):
+        return tree_map(
+            lambda x: x.index_select(0, row_indices.to(x.device)), past_key_values
+        )
+    if cache_is_dynamic(past_key_values):
+        legacy_cache = dynamic_cache_to_legacy(past_key_values)
+        gathered = tree_map(
+            lambda x: x.index_select(0, row_indices.to(x.device)), legacy_cache
+        )
+        return dynamic_cache_from_legacy(gathered)
+    return None
+
+
 @torch.no_grad()
 def _advance_cache(model, past_key_values, token_id: int):
     token = torch.tensor([[token_id]], device=model.device, dtype=torch.long)
@@ -175,6 +203,8 @@ def ms_pfr_tokens_from_logprobs(
     source: SharedPFRSource,
     num_samples: int,
     device,
+    *,
+    generator=None,
 ) -> LongTensor:
     """Return the token ids for the first ``num_samples`` arrivals in a shared
     Poisson race.
@@ -184,6 +214,11 @@ def ms_pfr_tokens_from_logprobs(
     cumulative sum of kth independent ``Exp(1)`` noises divided by ``p_v``.
     Taking the first global arrivals can therefore produce repeated token
     ids, which are later collapsed into branch multiplicities.
+
+    ``generator`` is an optional pre-allocated ``torch.Generator`` reused by
+    the multi-draft hot path; it gets re-seeded in place via the source's
+    ``seed()``.  Output bytes are identical to the no-generator path because
+    ``torch.rand(shape, generator=g)`` is deterministic in ``(seed, shape)``.
     """
     if num_samples <= 0:
         return torch.empty((0,), device=device, dtype=torch.long)
@@ -195,7 +230,9 @@ def ms_pfr_tokens_from_logprobs(
     probs = logprobs.exp()
     vocab_size = probs.shape[-1]
 
-    uniform_noise = source.uniform_noise((num_samples, vocab_size), device=device)
+    uniform_noise = source.uniform_noise(
+        (num_samples, vocab_size), device=device, generator=generator,
+    )
     exp_interarrival = -_safe_log(uniform_noise)
     arrival_times = torch.cumsum(exp_interarrival, dim=0)
     arrival_times = torch.where(
@@ -263,11 +300,41 @@ def build_multi_draft_tree(
     past_by_context: dict[ContextKey, any] = {}
     cached_n = cache_len(past_key_values)
 
+    # Mirror InvariantMultiDraftStrategy's incremental decode: keep
+    # ``level_cache`` aligned with ``prev_level``; depth d's forward grows
+    # it by 1 token to length ``root_len + d - 1``.  Previously this loop
+    # fed ``batch_ids[:, cached_n:]`` of length d at depth d, doing
+    # ``L(L+1)/2`` token-positions of work per block instead of ``L``.
+    level_cache: any = None
+
+    # B1: reuse one torch.Generator across all per-row noise calls.  Each
+    # call re-seeds it via ``source.seed()`` so output bytes match the old
+    # per-call Generator path (and detection's `_uniform_for_token`).
+    shared_gen = torch.Generator(device=device)
+
     for depth in range(1, lookahead + 1):
         prev_level = levels[depth - 1]
         batch_ids = _batch_from_keys(prev_level, device)
-        batch_past = _repeat_cache(past_key_values, batch_ids.shape[0])
-        input_tokens = batch_ids[:, cached_n:] if cached_n > 0 else batch_ids
+        n_prev = batch_ids.shape[0]
+
+        if depth == 1:
+            if cached_n > 0:
+                batch_past = _repeat_cache(past_key_values, n_prev)
+                input_tokens = batch_ids[:, cached_n:]
+            else:
+                batch_past = None
+                input_tokens = batch_ids
+        else:
+            prev_prev_level = levels[depth - 2]
+            prev_idx_map = {ctx: i for i, ctx in enumerate(prev_prev_level)}
+            parent_idx = torch.tensor(
+                [prev_idx_map[ctx[:-1]] for ctx in prev_level],
+                device=device,
+                dtype=torch.long,
+            )
+            batch_past = _gather_cache_rows(level_cache, parent_idx)
+            input_tokens = batch_ids[:, -1:]
+
         output = ref_model(
             input_tokens,
             past_key_values=batch_past,
@@ -276,6 +343,7 @@ def build_multi_draft_tree(
             output_attentions=False,
             output_hidden_states=False,
         )
+        level_cache = output.past_key_values
         logits = output.logits[:, -1, :]
         logits = process_logits(batch_ids, logits, **process_logits_kwargs)
         if max_vocab_size is not None and max_vocab_size < logits.shape[-1]:
@@ -284,18 +352,39 @@ def build_multi_draft_tree(
 
         next_level: list[ContextKey] = []
         seen_next: set[ContextKey] = set()
+
+        # B3: collect per-row token tensors on GPU first, then a SINGLE
+        # ``.cpu().tolist()`` per depth -- previously each row triggered its
+        # own CUDA sync, which dominated wall-time at small B because the
+        # target-7B forward couldn't hide that latency.
+        per_row_tokens: list[torch.Tensor] = []
+        per_row_mults: list[int] = []
         for row, context in enumerate(prev_level):
-            past_by_context[context] = _select_cache_row(output.past_key_values, row)
+            past_by_context[context] = _select_cache_row(level_cache, row)
             source = context_cache.source(context)
             sources[context] = source
-            draft_tokens = ms_pfr_tokens_from_logprobs(
+            mult = multiplicities[context]
+            per_row_mults.append(mult)
+            per_row_tokens.append(ms_pfr_tokens_from_logprobs(
                 logprobs[row],
                 source=source,
-                num_samples=multiplicities[context],
+                num_samples=mult,
                 device=device,
-            )
+                generator=shared_gen,
+            ))
+
+        flat = (
+            torch.cat(per_row_tokens).cpu().tolist()
+            if per_row_tokens
+            else []
+        )
+        offset = 0
+        for row, context in enumerate(prev_level):
+            mult = per_row_mults[row]
+            row_tokens = flat[offset:offset + mult]
+            offset += mult
             token_counts: dict[int, int] = {}
-            for token in draft_tokens.detach().cpu().tolist():
+            for token in row_tokens:
                 token_counts[int(token)] = token_counts.get(int(token), 0) + 1
             draft_sets[context] = set(token_counts)
 

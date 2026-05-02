@@ -240,14 +240,20 @@ class SharedPFRSource:
     def numpy_rng(self):
         return _get_rng(self.label, self.private_key)
 
-    def uniform_noise(self, shape, device) -> FloatTensor:
+    def uniform_noise(self, shape, device, *, generator=None) -> FloatTensor:
         # Use torch.Generator on the model device so generation noise can be
         # re-derived bit-exactly at detection time via the same primitive
         # (unbiased_watermark.scores.pfr_aaronson._uniform_for_token).
         # Numpy default_rng and torch.Generator(cuda) Philox produce
         # DIFFERENT bit streams from the same seed, so the two ends MUST
         # use the same RNG family or detection recovers garbage.
-        generator = torch.Generator(device=device)
+        #
+        # ``generator`` lets callers pass in a pre-allocated torch.Generator
+        # that gets re-seeded in place; this skips the per-call Generator
+        # construction in the multi-draft hot path while preserving the exact
+        # ``torch.rand(shape, generator=g)`` byte stream detection expects.
+        if generator is None:
+            generator = torch.Generator(device=device)
         generator.manual_seed(self.seed())
         return torch.rand(shape, device=device, dtype=torch.float32, generator=generator)
 
@@ -284,7 +290,11 @@ class FreshNoiseSource:
     """
     _cache: Dict[str, torch.Tensor] = field(default_factory=dict)
 
-    def uniform_noise(self, shape, device):
+    def uniform_noise(self, shape, device, *, generator=None):
+        # ``generator`` is accepted to match SharedPFRSource's signature so
+        # the multi-draft hot path can blindly forward a shared Generator;
+        # the fresh-noise variant is unseeded, so the kwarg is ignored.
+        del generator
         device_key = str(device)
         target_n, target_v = int(shape[0]), int(shape[1])
         existing = self._cache.get(device_key)
