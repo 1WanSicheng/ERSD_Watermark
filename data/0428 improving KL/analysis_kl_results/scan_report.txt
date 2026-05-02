@@ -1,0 +1,7 @@
+Scanned 2 JSON file(s).
+Compatible 2 file(s).
+
+OK: qwen_summarization450_len200_K2_pfr.json
+OK: qwen_summarization450_len200_K3_pfr.json
+
+Rejected:
