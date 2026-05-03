@@ -266,6 +266,29 @@ def load_prompts(dataset: str, n: int) -> List[List[dict]]:
             ]
             for row in ds
         ]
+    if dataset == "cnn_dailymail_basefmt":
+        # Same instruction content as ``cnn_dailymail`` ("in 3-5 sentences")
+        # but wrapped in the System:/INPUT:/OUTPUT: section markers from
+        # Hu & Huang's protocol so base llama recognises it as an
+        # instruction-tuned demonstration (lower entropy, no early-EOS
+        # pathology). Used when running base targets with the same
+        # instruction wording we use elsewhere; instruction-tuned targets
+        # should keep using ``cnn_dailymail`` with their native chat template.
+        ds = load_dataset("cnn_dailymail", "3.0.0").shuffle(seed=42)["test"]
+        ds = ds.filter(lambda x: len(x["article"]) < 3000).select(range(n))
+        return [
+            [
+                {
+                    "role": "user",
+                    "content": (
+                        "System:Summarize the following article in 3-5 sentences.\n"
+                        f"INPUT:{row['article'][:1500]}\n"
+                        "OUTPUT:"
+                    ),
+                },
+            ]
+            for row in ds
+        ]
     if dataset == "eli5":
         ds = load_dataset("sentence-transformers/eli5", split="train")
         ds = ds.shuffle(seed=42).select(range(n))
@@ -390,6 +413,7 @@ def _run_basic_uwm(target, draft, input_ids, *, lookahead, max_length, seed,
     gen = basic_uwm_generator(
         reweight=reweight, cc_extractor=cc_extractor, cch=cch,
         private_key=pk, model=target, input_ids=input_ids, n=1,
+        process_logits_kwargs=plk,
     )
     out, blocks, _, _ = _drain(gen, max_length)
     return out, blocks, pk, "DeltaGumbel", None, None
@@ -405,6 +429,7 @@ def _run_mc_uwm(target, draft, input_ids, *, lookahead, max_length, seed,
         reweight=reweight, cc_extractor=cc_extractor, cch=cch,
         private_key=pk, reweight_in_mc=strength,
         model=target, ref_model=draft, input_ids=input_ids, n=lookahead,
+        process_logits_kwargs=plk,
     )
     out, blocks, _, _ = _drain(gen, max_length)
     return out, blocks, pk, "DeltaGumbel", None, None
