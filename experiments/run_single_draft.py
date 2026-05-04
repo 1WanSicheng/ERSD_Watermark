@@ -45,36 +45,77 @@ import torch
 from . import _shared as S
 
 
+# Factory pattern for label functions (stateful for context_code repeated-
+# context masking; stateless labelers fit the same shape).
+_LABEL_FN_FACTORY_BY_MODE = {
+    "prefix":       lambda: S._prefix_labeler_label,
+    "mpfr_direct":  lambda: S._mpfr_direct_label,
+    "context_code": lambda: S.make_context_code_label_fn(n=3),
+}
+
+
 def _decoder_uniforms(
     *, target, in_ids, out_ids, wm_kind, source_labels, masked_flags,
     private_key, vocab_size,
+    force_detector_kind: Optional[str] = None,
+    force_labeler_mode: Optional[str] = None,
 ):
-    """Return (Us, skipped) for ANLPPT scoring; None if no detection path."""
-    if wm_kind == "PFR":
-        if not source_labels or len(source_labels) != int(out_ids.shape[-1]):
+    """Return (Us, skipped) for ANLPPT scoring; None if no detection path.
+
+    For empirical-FPR experiments, set ``force_detector_kind`` (and
+    ``force_labeler_mode`` for PFR) to score H0 outputs (e.g. ``mc``,
+    ``pfr_no_watermark``) with the H1 method's detector.  When labels were
+    not emitted by the gen-side decoder, they are reconstructed from the
+    realized prefix using the configured labeler.
+    """
+    detector_kind = force_detector_kind or wm_kind
+
+    if detector_kind == "PFR":
+        labels = source_labels
+        n_out = int(out_ids.shape[-1])
+        if (not labels or len(labels) != n_out) and force_labeler_mode is not None:
+            factory = _LABEL_FN_FACTORY_BY_MODE.get(force_labeler_mode)
+            if factory is None:
+                return None
+            label_fn = factory()  # fresh per-prompt closure
+            labels = S._rebuild_labels_for_prefix_scheme(in_ids, out_ids, label_fn)
+            masked_flags = [False] * n_out
+        if not labels or len(labels) != n_out:
             return None
         Us, skipped = S.uniforms_from_pfr(
-            out_ids=out_ids, source_labels=source_labels,
-            masked_flags=masked_flags or [False] * int(out_ids.shape[-1]),
+            out_ids=out_ids, source_labels=labels,
+            masked_flags=masked_flags or [False] * n_out,
             private_key=private_key, vocab_size=vocab_size,
         )
         return Us, skipped
-    if wm_kind == "DeltaGumbel":
+    if detector_kind == "DeltaGumbel":
         Us, skipped = S.uniforms_from_dg(
             target=target, out_ids=out_ids, in_ids=in_ids,
             private_key=private_key,
         )
         return Us, skipped
-    if wm_kind == "none":
-        # No watermark recovery path available; ANLPPT is not meaningful.
+    if detector_kind == "none":
         return None
-    raise ValueError(f"unknown wm_kind: {wm_kind}")
+    raise ValueError(f"unknown detector_kind: {detector_kind}")
+
+
+# Per-decoder labeler mode used by post-hoc KL/WS scoring (must match the
+# gen-side scheme so the detector reconstructs the same per-context PFR
+# source).  Single-draft PFR was switched from "context_code" to "prefix"
+# (see _run_pfr docstring), so KL scoring follows.
+_KL_LABELER_MODE_BY_DECODER = {
+    "pfr": "prefix",
+}
 
 
 def run_one_prompt(
     *, decoder_name, decoder_fn, target, draft, tokenizer, prompt,
     lookahead, max_length, seed, base_key, plk, vocab_size,
     metrics_cfg: dict, use_chat_template: bool = True,
+    lppl_applies: bool = False,
+    tpr_applies: bool = False,
+    kl_applies: bool = False,
+    detector_spec: Optional[dict] = None,
 ) -> dict:
     input_ids = S.encode_prompt(
         tokenizer, prompt, target.device,
@@ -113,20 +154,35 @@ def run_one_prompt(
     }
 
     anlppt_cfg = (metrics_cfg or {}).get("anlppt") or {}
-    if anlppt_cfg:
+    Us = None
+    skipped = None
+    force_detector_kind = None
+    force_labeler_mode = None
+    if detector_spec:
+        force_detector_kind = detector_spec.get("kind")
+        force_labeler_mode = detector_spec.get("labeler")
+        row["detector_kind"] = force_detector_kind or wm_kind
+        if force_labeler_mode:
+            row["detector_labeler"] = force_labeler_mode
+    if anlppt_cfg or tpr_applies:
         urec = _decoder_uniforms(
             target=target, in_ids=input_ids, out_ids=out_ids.to(target.device),
             wm_kind=wm_kind, source_labels=src_labels,
             masked_flags=masked_flags, private_key=pk,
             vocab_size=vocab_size,
+            force_detector_kind=force_detector_kind,
+            force_labeler_mode=force_labeler_mode,
         )
-        if urec is None:
+        if urec is not None:
+            Us, skipped = urec
+
+    if anlppt_cfg:
+        if Us is None:
             for v in anlppt_cfg.get("variants", ["U", "Li", "PL"]):
                 row[f"ANLPPT_{v}"] = float("nan")
             row["n_skipped"] = 0
             row["n_added"] = 0
         else:
-            Us, skipped = urec
             metrics = S.anlppt_metrics(
                 Us,
                 li_delta=float(anlppt_cfg.get("li_delta", 0.5)),
@@ -136,17 +192,46 @@ def run_one_prompt(
             )
             row.update(metrics)
 
-    if metrics_cfg.get("kl_ratio_pfr_only") and decoder_name == "pfr":
-        full = torch.cat(
-            [input_ids, out_ids.to(input_ids.device)], dim=1
+    if tpr_applies and Us is not None:
+        tpr_cfg = (metrics_cfg or {}).get("tpr_at_n") or {}
+        det = S.detector_at_first_n(
+            Us, skipped,
+            n_tokens=int(tpr_cfg.get("tokens", 64)),
+            fpr=float(tpr_cfg.get("fpr", 0.01)),
+            li_delta=float(tpr_cfg.get("li_delta",
+                anlppt_cfg.get("li_delta", 0.5))),
+            pl_eps=float(tpr_cfg.get("pl_eps",
+                anlppt_cfg.get("pl_eps", 0.1))),
+            variants=list(tpr_cfg.get("variants", ["U", "Li", "PL"])),
         )
-        kl = S.kl_ws_ratio_pfr(
+        row.update(det)
+
+    if lppl_applies:
+        full = torch.cat([input_ids, out_ids.to(input_ids.device)], dim=1)
+        row.update(S.lppl_under_target(
+            target_model=target, full_ids=full,
+            prompt_length=int(input_ids.shape[1]),
+            process_logits_kwargs=plk,
+        ))
+
+    # Legacy hook: still honour kl_ratio_pfr_only for pfr decoder.
+    if metrics_cfg.get("kl_ratio_pfr_only") and decoder_name == "pfr":
+        full = torch.cat([input_ids, out_ids.to(input_ids.device)], dim=1)
+        row.update(S.kl_ws_ratio_pfr(
             target_model=target, full_ids=full,
             prompt_length=int(input_ids.shape[1]),
             private_key=pk,
             process_logits_kwargs=plk,
-        )
-        row.update(kl)
+        ))
+    elif kl_applies and decoder_name in _KL_LABELER_MODE_BY_DECODER:
+        full = torch.cat([input_ids, out_ids.to(input_ids.device)], dim=1)
+        row.update(S.kl_ws_ratio_pfr(
+            target_model=target, full_ids=full,
+            prompt_length=int(input_ids.shape[1]),
+            private_key=pk,
+            process_logits_kwargs=plk,
+            labeler_mode=_KL_LABELER_MODE_BY_DECODER[decoder_name],
+        ))
     return row
 
 
@@ -161,6 +246,22 @@ def run_experiment(config: dict) -> dict:
         config.get("decoders", list(S.SINGLE_DRAFT_DECODERS.keys()))
     )
     metrics_cfg: dict = config.get("metrics", {}) or {}
+    lppl_applies_to = set(
+        ((metrics_cfg.get("lppl") or {}).get("applies_to") or [])
+    )
+    tpr_applies_to = set(
+        ((metrics_cfg.get("tpr_at_n") or {}).get("applies_to") or [])
+    )
+    kl_applies_to = set(
+        ((metrics_cfg.get("kl_ratio") or {}).get("applies_to") or [])
+    )
+    # detector_per_decoder: optional override mapping decoder name to a
+    # detector spec ``{"kind": "PFR"|"DeltaGumbel", "labeler": <mode>}``,
+    # used for empirical-FPR experiments where H0 outputs (mc /
+    # pfr_no_watermark) get scored with the H1 method's detector.
+    detector_per_decoder: dict = (
+        (metrics_cfg.get("tpr_at_n") or {}).get("detector_per_decoder") or {}
+    )
 
     target, draft, tokenizer, device = S.load_models_and_tokenizer(config)
     vocab_size = int(target.config.vocab_size)
@@ -184,6 +285,10 @@ def run_experiment(config: dict) -> dict:
         decoder_fn = S.SINGLE_DRAFT_DECODERS[d_name]
         is_invariant = d_name in S.LOOKAHEAD_INVARIANT
         sweep = [lookaheads[0]] if is_invariant else lookaheads
+        lppl_applies = d_name in lppl_applies_to
+        tpr_applies = d_name in tpr_applies_to
+        kl_applies = d_name in kl_applies_to
+        detector_spec = detector_per_decoder.get(d_name)
         for L in sweep:
             for idx, prompt in enumerate(prompts):
                 row = run_one_prompt(
@@ -193,6 +298,10 @@ def run_experiment(config: dict) -> dict:
                     max_length=max_new_tokens, seed=idx + 7,
                     base_key=base_key, plk=plk, vocab_size=vocab_size,
                     metrics_cfg=metrics_cfg,
+                    lppl_applies=lppl_applies,
+                    tpr_applies=tpr_applies,
+                    kl_applies=kl_applies,
+                    detector_spec=detector_spec,
                     use_chat_template=use_chat_template,
                 )
                 row["prompt_idx"] = idx
@@ -238,14 +347,25 @@ def _summarize(rows: List[dict], *, decoders: List[str], lookaheads: List[int]):
             if not sub:
                 continue
             agg: Dict[str, float] = {}
-            for k in (
-                "AATPS", "token_rate",
-                "ANLPPT_U", "ANLPPT_Li", "ANLPPT_PL", "ANLPPT_A",
-                "kl_ws_ratio",
-            ):
-                vals = [r[k] for r in sub if k in r and not (
-                    isinstance(r[k], float) and (np.isnan(r[k]) or np.isinf(r[k]))
-                )]
+            metric_keys: set = set()
+            for r in sub:
+                metric_keys.update(r.keys())
+            metric_keys -= {
+                "decoder", "lookahead", "wm_kind", "prompt_idx",
+            }
+            for k in sorted(metric_keys):
+                vals: list = []
+                for r in sub:
+                    v = r.get(k)
+                    if v is None:
+                        continue
+                    if isinstance(v, bool):
+                        vals.append(int(v))
+                        continue
+                    if isinstance(v, (int, float)) and not (
+                        isinstance(v, float) and (np.isnan(v) or np.isinf(v))
+                    ):
+                        vals.append(float(v))
                 if vals:
                     agg[k] = float(np.mean(vals))
             summary[f"{d}_L{L}"] = agg
@@ -274,16 +394,23 @@ def main():
     result = run_experiment(config)
 
     print("\n=== Summary ===")
-    print(f"{'decoder_L':<32s} {'AATPS':>8s} {'TR':>10s} "
-          f"{'U':>8s} {'Li':>8s} {'PL':>8s} {'KL':>8s}")
+    print(f"{'decoder_L':<32s} {'AATPS':>7s} {'TR':>7s} "
+          f"{'U':>7s} {'Li':>7s} {'PL':>7s} "
+          f"{'LPPL':>7s} {'TPR_U':>7s} {'KLrat':>7s}")
     for key, agg in result["summary"].items():
+        det_keys = sorted(k for k in agg if k.startswith("det_at_") and k.endswith("_U"))
+        tpr_u = agg.get(det_keys[0]) if det_keys else float("nan")
+        if not isinstance(tpr_u, float):
+            tpr_u = float("nan")
         print(
-            f"{key:<32s} {agg.get('AATPS', float('nan')):>8.3f} "
-            f"{agg.get('token_rate', float('nan')):>10.2f} "
-            f"{agg.get('ANLPPT_U', float('nan')):>8.3f} "
-            f"{agg.get('ANLPPT_Li', float('nan')):>8.3f} "
-            f"{agg.get('ANLPPT_PL', float('nan')):>8.3f} "
-            f"{agg.get('kl_ws_ratio', float('nan')):>8.3f}"
+            f"{key:<32s} {agg.get('AATPS', float('nan')):>7.3f} "
+            f"{agg.get('token_rate', float('nan')):>7.2f} "
+            f"{agg.get('ANLPPT_U', float('nan')):>7.3f} "
+            f"{agg.get('ANLPPT_Li', float('nan')):>7.3f} "
+            f"{agg.get('ANLPPT_PL', float('nan')):>7.3f} "
+            f"{agg.get('LPPL', float('nan')):>7.3f} "
+            f"{tpr_u:>7.3f} "
+            f"{agg.get('kl_ws_ratio', float('nan')):>7.3f}"
         )
 
     out_path.write_text(json.dumps(result, indent=2, ensure_ascii=False),

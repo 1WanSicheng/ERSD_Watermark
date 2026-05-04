@@ -20,6 +20,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
+import torch.nn.functional as F
 from datasets import load_dataset
 from transformers import (
     AutoModelForCausalLM,
@@ -50,6 +51,7 @@ from unbiased_watermark.scores import (  # noqa: E402
     DeltaGumbel_U,
 )
 from unbiased_watermark.scores.pfr_aaronson import _uniform_for_token  # noqa: E402
+from accuwm.utils import process_logits  # noqa: E402
 from unbiased_watermark.scores.pfr_watermark_strength import (  # noqa: E402
     compute_pfr_watermark_strength_from_sequence,
 )
@@ -437,11 +439,22 @@ def _run_mc_uwm(target, draft, input_ids, *, lookahead, max_length, seed,
 
 def _run_pfr(target, draft, input_ids, *, lookahead, max_length, seed,
              base_key, plk, **_):
+    """Single-draft PFR with **full-prefix labeler**.
+
+    Switched from "context_code" (PrevN(3)) to "prefix" so every token has a
+    unique label and the repeated-context-masking pipeline never skips any
+    output token.  This keeps n_eff = output length on every prompt, which
+    is necessary for the empirical-FPR TPR experiments to have a stable
+    H0 score distribution (Gamma(n_eff, 1) with n_eff varying per prompt
+    causes high variance in the H0 99-percentile estimate).  Multi-draft
+    PFR variants (mpfr_torchgen_cached / ms_pfr_cached) already use a
+    full-prefix scheme; this aligns single-draft with them.
+    """
     pk = seeded_private_key(seed, base_key)
     gen = pfr_sample_generator(
         model=target, ref_model=draft, input_ids=input_ids,
         n=lookahead, max_length=max_length, private_key=pk,
-        labeler_mode="context_code", process_logits_kwargs=plk,
+        labeler_mode="prefix", process_logits_kwargs=plk,
     )
     out, blocks, lbls, msk = _drain(gen, max_length, collect_labels=True)
     return out, blocks, pk, "PFR", lbls, msk
@@ -488,6 +501,30 @@ def _mpfr_direct_label(prefix_ids: torch.LongTensor) -> bytes:
     return b"MPFR_DIRECT_CLOCK_V1" + b"".join(
         int(t).to_bytes(8, "big", signed=True) for t in tokens
     )
+
+
+def make_context_code_label_fn(n: int = 3, mask_prefix: bytes = b"repeat::"):
+    """Build a stateful per-token label function matching the gen-side
+    ``RepeatedContextMaskingLabeler(ContextCodeLabeler(PrevN_ContextCodeExtractor(n)))``
+    behavior used by ``pfr_sample_generator(labeler_mode="context_code", ...)``.
+
+    Returns a closure that takes a prefix_ids tensor and emits the matching
+    label bytes (with masking prefix when the same base label has been seen
+    before in this generation).  Each call must use a FRESH closure per
+    prompt so the masking state does not leak across prompts.
+    """
+    seen: set = set()
+
+    def label_fn(prefix_ids: torch.LongTensor) -> bytes:
+        # PrevN(n): take last n tokens of the prefix as the base label.
+        tail = prefix_ids[..., -n:].detach().cpu().numpy().astype(np.int32, copy=False)
+        base_label = tail.tobytes()
+        if base_label in seen:
+            return mask_prefix + base_label
+        seen.add(base_label)
+        return base_label
+
+    return label_fn
 
 
 def _rebuild_labels_for_prefix_scheme(in_ids, out_ids, label_fn) -> List[bytes]:
@@ -712,6 +749,154 @@ def anlppt_metrics(
         out["ANLPPT_PL"] = -float(s.get_log_p_value()) / n_added
     out["n_skipped"] = int(skipped.sum())
     out["n_added"] = n_added
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Metric: log-perplexity (LPPL) under target's processed distribution
+# ---------------------------------------------------------------------------
+
+
+@torch.no_grad()
+def lppl_under_target(
+    *, target_model, full_ids: torch.LongTensor, prompt_length: int,
+    process_logits_kwargs: Optional[dict] = None,
+) -> Dict[str, float]:
+    """Mean per-token NLL of the realized output under target's *processed*
+    distribution (top_k / top_p / temperature applied).
+
+    Cost: 1 target forward over the full prompt+output sequence.  Run OUTSIDE
+    the timing window since this would otherwise inflate the measured TR.
+
+    Returns:
+        {"LPPL": float, "num_scored_lppl": int}.  LPPL=NaN if there are no
+        scored tokens (or every emitted token has -inf log-prob under the
+        processed distribution).
+    """
+    if process_logits_kwargs is None:
+        process_logits_kwargs = {}
+    n_total = int(full_ids.shape[1])
+    n_out = n_total - int(prompt_length)
+    if n_out <= 0:
+        return {"LPPL": float("nan"), "num_scored_lppl": 0}
+
+    full_ids = full_ids.to(target_model.device)
+    out = target_model(full_ids)
+    # logits[:, t, :] predicts token at t+1.  We need predictions for output
+    # positions [prompt_length, n_total) -> use logits[:, prompt_length-1:n_total-1, :].
+    raw = out.logits[:, prompt_length - 1: n_total - 1, :]  # (1, n_out, V)
+
+    # Top_k/top_p warpers operate on (batch, vocab); flatten the time axis and
+    # feed dummy input_ids since the warper signature requires them but
+    # top_k/top_p/temperature ignore them.
+    flat = raw.reshape(-1, raw.shape[-1])  # (n_out, V)
+    dummy_ids = torch.zeros(
+        (flat.shape[0], 1), dtype=torch.long, device=flat.device
+    )
+    processed = process_logits(dummy_ids, flat, **process_logits_kwargs)
+    logprobs = F.log_softmax(processed.float(), dim=-1)  # (n_out, V)
+
+    emitted = full_ids[0, prompt_length:n_total].to(logprobs.device)
+    nll = -logprobs.gather(1, emitted.unsqueeze(-1)).squeeze(-1)  # (n_out,)
+    finite = torch.isfinite(nll)
+    if not bool(finite.any()):
+        return {"LPPL": float("nan"), "num_scored_lppl": 0}
+    return {
+        "LPPL": float(nll[finite].mean().item()),
+        "num_scored_lppl": int(finite.sum().item()),
+    }
+
+
+# ---------------------------------------------------------------------------
+# Metric: TPR @ FPR=fpr at first n_tokens (PFR-family decoders only)
+# ---------------------------------------------------------------------------
+
+
+def detector_at_first_n(
+    Us: torch.Tensor,
+    skipped: Optional[np.ndarray],
+    *,
+    n_tokens: int = 64,
+    fpr: float = 0.01,
+    li_delta: float = 0.5,
+    pl_eps: float = 0.1,
+    variants: Optional[List[str]] = None,
+) -> Dict[str, float]:
+    """Per-prompt detector decision after the first ``n_tokens`` output tokens.
+
+    Reports TWO test variants per prompt:
+
+    1. **Chernoff bounds** on the existing ANLPPT-{U, Li, PL} statistics.
+       Conservative (Chernoff is a p-value upper bound), under-reports TPR.
+       Fields: ``log_p_at_{n_tokens}_{v}``, ``det_at_{n_tokens}_{v}``.
+
+    2. **Aaronson Gamma-tail** test (LR-optimal under DG / PFR watermark):
+       per-token score s_t = -log(1 - U_t).  Under H0, s_t ~ Exp(1) iid →
+       sum ~ Gamma(n, 1).  Exact log p-value via the Erlang series in
+       ``unbiased_watermark.scores.pfr_aaronson._log_gamma_tail_p_value``.
+       Fields: ``score_aaronson_at_{n_tokens}``, ``log_p_aaronson_at_{n_tokens}``,
+       ``det_aaronson_at_{n_tokens}``.
+
+    Both share ``n_added_at_{n_tokens}`` as the effective sample size after
+    skipping repeated-context tokens.
+
+    If the realized output has fewer than ``n_tokens`` tokens, the detector
+    runs on whatever is available (the row is NOT auto-rejected).
+    """
+    if variants is None:
+        variants = ["U", "Li", "PL"]
+    threshold = np.log(float(fpr))
+    Us_full = Us.detach().cpu()
+    actual_n = int(min(int(n_tokens), Us_full.shape[1]))
+    if actual_n <= 0:
+        return {f"n_added_at_{n_tokens}": 0}
+    Us_n = Us_full[:, :actual_n]
+    skipped_n = (
+        np.asarray(skipped, dtype=bool).reshape(1, -1)[:, :actual_n]
+        if skipped is not None else None
+    )
+    inner = anlppt_metrics(
+        Us_n, li_delta=li_delta, pl_eps=pl_eps,
+        skipped=skipped_n, variants=variants,
+    )
+    n_added = int(inner.get("n_added", 0))
+    out: Dict[str, float] = {f"n_added_at_{n_tokens}": n_added}
+
+    # ---- (1) Chernoff bound on ANLPPT-{U, Li, PL} (existing) ----
+    if n_added <= 0:
+        for v in variants:
+            out[f"log_p_at_{n_tokens}_{v}"] = float("nan")
+            out[f"det_at_{n_tokens}_{v}"] = 0
+    else:
+        for v in variants:
+            anlppt_key = f"ANLPPT_{v}"
+            if anlppt_key not in inner:
+                continue
+            log_p = -float(inner[anlppt_key]) * n_added
+            out[f"log_p_at_{n_tokens}_{v}"] = log_p
+            out[f"det_at_{n_tokens}_{v}"] = int(log_p <= threshold)
+
+    # ---- (2) Aaronson exact Gamma-tail (LR-optimal) ----
+    from unbiased_watermark.scores.pfr_aaronson import _log_gamma_tail_p_value
+    Us_arr = Us_n.numpy().reshape(-1)
+    if skipped_n is not None:
+        valid_mask = ~skipped_n.reshape(-1)
+        Us_arr = Us_arr[valid_mask]
+    n_eff = int(Us_arr.size)
+    if n_eff <= 0:
+        out[f"score_aaronson_at_{n_tokens}"] = float("nan")
+        out[f"log_p_aaronson_at_{n_tokens}"] = float("nan")
+        out[f"det_aaronson_at_{n_tokens}"] = 0
+    else:
+        # s_t = -log(1 - U_t); use log1p for numerical stability when U near 0.
+        # Clip away from 1 to avoid -log(0) = +inf when U exactly == 1
+        # (recovered uniforms are clipped to [1e-10, 1 - 1e-10] upstream).
+        u_clip = np.clip(Us_arr, 0.0, 1.0 - 1e-10)
+        score_aaronson = float(np.sum(-np.log1p(-u_clip)))
+        log_p_aaronson = _log_gamma_tail_p_value(n_eff, score_aaronson)
+        out[f"score_aaronson_at_{n_tokens}"] = score_aaronson
+        out[f"log_p_aaronson_at_{n_tokens}"] = float(log_p_aaronson)
+        out[f"det_aaronson_at_{n_tokens}"] = int(log_p_aaronson <= threshold)
     return out
 
 

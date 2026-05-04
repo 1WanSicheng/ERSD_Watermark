@@ -127,6 +127,26 @@ class PrefixLabeler(AbstractLabeler):
 
 
 @dataclass(frozen=True)
+class MPFRDirectLabeler(AbstractLabeler):
+    """Per-context label scheme used by ``MPFR_spec.mpfr_batched_torchgen_cached``.
+
+    Generated as ``b"MPFR_DIRECT_CLOCK_V1" + concat(token.to_bytes(8, "big",
+    signed=True) for token in context)``.  Required for KL/WS-ratio scoring of
+    mpfr-generated sequences: the post-hoc detector must reconstruct the same
+    per-context PFR source as the generator did, which depends on bit-exact
+    label bytes.
+    """
+
+    def label(self, context: LongTensor) -> bytes:
+        tokens = context.detach().cpu().tolist()
+        if isinstance(tokens, list) and tokens and isinstance(tokens[0], list):
+            tokens = tokens[0]
+        return b"MPFR_DIRECT_CLOCK_V1" + b"".join(
+            int(t).to_bytes(8, "big", signed=True) for t in tokens
+        )
+
+
+@dataclass(frozen=True)
 class ContextCodeLabeler(AbstractLabeler):
     cc_extractor: AbstractContextCodeExtractor
 
@@ -216,6 +236,8 @@ def build_default_labeler(
         if cc_extractor is None:
             cc_extractor = PrevN_ContextCodeExtractor(n=3)
         base_labeler = ContextCodeLabeler(cc_extractor=cc_extractor)
+    elif mode == "mpfr_direct":
+        base_labeler = MPFRDirectLabeler()
     else:
         raise ValueError(f"unknown labeler mode: {mode}")
     return RepeatedContextMaskingLabeler(
