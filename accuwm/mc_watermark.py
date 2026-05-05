@@ -20,6 +20,10 @@ def gen_mc_last_uwm(
     only_last: bool,
     past_key_values=None,
     process_logits_kwargs={},
+    mc_synthid: bool = False,
+    mc_private_key: bytes = None,
+    psedo_r: bool = False,
+    temperature: float = 1.0,
 ) -> tuple[LongTensor, FloatTensor, FloatTensor, any, bool]:
     """
     reweight:
@@ -55,7 +59,7 @@ def gen_mc_last_uwm(
     else:
         input_tokens = torch.cat([input_ids, ref_output_ids], dim=1)
         past_key_values = create_empty_cache()
-    _ids = torch.cat([input_ids, ref_output_ids], dim=1)
+    _ids = torch.cat([input_ids, ref_output_ids], dim=1)    # _ids = [input_ids, ref_output_ids]
     # _ids: (batch_size, seq_len+n)
     output = model(input_tokens, past_key_values=past_key_values, use_cache=True)
     #  logits = output.logits.clone()
@@ -74,28 +78,32 @@ def gen_mc_last_uwm(
                 logits[:, i + 1, :],
                 **process_logits_kwargs,
             )
-    # logits: (batch_size, n+1, vocab_size)
     if ref_logprobs.shape[-1] != logits.shape[-1]:
         min_vocab = min(ref_logprobs.shape[-1], logits.shape[-1])
         if hasattr(ref_watermark_code, "g"):
             min_vocab = min(min_vocab, ref_watermark_code.g.shape[-1])
         elif hasattr(ref_watermark_code, "shuffle"):
             min_vocab = min(min_vocab, ref_watermark_code.shuffle.shape[-1])
+        elif hasattr(ref_watermark_code, "binary_matrix"):
+            min_vocab = min(min_vocab, ref_watermark_code.binary_matrix.shape[-2])
         logits = logits[..., :min_vocab]
         ref_logprobs = ref_logprobs[..., :min_vocab]
         if hasattr(ref_watermark_code, "g") and ref_watermark_code.g.shape[-1] != min_vocab:
             ref_watermark_code = ref_watermark_code.__class__(
                 ref_watermark_code.g[..., :min_vocab]
             )
-        elif (
-            hasattr(ref_watermark_code, "shuffle")
-            and ref_watermark_code.shuffle.shape[-1] != min_vocab
-        ):
+        elif hasattr(ref_watermark_code, "shuffle") and ref_watermark_code.shuffle.shape[-1] != min_vocab:
             ref_watermark_code = ref_watermark_code.__class__(
                 ref_watermark_code.shuffle[..., :min_vocab]
             )
+        elif hasattr(ref_watermark_code, "binary_matrix") and ref_watermark_code.binary_matrix.shape[-2] != min_vocab:
+            ref_watermark_code = ref_watermark_code.__class__(
+                ref_watermark_code.binary_matrix[..., :min_vocab, :]
+            )
+    # logits: (batch_size, n+1, vocab_size), get the logits of the target model
     if not only_last:
         q_logits = reweight.reweight_logits(ref_watermark_code, logits[:, :-1, :])
+        # if the context is repeated and detected in draft, then it's also repeated in the target, so we skip the watermark
         pytorch_ref_skipped = torch.tensor(
             ref_skipped, dtype=torch.bool, device=q_logits.device
         )
@@ -107,19 +115,35 @@ def gen_mc_last_uwm(
     else:
         target_logits = logits[:, :-1, :]
     # target_logprob: (batch_size, n, vocab_size)
-
-    gen_tokens, watermarked_logprobs, poverlaps, fully_coupled = mc_sample(
-        target_logits[0, :, :],  # shape (n, vocab_size)
-        ref_logprobs[0],
-        ref_output_ids[0],
-    )
+    if not mc_synthid:
+        gen_tokens, watermarked_logprobs, poverlaps, fully_coupled = mc_sample(
+            target_logits[0, :, :],  # shape (n, vocab_size)
+            ref_logprobs[0],
+            ref_output_ids[0],
+        )
+    else:
+        assert mc_private_key is not None, "mc_private_key must be provided when mc_synthid is True"
+        assert only_last, "we are implementing the fast watermark, so only_last must be True"
+        reweight_mc = reweight.__class__()
+        gen_tokens, watermarked_logprobs, poverlaps, fully_coupled = mc_sample_synthid(
+            target_logits[0, :, :],  # shape (n, vocab_size)
+            ref_logprobs[0],
+            ref_output_ids[0],
+            input_ids[0],
+            cc_extractor,
+            mc_private_key,
+            reweight_mc,
+            temperature,
+            psedo_r=psedo_r,
+            residual_private_key=private_key,
+        )
     # gen_tokens: (min(gen_len,n))
     # watermarked_logprobs: (min(gen_len,n), vocab_size)
     # poverlaps: (min(gen_len,n))
     got_eos = False
     if gen_tokens[-1] == model.config.eos_token_id:
         got_eos = True
-    if fully_coupled and not got_eos:
+    if fully_coupled and not got_eos:       # if all tokens from draft are accepted, then generate an additional token from the watermarked target model
         (
             last_watermarked_logits,
             _last_q_logits,
@@ -127,17 +151,21 @@ def gen_mc_last_uwm(
             last_watermark_code,
             last_skipped,
         ) = step_watermark(
-            reweight, logits[:, -1, :], _ids, cc_extractor, cch, private_key
+            reweight, logits[:, -1, :], _ids, cc_extractor, cch, private_key, temperature
         )
         # last_watermarked_logits: (batch_size, vocab_size)
         # last_cc: (batch_size, )
-        # last_watermark_code: (batch_size, )
+        # last_watermark_code: (batch_size, vocab_size, d) for synthid and (batch_size, vocab_size) for gumbel
         # last_skipped: (batch_size, )
         cc = np.concatenate([ref_context_code, last_cc[:, None]], axis=1)
+        # for gumbel, it concat[(batch_size, n, vocab_size), (batch_size, 1, vocab_size), dim=-2]
+        # for synthid, it concat[(batch_size, n, vocab_size, d), (batch_size, 1, vocab_size, d), dim=-3]
+        # print(ref_watermark_code.g.shape, last_watermark_code.g.shape)
+        # here we need to use unsqueeze(1) in order to consider synthid's watermark code
         watermark_code = ref_watermark_code.concat(
             [
                 ref_watermark_code,
-                last_watermark_code.tensor_shape_map(lambda x: x.unsqueeze(-1)),
+                last_watermark_code.tensor_shape_map(lambda x: x.unsqueeze(1)),
             ],
             dim=-1,
         )
@@ -207,6 +235,10 @@ def mc_uwm_sample_generator(
     n: int,
     past_key_values=None,
     ref_past_key_values=None,
+    mc_synthid: bool = False,
+    mc_private_key: bytes = None,
+    psedo_r: bool = False,
+    temperature: float = 1.0,
     **kwargs,
 ):
     model.eval()
@@ -229,6 +261,7 @@ def mc_uwm_sample_generator(
             ref_model,
             input_ids,
             n,
+            temperature,
             past_key_values=ref_past_key_values,
             **kwargs,
         )
@@ -257,9 +290,10 @@ def mc_uwm_sample_generator(
                 ref_watermark_logprobs,  # not ref_logprobs
                 only_last=False,
                 past_key_values=past_key_values,
+                temperature=temperature,
                 **kwargs,
             )
-        else:
+        else:   # fast watermark, we have 2 versions
             (
                 cc,
                 watermark_code,
@@ -284,6 +318,10 @@ def mc_uwm_sample_generator(
                 ref_logprobs,  # not ref_watermark_logprobs
                 only_last=True,
                 past_key_values=past_key_values,
+                mc_synthid=mc_synthid,  # if use synthid's fast watermark.
+                mc_private_key=mc_private_key,
+                psedo_r=psedo_r,
+                temperature=temperature,
                 **kwargs,
             )
         ref_past_key_values = fix_gen_n_token_pass_key_values(
