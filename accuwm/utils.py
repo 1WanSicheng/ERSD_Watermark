@@ -60,10 +60,19 @@ def get_rng(*bs) -> np.random.Generator:
     return np.random.default_rng(seed)
 
 
-def process_logits(input_ids, logits, logits_processor=None, logits_warper=None):
+def process_logits(input_ids, logits, logits_processor=None, logits_warper=None,
+                   **_unused):
     """
     logits_processor: TODO
     logits_warper: TODO
+
+    ``**_unused`` lets callers thread auxiliary scalar/callable fields
+    (temperature, draft_temperature, draft_logits_warper, ...) through
+    a single ``process_logits_kwargs`` dict; only ``logits_processor`` /
+    ``logits_warper`` are consumed here, the rest are read by other
+    consumers (drafter forwards in ``pfr.py`` swap in
+    ``draft_logits_warper``; multi-draft ``MPFR_spec/mpfr_*`` reads
+    scalar ``draft_temperature``).
     """
     if logits_processor is not None:
         logits = logits_processor(input_ids, logits)

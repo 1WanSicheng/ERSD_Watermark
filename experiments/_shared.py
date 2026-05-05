@@ -220,6 +220,64 @@ def encode_prompt(tokenizer, prompt, device, use_chat_template: bool = True):
     return tokenizer(text, return_tensors="pt").input_ids.to(device)
 
 
+def load_references(dataset: str, n: int) -> Optional[List[str]]:
+    """Return aligned-by-index reference texts for ROUGE-L scoring, or None
+    if the dataset has no canonical reference field.
+
+    Used by the ROUGE-L-vs-reference quality audit (Exp 1 in the ablation
+    plan).  Indexing matches ``load_prompts(dataset, n)`` so row.prompt_idx
+    maps directly into the returned list.
+    """
+    if dataset == "cnn_dailymail":
+        ds = load_dataset("cnn_dailymail", "3.0.0").shuffle(seed=42)["test"]
+        ds = ds.filter(lambda x: len(x["article"]) < 3000).select(range(n))
+        return [str(row.get("highlights", "")) for row in ds]
+    return None
+
+
+def _rouge_l_f1(a_tokens: List[int], b_tokens: List[int]) -> float:
+    """ROUGE-L F1 over token-id sequences (no external dependency).
+
+    LCS-based recall/precision, F1 = 2PR/(P+R).  Operates on token ids
+    directly so it's tokenizer-agnostic for cross-method comparisons; for
+    "vs gold reference" we tokenize the reference text with the same
+    tokenizer used to generate, so both sides are on the same id space.
+    """
+    if not a_tokens or not b_tokens:
+        return 0.0
+    n, m = len(a_tokens), len(b_tokens)
+    if n < m:
+        a_tokens, b_tokens = b_tokens, a_tokens
+        n, m = m, n
+    prev = [0] * (m + 1)
+    for i in range(1, n + 1):
+        cur = [0] * (m + 1)
+        ai = a_tokens[i - 1]
+        for j in range(1, m + 1):
+            if ai == b_tokens[j - 1]:
+                cur[j] = prev[j - 1] + 1
+            else:
+                cur[j] = cur[j - 1] if cur[j - 1] > prev[j] else prev[j]
+        prev = cur
+    L = prev[m]
+    if L == 0:
+        return 0.0
+    p = L / len(b_tokens)
+    r = L / len(a_tokens)
+    return (2 * p * r) / (p + r) if (p + r) > 0 else 0.0
+
+
+def rouge_l_against_reference(
+    *, tokenizer, output_ids: List[int], reference_text: str,
+) -> float:
+    """ROUGE-L F1 between generated output token ids and a reference text
+    (the reference is tokenized with the same tokenizer)."""
+    if not reference_text:
+        return float("nan")
+    ref_tok_ids = tokenizer(reference_text, add_special_tokens=False)["input_ids"]
+    return _rouge_l_f1(list(output_ids), list(ref_tok_ids))
+
+
 def load_prompts(dataset: str, n: int) -> List[List[dict]]:
     if dataset == "gsm8k":
         ds = load_dataset("openai/gsm8k", "main")["train"].select(range(n))
@@ -313,27 +371,62 @@ def load_prompts(dataset: str, n: int) -> List[List[dict]]:
 def build_process_logits_kwargs(spec: dict | None) -> dict:
     """Build kwargs for accuwm.utils.process_logits from a config block.
 
-    spec is e.g. {"top_k": 50, "top_p": 1.0, "temperature": 1.0}.
+    spec is e.g. ``{"top_k": 50, "top_p": 1.0, "temperature": 1.0,
+    "draft_temperature": 1.5}``.
+
+    The returned dict packs:
+    - ``logits_warper``: warper using the *target* temperature (consumed by
+      single-draft warper-style code paths and by target forwards in PFR).
+    - ``draft_logits_warper`` (only if ``draft_temperature`` differs from
+      ``temperature``): warper using the *drafter* temperature.  PFR /
+      mc_uwm drafter forwards swap this in as their ``logits_warper`` for
+      drafter-invariance ablations.
+    - scalar fields ``temperature``, ``top_k``, ``top_p``,
+      ``draft_temperature`` (when set): consumed by multi-draft scalar
+      paths via ``MPFR_spec/mpfr_direct_optimized._temperature_for_draft``
+      etc.
     """
     spec = spec or {}
     top_k = int(spec.get("top_k", 0) or 0)
     top_p = float(spec.get("top_p", 1.0) or 1.0)
     temperature = float(spec.get("temperature", 1.0) or 1.0)
-    parts = []
-    if temperature != 1.0:
-        parts.append(TemperatureLogitsWarper(temperature))
-    if top_k > 0:
-        parts.append(TopKLogitsWarper(top_k))
-    if 0.0 < top_p < 1.0:
-        parts.append(TopPLogitsWarper(top_p))
-    if not parts:
-        return {}
-    warper = LogitsProcessorList(parts)
+    draft_temperature = spec.get("draft_temperature", None)
+    if draft_temperature is not None:
+        draft_temperature = float(draft_temperature)
 
-    def warp(input_ids, logits):
-        return warper(input_ids, logits)
+    out: dict = {
+        "temperature": temperature,
+        "top_k": top_k if top_k > 0 else 0,
+        "top_p": top_p,
+    }
+    if draft_temperature is not None:
+        out["draft_temperature"] = draft_temperature
 
-    return {"logits_warper": warp}
+    def _build_warper(temp: float):
+        parts = []
+        if temp != 1.0:
+            parts.append(TemperatureLogitsWarper(temp))
+        if top_k > 0:
+            parts.append(TopKLogitsWarper(top_k))
+        if 0.0 < top_p < 1.0:
+            parts.append(TopPLogitsWarper(top_p))
+        if not parts:
+            return None
+        warper = LogitsProcessorList(parts)
+        def warp(input_ids, logits):
+            return warper(input_ids, logits)
+        return warp
+
+    target_warp = _build_warper(temperature)
+    if target_warp is not None:
+        out["logits_warper"] = target_warp
+
+    if draft_temperature is not None and draft_temperature != temperature:
+        draft_warp = _build_warper(draft_temperature)
+        if draft_warp is not None:
+            out["draft_logits_warper"] = draft_warp
+
+    return out
 
 
 def _sync():

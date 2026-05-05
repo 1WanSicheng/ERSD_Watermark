@@ -243,6 +243,23 @@ def mc_uwm_sample_generator(
 ):
     model.eval()
     ref_model.eval()
+    # Drafter-invariance plumbing: when ``process_logits_kwargs`` carries a
+    # ``draft_logits_warper`` (built by experiments._shared.build_process_logits_kwargs
+    # whenever ``draft_temperature`` differs from target), swap it into the
+    # drafter forward as the canonical ``logits_warper``; strip it from the
+    # target forward (process_logits absorbs unknown keys but cleaner to drop).
+    def _split_role_kwargs(role: str):
+        out = dict(kwargs or {})
+        plk = dict((out.get("process_logits_kwargs") or {}))
+        if role == "drafter":
+            if "draft_logits_warper" in plk:
+                plk["logits_warper"] = plk.pop("draft_logits_warper")
+        else:  # target
+            plk.pop("draft_logits_warper", None)
+        out["process_logits_kwargs"] = plk
+        return out
+    draft_kwargs = _split_role_kwargs("drafter")
+    target_kwargs = _split_role_kwargs("target")
     while True:
         (
             ref_context_code,
@@ -263,7 +280,7 @@ def mc_uwm_sample_generator(
             n,
             temperature,
             past_key_values=ref_past_key_values,
-            **kwargs,
+            **draft_kwargs,
         )
         if reweight_in_mc:
             (
@@ -291,7 +308,7 @@ def mc_uwm_sample_generator(
                 only_last=False,
                 past_key_values=past_key_values,
                 temperature=temperature,
-                **kwargs,
+                **target_kwargs,
             )
         else:   # fast watermark, we have 2 versions
             (
@@ -322,7 +339,7 @@ def mc_uwm_sample_generator(
                 mc_private_key=mc_private_key,
                 psedo_r=psedo_r,
                 temperature=temperature,
-                **kwargs,
+                **target_kwargs,
             )
         ref_past_key_values = fix_gen_n_token_pass_key_values(
             ref_output_ids, output_ids, ref_past_key_values

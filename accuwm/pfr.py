@@ -462,7 +462,14 @@ def _build_draft_chain(
             return_dict=True,
         )
         logits = out.logits[:, -1, :]
-        logits = process_logits(running_ids, logits, **(process_logits_kwargs or {}))
+        # Drafter-invariance support: if a separate ``draft_logits_warper`` is
+        # provided, swap it in here (drafter side); the target forward in
+        # ``_target_batched_forward_with_cache`` keeps the primary
+        # ``logits_warper`` (which holds target temperature).
+        _plk = dict(process_logits_kwargs or {})
+        if "draft_logits_warper" in _plk:
+            _plk["logits_warper"] = _plk.pop("draft_logits_warper")
+        logits = process_logits(running_ids, logits, **_plk)
         if max_vocab_size is not None and max_vocab_size < logits.shape[-1]:
             logits = logits[..., :max_vocab_size]
         logprobs = F.log_softmax(logits, dim=-1)
@@ -528,9 +535,11 @@ def _target_batched_forward_with_cache(
             )
         raw_logits = logits_all[0, pos, :]
         prefix_ids = leaf_ids[:, : root_len + d]
-        processed = process_logits(
-            prefix_ids, raw_logits.unsqueeze(0), **(process_logits_kwargs or {}),
-        )
+        # Target side: drop the drafter-only warper so target temperature
+        # (the primary ``logits_warper``) stays in effect.
+        _plk = dict(process_logits_kwargs or {})
+        _plk.pop("draft_logits_warper", None)
+        processed = process_logits(prefix_ids, raw_logits.unsqueeze(0), **_plk)
         logprobs_per_depth.append(F.log_softmax(processed[0].float(), dim=-1))
 
     return logprobs_per_depth, new_target_cache

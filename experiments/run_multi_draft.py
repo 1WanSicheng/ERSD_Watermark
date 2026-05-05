@@ -121,6 +121,8 @@ def run_one_prompt(
     lppl_applies: bool = False,
     tpr_applies: bool = False,
     kl_applies: bool = False,
+    rouge_applies: bool = False,
+    reference_text: Optional[str] = None,
     detector_spec: Optional[dict] = None,
 ) -> dict:
     input_ids = S.encode_prompt(
@@ -160,6 +162,9 @@ def run_one_prompt(
         "elapsed_sec": float(elapsed),
         "wm_kind": wm_kind,
     }
+    if (metrics_cfg or {}).get("save_output_ids"):
+        # Used by drafter-invariance / cross-condition pairwise ROUGE-L.
+        row["output_ids"] = [int(t) for t in out_ids[0].tolist()]
 
     Us = None
     skipped = None
@@ -234,6 +239,17 @@ def run_one_prompt(
             labeler_mode=_KL_LABELER_MODE_BY_DECODER[decoder_name],
         ))
 
+    if rouge_applies and reference_text:
+        try:
+            row["ROUGE_L_vs_ref"] = float(
+                S.rouge_l_against_reference(
+                    tokenizer=tokenizer,
+                    output_ids=[int(t) for t in out_ids[0].tolist()],
+                    reference_text=str(reference_text),
+                )
+            )
+        except Exception:
+            row["ROUGE_L_vs_ref"] = float("nan")
     return row
 
 
@@ -269,10 +285,14 @@ def run_experiment(config: dict) -> dict:
     detector_per_decoder: dict = (
         (metrics_cfg.get("tpr_at_n") or {}).get("detector_per_decoder") or {}
     )
+    rouge_applies_to = set(
+        ((metrics_cfg.get("rouge_vs_reference") or {}).get("applies_to") or [])
+    )
 
     target, draft, tokenizer, device = S.load_models_and_tokenizer(config)
     vocab_size = int(target.config.vocab_size)
     prompts = S.load_prompts(dataset, samples)
+    references = S.load_references(dataset, samples) if rouge_applies_to else None
     use_chat_template = bool(config.get("use_chat_template", True))
 
     print(
@@ -291,6 +311,7 @@ def run_experiment(config: dict) -> dict:
         lppl_applies = d_name in lppl_applies_to
         tpr_applies = d_name in tpr_applies_to
         kl_applies = d_name in kl_applies_to
+        rouge_applies = d_name in rouge_applies_to
         detector_spec = detector_per_decoder.get(d_name)
         for L in lookaheads:
             for B in num_drafts:
@@ -302,6 +323,8 @@ def run_experiment(config: dict) -> dict:
                         max_length=max_new_tokens, seed=idx + 7,
                         base_key=base_key, plk=plk, vocab_size=vocab_size,
                         metrics_cfg=metrics_cfg,
+                        rouge_applies=rouge_applies,
+                        reference_text=(references[idx] if references else None),
                         anlppt_applies=anlppt_applies,
                         lppl_applies=lppl_applies,
                         tpr_applies=tpr_applies,

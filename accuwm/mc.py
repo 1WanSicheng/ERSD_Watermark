@@ -118,9 +118,23 @@ def mc_sample_generator_full(
         ref_past_key_values, (list, tuple)
     ):
         ref_past_key_values = None
+    # Drafter-invariance plumbing: route ``draft_logits_warper`` to drafter
+    # forward only; strip from target.  Mirror of mc_watermark.mc_uwm_sample_generator.
+    def _split_role_kwargs(role: str):
+        out = dict(kwargs or {})
+        plk = dict((out.get("process_logits_kwargs") or {}))
+        if role == "drafter":
+            if "draft_logits_warper" in plk:
+                plk["logits_warper"] = plk.pop("draft_logits_warper")
+        else:  # target
+            plk.pop("draft_logits_warper", None)
+        out["process_logits_kwargs"] = plk
+        return out
+    draft_kwargs = _split_role_kwargs("drafter")
+    target_kwargs = _split_role_kwargs("target")
     while True:
         ref_output_ids, ref_logprobs, ref_past_key_values, _got_eos = gen_n_token(
-            ref_model, input_ids, n, past_key_values=ref_past_key_values, **kwargs
+            ref_model, input_ids, n, past_key_values=ref_past_key_values, **draft_kwargs
         )
         #  output_ids, output_logprobs, poverlaps, past_key_values, got_eos = gen_mc_old(
         output_ids, output_logprobs, poverlaps, past_key_values, got_eos = gen_mc(
@@ -129,7 +143,7 @@ def mc_sample_generator_full(
             ref_output_ids,
             ref_logprobs,
             past_key_values=past_key_values,
-            **kwargs,
+            **target_kwargs,
         )
         if ref_past_key_values is not None:
             ref_past_key_values = fix_gen_n_token_pass_key_values(

@@ -109,6 +109,11 @@ def _temperature_for_target(process_logits_kwargs: Optional[Dict[str, Any]]) -> 
 def _temperature_for_draft(process_logits_kwargs: Optional[Dict[str, Any]]) -> Any:
     if not process_logits_kwargs:
         return 1.0
+    # Explicit ``draft_temperature`` override wins (drafter-invariance
+    # ablations: target T held fixed, drafter T perturbed).  Falls back to
+    # legacy list/tuple convention then to a single scalar.
+    if "draft_temperature" in process_logits_kwargs:
+        return process_logits_kwargs["draft_temperature"]
     temp = process_logits_kwargs.get("temperature", 1.0)
     if isinstance(temp, (list, tuple)):
         return temp[1] if len(temp) > 1 else temp[0]
