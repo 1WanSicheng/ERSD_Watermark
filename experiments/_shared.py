@@ -437,24 +437,61 @@ def _run_mc_uwm(target, draft, input_ids, *, lookahead, max_length, seed,
     return out, blocks, pk, "DeltaGumbel", None, None
 
 
+def _mc_uwm_pseudo_r_key(seed: int, base_key: bytes) -> bytes:
+    """Second key (zeta_R) for the pseudorandom-acceptance step in
+    Algorithm 1 of arXiv:2602.01428.  Distinct from the watermark key
+    (zeta_D / zeta_T = `private_key`) so the acceptance pseudorandomness is
+    decorrelated from the watermark itself."""
+    return b"PSEUDO_R::" + int(seed).to_bytes(8, "big") + base_key
+
+
+def _run_mc_uwm_pseudo_r(target, draft, input_ids, *, lookahead, max_length,
+                          seed, base_key, plk, **_):
+    """Algorithm 1 of arXiv:2602.01428 instantiated with DeltaGumbel reweight.
+
+    speed-mode topology (target verify uses raw P, not P_zeta) plus:
+      - watermarked residual sampled from (P - Q)_+ reweighted under zeta_T
+        (= private_key, same as draft), via mc_sample_synthid path with
+        DeltaGumbel reweight (NOT SynthID — function name is misleading).
+      - pseudorandom acceptance variable u_t = G(zeta_R_t) where zeta_R is
+        a separate key from the watermark, replacing torch.rand() in the
+        accept/reject decision.
+
+    Theorem 4.1 of the paper claims this achieves max sampling efficiency
+    (1 - TV(Q,P)) AND max watermark strength (Ent(P)) simultaneously.
+    """
+    pk = seeded_private_key(seed, base_key)
+    mc_pk = _mc_uwm_pseudo_r_key(seed, base_key)
+    reweight = uwm.DeltaGumbel_Reweight()
+    cc_extractor = uwm.lm.PrevN_ContextCodeExtractor(n=3)
+    cch = uwm.lm.ContextCodeHistory(batch_shape=(1,))
+    gen = mc_uwm_sample_generator(
+        reweight=reweight, cc_extractor=cc_extractor, cch=cch,
+        private_key=pk, reweight_in_mc=False,
+        mc_synthid=True, mc_private_key=mc_pk, psedo_r=True,
+        model=target, ref_model=draft, input_ids=input_ids, n=lookahead,
+        process_logits_kwargs=plk,
+    )
+    out, blocks, _, _ = _drain(gen, max_length)
+    # Bundle both keys so the dual-key DG detector can score the residual-
+    # token contribution under zeta_R as well as the coupled tokens under
+    # zeta_T (= pk).  _DualPK is bytes-compatible for any single-key path.
+    return out, blocks, _DualPK(pk, mc_pk), "DeltaGumbelDual", None, None
+
+
 def _run_pfr(target, draft, input_ids, *, lookahead, max_length, seed,
              base_key, plk, **_):
-    """Single-draft PFR with **full-prefix labeler**.
+    """Single-draft PFR with PrevN(3) context_code labeler.
 
-    Switched from "context_code" (PrevN(3)) to "prefix" so every token has a
-    unique label and the repeated-context-masking pipeline never skips any
-    output token.  This keeps n_eff = output length on every prompt, which
-    is necessary for the empirical-FPR TPR experiments to have a stable
-    H0 score distribution (Gamma(n_eff, 1) with n_eff varying per prompt
-    causes high variance in the H0 99-percentile estimate).  Multi-draft
-    PFR variants (mpfr_torchgen_cached / ms_pfr_cached) already use a
-    full-prefix scheme; this aligns single-draft with them.
+    Aligned with the DG-family decoders (basic_uwm, mc, mc_uwm_*) which all
+    derive per-token randomness from PrevN(3) context codes.  This makes
+    cross-method TPR comparisons in single_draft directly comparable.
     """
     pk = seeded_private_key(seed, base_key)
     gen = pfr_sample_generator(
         model=target, ref_model=draft, input_ids=input_ids,
         n=lookahead, max_length=max_length, private_key=pk,
-        labeler_mode="prefix", process_logits_kwargs=plk,
+        labeler_mode="context_code", process_logits_kwargs=plk,
     )
     out, blocks, lbls, msk = _drain(gen, max_length, collect_labels=True)
     return out, blocks, pk, "PFR", lbls, msk
@@ -476,6 +513,10 @@ SINGLE_DRAFT_DECODERS: Dict[str, Callable] = {
     "basic_uwm":        _run_basic_uwm,
     "mc_uwm_speed":     lambda *a, **kw: _run_mc_uwm(*a, strength=False, **kw),
     "mc_uwm_strength":  lambda *a, **kw: _run_mc_uwm(*a, strength=True, **kw),
+    # Algorithm 1 of arXiv:2602.01428 with DeltaGumbel reweight: speed-mode
+    # topology + watermarked residual + pseudorandom acceptance via 2nd key.
+    # Same DG-UWM detector as the rest of this row (Aaronson Gamma-tail).
+    "mc_uwm_pseudo_r":  _run_mc_uwm_pseudo_r,
     "pfr":              _run_pfr,
     "pfr_no_watermark": _run_pfr_nowm,
 }
@@ -652,9 +693,31 @@ MULTI_DRAFT_DECODERS: Dict[str, Callable] = {
 # ---------------------------------------------------------------------------
 
 
-def uniforms_from_dg(
+# Sidecar map from primary key bytes -> residual mc_pk bytes.  Used by the
+# dual-key DG detector to look up zeta_R given zeta_T (= the primary
+# private_key returned by the decoder).  Avoids subclassing bytes (which
+# does not permit instance attributes) and avoids changing the 6-tuple
+# decoder return contract.
+_DUAL_PK_MAP: Dict[bytes, bytes] = {}
+
+
+def _DualPK(pk: bytes, mc_pk: bytes) -> bytes:
+    """Register (pk -> mc_pk) and return pk unchanged so all single-key
+    paths continue to see plain bytes; dual-key detectors look mc_pk up
+    via ``dual_pk_lookup(pk)``."""
+    pk_b = bytes(pk)
+    _DUAL_PK_MAP[pk_b] = bytes(mc_pk)
+    return pk_b
+
+
+def dual_pk_lookup(pk: bytes):
+    return _DUAL_PK_MAP.get(bytes(pk))
+
+
+def _dg_uniforms_for_key(
     *, target, out_ids, in_ids, private_key,
 ) -> Tuple[torch.Tensor, np.ndarray]:
+    """Compute per-token DG uniforms u_t under one private_key."""
     reweight = uwm.DeltaGumbel_Reweight()
     cc_extractor = uwm.lm.PrevN_ContextCodeExtractor(n=3)
     cch = uwm.lm.ContextCodeHistory(batch_shape=(1,))
@@ -670,6 +733,121 @@ def uniforms_from_dg(
     ).squeeze(-1)
     Us = torch.exp(-torch.exp(-gs)).clamp(1e-10, 1 - 1e-10)
     return Us, np.asarray(skipped, dtype=bool)
+
+
+def uniforms_from_dg(
+    *, target, out_ids, in_ids, private_key,
+) -> Tuple[torch.Tensor, np.ndarray]:
+    return _dg_uniforms_for_key(
+        target=target, out_ids=out_ids, in_ids=in_ids,
+        private_key=private_key,
+    )
+
+
+def _r_values_under_key(
+    *, out_ids, in_ids, private_key,
+) -> np.ndarray:
+    """Reconstruct the pseudorandom acceptance variables r_t = G(zeta_R)_t
+    used by Algorithm 1 (arXiv:2602.01428).  Mirrors improving_KL's
+    ``unbiased_watermark.lm.get_r_values``: PrevN(3) cc, sha256-seeded
+    Generator.random() per token."""
+    cc_extractor = uwm.lm.PrevN_ContextCodeExtractor(n=3)
+    cch = uwm.lm.ContextCodeHistory(batch_shape=out_ids.shape[:-1])
+    ids = out_ids if in_ids is None else torch.cat(
+        [in_ids.to(out_ids.device), out_ids], dim=-1
+    )
+    cc_s = []
+    for i in range(ids.shape[-1] - out_ids.shape[-1], ids.shape[-1]):
+        cc_step = cch.step(cc_extractor, ids[..., :i])
+        cc = cc_step[0] if isinstance(cc_step, tuple) else cc_step
+        cc_s.append(cc)
+    cc = np.stack(cc_s, axis=-1)
+    pk = bytes(private_key)
+    r_values = np.empty(cc.shape, dtype=np.float32)
+    for index in np.ndindex(r_values.shape):
+        rng = _get_rng_local(cc[index], pk)
+        r_values[index] = rng.random()
+    return r_values
+
+
+def _get_rng_local(*bs):
+    """Local sha256-seeded numpy Generator (matches accuwm.utils.get_rng on
+    the pod and improving_KL's get_rng).  Bytes-coerce non-bytes inputs."""
+    import hashlib
+    m = hashlib.sha256()
+    for b in bs:
+        if isinstance(b, str):
+            b = b.encode("utf-8")
+        elif hasattr(b, "item"):
+            b = b.item()
+        if not isinstance(b, (bytes, bytearray, memoryview)):
+            b = bytes(b)
+        m.update(b)
+    seed = int.from_bytes(m.digest(), "big") % (2**32 - 1)
+    return np.random.default_rng(seed)
+
+
+def dg_dual_key_components(
+    *, target, out_ids, in_ids, private_key, mc_private_key,
+) -> Dict[str, np.ndarray]:
+    """Return (Us_pk, Us_mc, r_values, skipped_pk, skipped_mc) for the
+    dual-key DG detector.  Lets callers post-hoc sweep mixing thresholds
+    or implement Ars-tau without re-running detection.  Shapes (1, T)
+    each (or (T,) for 1D)."""
+    Us_pk, skipped_pk = _dg_uniforms_for_key(
+        target=target, out_ids=out_ids, in_ids=in_ids,
+        private_key=bytes(private_key),
+    )
+    Us_mc, skipped_mc = _dg_uniforms_for_key(
+        target=target, out_ids=out_ids, in_ids=in_ids,
+        private_key=bytes(mc_private_key),
+    )
+    r_values = _r_values_under_key(
+        out_ids=out_ids, in_ids=in_ids, private_key=bytes(mc_private_key),
+    )
+    return {
+        "Us_pk": Us_pk.detach().cpu().numpy().astype(np.float32),
+        "Us_mc": Us_mc.detach().cpu().numpy().astype(np.float32),
+        "r_values": np.asarray(r_values, dtype=np.float32),
+        "skipped_pk": np.asarray(skipped_pk, dtype=bool),
+        "skipped_mc": np.asarray(skipped_mc, dtype=bool),
+    }
+
+
+def uniforms_from_dg_dual_key(
+    *, target, out_ids, in_ids, private_key, mc_private_key,
+    accept_threshold: float = 0.5,
+) -> Tuple[torch.Tensor, np.ndarray]:
+    """Dual-key Aaronson detector for Algorithm 1 (arXiv:2602.01428).
+
+    Token-level mix using r_values: at gen time a token is accepted iff
+    ``r_t = G(zeta_R)_t <= prob_ratio_t``, where r_t is the pseudorandom
+    acceptance variable.  Without prob_ratio at detection time we use a
+    fixed threshold ``accept_threshold`` (rough estimate of mean accept
+    probability).  Tokens with r_t > threshold are predicted to be
+    residual-resampled (watermarked under zeta_R = mc_private_key); the
+    rest are predicted accepted (watermarked under zeta_T = private_key).
+
+    Returns the SELECTED uniforms per token, shape (1, T), so the caller
+    can run the standard Aaronson Gamma-tail test on top.
+    """
+    Us_pk, skipped_pk = _dg_uniforms_for_key(
+        target=target, out_ids=out_ids, in_ids=in_ids,
+        private_key=bytes(private_key),
+    )
+    Us_mc, skipped_mc = _dg_uniforms_for_key(
+        target=target, out_ids=out_ids, in_ids=in_ids,
+        private_key=bytes(mc_private_key),
+    )
+    r_values = _r_values_under_key(
+        out_ids=out_ids, in_ids=in_ids, private_key=bytes(mc_private_key),
+    )
+    r_t = torch.from_numpy(r_values).to(Us_pk.device)
+    use_mc = r_t > float(accept_threshold)
+    Us = torch.where(use_mc, Us_mc.to(Us_pk.device), Us_pk)
+    # skipped iff skipped under whichever key was chosen
+    skipped = np.where(use_mc.cpu().numpy(), skipped_mc, skipped_pk)
+    return Us.clamp(1e-10, 1 - 1e-10), skipped
 
 
 def uniforms_from_pfr(
@@ -903,6 +1081,316 @@ def detector_at_first_n(
 # ---------------------------------------------------------------------------
 # Metric: KL/WS ratio (Definition 3.1, delta-conditional empirical estimator)
 # ---------------------------------------------------------------------------
+
+
+@torch.no_grad()
+def _logits_per_output_step(model, full_ids, prompt_length, plk):
+    """Run model on full_ids, return per-output-position processed logits."""
+    if full_ids.shape[0] != 1:
+        raise ValueError("only batch_size=1 is supported")
+    seq_len = int(full_ids.shape[1])
+    if not 0 < prompt_length <= seq_len:
+        raise ValueError("invalid prompt_length")
+    if prompt_length == seq_len:
+        return torch.empty(
+            (1, 0, int(model.config.vocab_size)),
+            device=full_ids.device, dtype=torch.float32,
+        )
+    out = model(full_ids)
+    raw = out.logits[:, prompt_length - 1:-1, :]
+    if not plk:
+        return raw
+    proc = []
+    for offset in range(raw.shape[1]):
+        pos = prompt_length + offset
+        proc.append(process_logits(full_ids[:, :pos], raw[:, offset, :], **plk))
+    return torch.stack(proc, dim=1)
+
+
+def _watermark_code_from_contexts(reweight, cc_extractor, cch, private_key,
+                                  out_ids, vocab_size, in_ids=None):
+    """Per-step watermark codes for output tokens, with skipped flags."""
+    ids = out_ids if in_ids is None else torch.cat([in_ids, out_ids], dim=-1)
+    cc_s, sk_s = [], []
+    start = ids.shape[-1] - out_ids.shape[-1]
+    for i in range(start, ids.shape[-1]):
+        step = cch.step(cc_extractor, ids[..., :i])
+        if isinstance(step, tuple) and len(step) >= 2:
+            cc, sk = step[0], step[1]
+        else:
+            cc, sk = step, np.zeros(out_ids.shape[:-1], dtype=bool)
+        cc_s.append(cc)
+        sk_s.append(sk)
+    cc_arr = np.stack(cc_s, axis=-1)
+    sk_arr = np.stack(sk_s, axis=-1)
+    rng = np.empty(cc_arr.shape, dtype=object)
+    pk_b = bytes(private_key)
+    for index in np.ndindex(rng.shape):
+        rng[index] = _get_rng_local(cc_arr[index], pk_b)
+    code = reweight.watermark_code_type.from_random(rng, vocab_size)
+    code = code.tensor_shape_map(lambda x: x.to(out_ids.device))
+    return code, sk_arr
+
+
+@torch.no_grad()
+def kl_ws_ratio_mc_pseudo_r(
+    *, target_model, draft_model, full_ids, prompt_length,
+    private_key, mc_private_key,
+    process_logits_kwargs: Optional[dict],
+) -> Dict[str, float]:
+    """Algorithm-1 (arXiv:2602.01428) effective-distribution KL.
+
+    The fixed-zeta one-step effective distribution at each output position
+    is::
+
+        effective = qz * indicator(r <= alpha) + (1 - accept_mass) * residual_zeta
+
+    where:
+      - qz       = zeta_T-reweight(Q) under DeltaGumbel + PrevN(3)
+      - alpha    = min(1, P/Q)
+      - r        = pseudorandom acceptance variable G(zeta_R)
+      - residual_zeta = zeta_R-reweight((P-Q)+ normalised)
+    KL(effective || P) is computed and aggregated like the basic DG case.
+
+    With ``psedo_r=True`` ALL randomness is pinned to zeta_T + zeta_R, so
+    the effective distribution should approach P-watermark-strength-bound
+    (KL/H ratio close to 1).  Mirrors improving_KL
+    compute_mc_uwm_speed_kl_from_sequence(pseudo_r_private_key, residual_private_key).
+    """
+    seq_len = int(full_ids.shape[1])
+    if not 0 < prompt_length < seq_len:
+        return {"kl_ws_ratio": float("nan"), "kl_ws_sum": 0.0,
+                "kl_h_sum": 0.0, "kl_num_scored": 0,
+                "kl_masked_ratio": 0.0}
+    out_ids = full_ids[:, prompt_length:]
+    in_ids = full_ids[:, :prompt_length]
+    plk = process_logits_kwargs or {}
+
+    # Target P logits and draft Q logits at each output step
+    p_logits = _logits_per_output_step(target_model, full_ids, prompt_length, plk)
+    q_logits = _logits_per_output_step(draft_model, full_ids, prompt_length, plk)
+    V = min(int(p_logits.shape[-1]), int(q_logits.shape[-1]))
+    p_logits = p_logits[..., :V]
+    q_logits = q_logits[..., :V]
+
+    reweight = uwm.DeltaGumbel_Reweight()
+    cc_extractor = uwm.lm.PrevN_ContextCodeExtractor(n=3)
+    cch_t = uwm.lm.ContextCodeHistory(batch_shape=(1,))
+    code_t, skipped = _watermark_code_from_contexts(
+        reweight, cc_extractor, cch_t, bytes(private_key),
+        out_ids.to(target_model.device), V, in_ids=in_ids.to(target_model.device),
+    )
+    # qz = zeta_T-reweight applied to Q
+    qz_logits = reweight.reweight_logits(code_t, q_logits.float())
+    qz_probs = F.softmax(qz_logits.float(), dim=-1)
+
+    p_probs = F.softmax(p_logits.float(), dim=-1)
+    q_probs = F.softmax(q_logits.float(), dim=-1)
+    eps = 1e-20
+    alpha = torch.minimum(torch.ones_like(p_probs),
+                          p_probs / q_probs.clamp_min(eps))
+
+    # r values from zeta_R
+    r_values = _r_values_under_key(
+        out_ids=out_ids.to(target_model.device),
+        in_ids=in_ids.to(target_model.device),
+        private_key=bytes(mc_private_key),
+    )
+    r = torch.from_numpy(np.asarray(r_values, dtype=np.float32)).to(p_probs.device)
+    indicator = (r.unsqueeze(-1) <= alpha).float()
+    accept_mass = (qz_probs * indicator).sum(dim=-1, keepdim=True)
+
+    # residual_zeta = zeta_R reweight of (P-Q)+
+    cch_r = uwm.lm.ContextCodeHistory(batch_shape=(1,))
+    code_r, _ = _watermark_code_from_contexts(
+        reweight, cc_extractor, cch_r, bytes(mc_private_key),
+        out_ids.to(target_model.device), V, in_ids=in_ids.to(target_model.device),
+    )
+    residual = torch.clamp(p_probs - q_probs, min=0.0)
+    residual = residual / residual.sum(dim=-1, keepdim=True).clamp_min(eps)
+    res_logits = reweight.reweight_logits(code_r, residual.clamp_min(eps).log())
+    residual_zeta = F.softmax(res_logits.float(), dim=-1)
+
+    effective = qz_probs * indicator + (1.0 - accept_mass) * residual_zeta
+    effective = effective / effective.sum(dim=-1, keepdim=True).clamp_min(eps)
+
+    # discrete KL(effective || p_probs)
+    e = effective.clamp_min(eps)
+    p = p_probs.clamp_min(eps)
+    per_token_kl = (e * (e.log() - p.log())).sum(dim=-1)
+    per_token_h = -torch.where(p > 0, p * p.log(), torch.zeros_like(p)).sum(dim=-1)
+
+    skipped_t = torch.tensor(np.asarray(skipped, dtype=bool),
+                             device=per_token_kl.device, dtype=torch.bool)
+    if skipped_t.shape != per_token_kl.shape:
+        skipped_t = skipped_t.reshape(per_token_kl.shape)
+    mask = ~skipped_t
+    count = int(mask.sum().item())
+    kl_sum = float(per_token_kl[mask].sum().item()) if count else 0.0
+    h_sum = float(per_token_h[mask].sum().item()) if count else 0.0
+    return {
+        "kl_ws_ratio": float(kl_sum / max(h_sum, eps)),
+        "kl_ws_mean": kl_sum / max(count, 1),
+        "kl_h_mean": h_sum / max(count, 1),
+        "kl_ws_sum": kl_sum,
+        "kl_h_sum": h_sum,
+        "kl_num_scored": count,
+        "kl_masked_ratio": float(skipped_t.float().mean().item())
+        if skipped_t.numel() else 0.0,
+    }
+
+
+@torch.no_grad()
+def kl_ws_ratio_mc_speed(
+    *, target_model, draft_model, full_ids, prompt_length, private_key,
+    process_logits_kwargs: Optional[dict],
+) -> Dict[str, float]:
+    """mc_uwm_speed effective-distribution KL (no pseudo_r, no residual_zeta).
+
+    effective = qz * alpha + (1 - accept_mass) * residual_uniform_over_(P-Q)+
+
+    Mirrors improving_KL compute_mc_uwm_speed_kl_from_sequence with
+    pseudo_r_private_key=None.
+    """
+    seq_len = int(full_ids.shape[1])
+    if not 0 < prompt_length < seq_len:
+        return {"kl_ws_ratio": float("nan"), "kl_ws_sum": 0.0,
+                "kl_h_sum": 0.0, "kl_num_scored": 0,
+                "kl_masked_ratio": 0.0}
+    out_ids = full_ids[:, prompt_length:]
+    in_ids = full_ids[:, :prompt_length]
+    plk = process_logits_kwargs or {}
+    p_logits = _logits_per_output_step(target_model, full_ids, prompt_length, plk)
+    q_logits = _logits_per_output_step(draft_model, full_ids, prompt_length, plk)
+    V = min(int(p_logits.shape[-1]), int(q_logits.shape[-1]))
+    p_logits = p_logits[..., :V]
+    q_logits = q_logits[..., :V]
+
+    reweight = uwm.DeltaGumbel_Reweight()
+    cc_extractor = uwm.lm.PrevN_ContextCodeExtractor(n=3)
+    cch_t = uwm.lm.ContextCodeHistory(batch_shape=(1,))
+    code_t, skipped = _watermark_code_from_contexts(
+        reweight, cc_extractor, cch_t, bytes(private_key),
+        out_ids.to(target_model.device), V, in_ids=in_ids.to(target_model.device),
+    )
+    qz_logits = reweight.reweight_logits(code_t, q_logits.float())
+    qz_probs = F.softmax(qz_logits.float(), dim=-1)
+
+    p_probs = F.softmax(p_logits.float(), dim=-1)
+    q_probs = F.softmax(q_logits.float(), dim=-1)
+    eps = 1e-20
+    alpha = torch.minimum(torch.ones_like(p_probs),
+                          p_probs / q_probs.clamp_min(eps))
+    accept_mass = (qz_probs * alpha).sum(dim=-1, keepdim=True)
+    residual = torch.clamp(p_probs - q_probs, min=0.0)
+    residual = residual / residual.sum(dim=-1, keepdim=True).clamp_min(eps)
+    effective = qz_probs * alpha + (1.0 - accept_mass) * residual
+    effective = effective / effective.sum(dim=-1, keepdim=True).clamp_min(eps)
+
+    e = effective.clamp_min(eps)
+    p = p_probs.clamp_min(eps)
+    per_token_kl = (e * (e.log() - p.log())).sum(dim=-1)
+    per_token_h = -torch.where(p > 0, p * p.log(), torch.zeros_like(p)).sum(dim=-1)
+    skipped_t = torch.tensor(np.asarray(skipped, dtype=bool),
+                             device=per_token_kl.device, dtype=torch.bool)
+    if skipped_t.shape != per_token_kl.shape:
+        skipped_t = skipped_t.reshape(per_token_kl.shape)
+    mask = ~skipped_t
+    count = int(mask.sum().item())
+    kl_sum = float(per_token_kl[mask].sum().item()) if count else 0.0
+    h_sum = float(per_token_h[mask].sum().item()) if count else 0.0
+    return {
+        "kl_ws_ratio": float(kl_sum / max(h_sum, eps)),
+        "kl_ws_mean": kl_sum / max(count, 1),
+        "kl_h_mean": h_sum / max(count, 1),
+        "kl_ws_sum": kl_sum,
+        "kl_h_sum": h_sum,
+        "kl_num_scored": count,
+        "kl_masked_ratio": float(skipped_t.float().mean().item())
+        if skipped_t.numel() else 0.0,
+    }
+
+
+@torch.no_grad()
+def kl_ws_ratio_dg(
+    *, target_model, full_ids, prompt_length, private_key,
+    process_logits_kwargs: Optional[dict],
+) -> Dict[str, float]:
+    """Per-token KL(S(P,zeta) || P) summed over output for DG-family
+    watermarks (basic_uwm, mc_uwm_*).
+
+    Computes one target forward over (prompt + output), extracts p_logits
+    at each output position, applies process_logits, then runs detect_pre
+    with DeltaGumbel reweight + PrevN(3) extractor under ``private_key``
+    to recover per-step q_logits.  Returns kl_sum / entropy_sum (==
+    ws/H ratio used in improving_KL).
+
+    Mirrors improving_KL.unbiased_watermark.scores.kl_watermark_strength.
+    compute_basic_uwm_kl_from_sequence (target-side full-vocab variant).
+    """
+    if full_ids.shape[0] != 1:
+        raise ValueError("only batch_size=1 is supported")
+    seq_len = int(full_ids.shape[1])
+    if not 0 < prompt_length < seq_len:
+        return {"kl_ws_ratio": float("nan"), "kl_ws_sum": 0.0,
+                "kl_h_sum": 0.0, "kl_num_scored": 0,
+                "kl_masked_ratio": 0.0}
+    out_len = seq_len - prompt_length
+    out_ids = full_ids[:, prompt_length:]
+    in_ids = full_ids[:, :prompt_length]
+    # Target forward over the full sequence; p_logits[t] is the target's
+    # logits AT position prompt_length+t (predicting the t-th output).
+    output = target_model(full_ids)
+    raw_logits = output.logits[:, prompt_length - 1:-1, :]  # (1, out_len, V)
+    plk = process_logits_kwargs or {}
+    if plk:
+        proc = []
+        for offset in range(raw_logits.shape[1]):
+            pos = prompt_length + offset
+            proc.append(process_logits(
+                full_ids[:, :pos], raw_logits[:, offset, :], **plk,
+            ))
+        p_logits = torch.stack(proc, dim=1)
+    else:
+        p_logits = raw_logits
+    reweight = uwm.DeltaGumbel_Reweight()
+    cc_extractor = uwm.lm.PrevN_ContextCodeExtractor(n=3)
+    cch = uwm.lm.ContextCodeHistory(batch_shape=(1,))
+    _wm_logits, q_logits, _cc, _code, skipped = uwm.lm.detect_pre(
+        int(target_model.config.vocab_size), reweight, cc_extractor, cch,
+        bytes(private_key),
+        out_ids.to(target_model.device),
+        in_ids=in_ids.to(target_model.device),
+        p_logits=p_logits,
+    )
+    log_q = F.log_softmax(q_logits.float(), dim=-1)
+    log_p = F.log_softmax(p_logits.float(), dim=-1)
+    q = log_q.exp()
+    per_token_kl = torch.where(q > 0, q * (log_q - log_p),
+                               torch.zeros_like(q)).sum(dim=-1)
+    p = log_p.exp()
+    # Guard 0 * (-inf) = NaN at top-k-masked positions: zero those terms.
+    per_token_h = -torch.where(p > 0, p * log_p,
+                               torch.zeros_like(p)).sum(dim=-1)
+    skipped_t = torch.tensor(np.asarray(skipped, dtype=bool),
+                             device=per_token_kl.device, dtype=torch.bool)
+    if skipped_t.shape != per_token_kl.shape:
+        skipped_t = skipped_t.reshape(per_token_kl.shape)
+    mask = ~skipped_t
+    count = int(mask.sum().item())
+    kl_sum = float(per_token_kl[mask].sum().item()) if count else 0.0
+    h_sum = float(per_token_h[mask].sum().item()) if count else 0.0
+    ratio = kl_sum / max(h_sum, 1e-20)
+    return {
+        "kl_ws_ratio": float(ratio),
+        "kl_ws_mean": kl_sum / max(count, 1),
+        "kl_h_mean": h_sum / max(count, 1),
+        "kl_ws_sum": kl_sum,
+        "kl_h_sum": h_sum,
+        "kl_num_scored": count,
+        "kl_masked_ratio": float(skipped_t.float().mean().item())
+        if skipped_t.numel() else 0.0,
+    }
 
 
 @torch.no_grad()

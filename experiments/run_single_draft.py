@@ -59,6 +59,7 @@ def _decoder_uniforms(
     private_key, vocab_size,
     force_detector_kind: Optional[str] = None,
     force_labeler_mode: Optional[str] = None,
+    detector_extra: Optional[dict] = None,
 ):
     """Return (Us, skipped) for ANLPPT scoring; None if no detection path.
 
@@ -94,6 +95,35 @@ def _decoder_uniforms(
             private_key=private_key,
         )
         return Us, skipped
+    if detector_kind == "DeltaGumbelDual":
+        # Algorithm 1 dual-key detector: needs the residual key (mc_pk).
+        # The decoder registered it via S._DualPK(pk, mc_pk); look it up.
+        mc_pk = S.dual_pk_lookup(private_key)
+        if mc_pk is None:
+            raise RuntimeError(
+                "DeltaGumbelDual detector needs mc_pk in S._DUAL_PK_MAP; "
+                "decoder must register via S._DualPK(pk, mc_pk)."
+            )
+        thr = float((detector_extra or {}).get("accept_threshold", 0.5))
+        # Compute components once so caller can also stash Y/Y_mc/R for
+        # post-hoc threshold sweeps without re-running detection.
+        comps = S.dg_dual_key_components(
+            target=target, out_ids=out_ids, in_ids=in_ids,
+            private_key=bytes(private_key), mc_private_key=mc_pk,
+        )
+        import torch as _t
+        Us_pk = _t.from_numpy(comps["Us_pk"]).to(out_ids.device)
+        Us_mc = _t.from_numpy(comps["Us_mc"]).to(out_ids.device)
+        r_t = _t.from_numpy(comps["r_values"]).to(out_ids.device)
+        use_mc = r_t > thr
+        Us = _t.where(use_mc, Us_mc, Us_pk).clamp(1e-10, 1 - 1e-10)
+        import numpy as _np
+        skipped = _np.where(use_mc.cpu().numpy(),
+                            comps["skipped_mc"], comps["skipped_pk"])
+        # Stash components so caller can save them in the row.
+        if isinstance(detector_extra, dict):
+            detector_extra["_components"] = comps
+        return Us, skipped
     if detector_kind == "none":
         return None
     raise ValueError(f"unknown detector_kind: {detector_kind}")
@@ -101,11 +131,17 @@ def _decoder_uniforms(
 
 # Per-decoder labeler mode used by post-hoc KL/WS scoring (must match the
 # gen-side scheme so the detector reconstructs the same per-context PFR
-# source).  Single-draft PFR was switched from "context_code" to "prefix"
-# (see _run_pfr docstring), so KL scoring follows.
+# source).  Single-draft PFR uses PrevN(3) context_code, aligned with the
+# DG-family decoders (see _run_pfr docstring).
 _KL_LABELER_MODE_BY_DECODER = {
-    "pfr": "prefix",
+    "pfr": "context_code",
 }
+
+# Decoders that use the DG-family target-side KL/WS estimator
+# (per-token KL(S(P,zeta) || P) with DeltaGumbel reweight + PrevN(3)).
+# This is improving_KL's compute_basic_uwm_kl_from_sequence equivalent.
+_DG_KL_DECODERS = {"basic_uwm", "mc", "mc_uwm_speed",
+                   "mc_uwm_strength", "mc_uwm_pseudo_r", "pfr_no_watermark"}
 
 
 def run_one_prompt(
@@ -158,9 +194,12 @@ def run_one_prompt(
     skipped = None
     force_detector_kind = None
     force_labeler_mode = None
+    detector_extra = None
     if detector_spec:
         force_detector_kind = detector_spec.get("kind")
         force_labeler_mode = detector_spec.get("labeler")
+        detector_extra = {k: v for k, v in detector_spec.items()
+                          if k not in {"kind", "labeler"}}
         row["detector_kind"] = force_detector_kind or wm_kind
         if force_labeler_mode:
             row["detector_labeler"] = force_labeler_mode
@@ -172,9 +211,26 @@ def run_one_prompt(
             vocab_size=vocab_size,
             force_detector_kind=force_detector_kind,
             force_labeler_mode=force_labeler_mode,
+            detector_extra=detector_extra,
         )
         if urec is not None:
             Us, skipped = urec
+        # Stash per-token uniforms + skip mask so we can plot TPR-vs-token
+        # curves post-hoc without re-running the detector.  Shapes (T,).
+        if Us is not None:
+            row["u_per_token"] = Us.detach().cpu().numpy().reshape(-1).tolist()
+            if skipped is not None:
+                row["skipped_per_token"] = (
+                    np.asarray(skipped, dtype=bool).reshape(-1).tolist()
+                )
+        # Dual-key components for mc_uwm_pseudo_r: full sequence (was _64;
+        # extended so post-hoc Ars-tau / threshold sweeps can use all 128
+        # tokens, matching paper-style TPR-vs-n curves).
+        if detector_extra and "_components" in detector_extra:
+            comps = detector_extra["_components"]
+            row["dual_Us_pk"] = comps["Us_pk"].reshape(-1).tolist()
+            row["dual_Us_mc"] = comps["Us_mc"].reshape(-1).tolist()
+            row["dual_r"] = comps["r_values"].reshape(-1).tolist()
 
     if anlppt_cfg:
         if Us is None:
@@ -231,6 +287,37 @@ def run_one_prompt(
             private_key=pk,
             process_logits_kwargs=plk,
             labeler_mode=_KL_LABELER_MODE_BY_DECODER[decoder_name],
+        ))
+    elif kl_applies and decoder_name == "mc_uwm_pseudo_r":
+        # Algorithm-1 effective-distribution KL: needs target+draft logits
+        # AND the residual key (zeta_R) registered in the dual-key map.
+        mc_pk = S.dual_pk_lookup(pk)
+        if mc_pk is None:
+            return row
+        full = torch.cat([input_ids, out_ids.to(input_ids.device)], dim=1)
+        row.update(S.kl_ws_ratio_mc_pseudo_r(
+            target_model=target, draft_model=draft, full_ids=full,
+            prompt_length=int(input_ids.shape[1]),
+            private_key=bytes(pk), mc_private_key=mc_pk,
+            process_logits_kwargs=plk,
+        ))
+    elif kl_applies and decoder_name == "mc_uwm_speed":
+        full = torch.cat([input_ids, out_ids.to(input_ids.device)], dim=1)
+        row.update(S.kl_ws_ratio_mc_speed(
+            target_model=target, draft_model=draft, full_ids=full,
+            prompt_length=int(input_ids.shape[1]),
+            private_key=bytes(pk),
+            process_logits_kwargs=plk,
+        ))
+    elif kl_applies and decoder_name in _DG_KL_DECODERS:
+        # basic_uwm, mc_uwm_strength, mc, pfr_no_watermark: simple
+        # zeta_T-only target-side KL (per-token reweight of P).
+        full = torch.cat([input_ids, out_ids.to(input_ids.device)], dim=1)
+        row.update(S.kl_ws_ratio_dg(
+            target_model=target, full_ids=full,
+            prompt_length=int(input_ids.shape[1]),
+            private_key=bytes(pk),
+            process_logits_kwargs=plk,
         ))
     return row
 

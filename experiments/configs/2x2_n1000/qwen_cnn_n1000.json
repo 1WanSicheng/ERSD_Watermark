@@ -1,0 +1,36 @@
+{
+  "experiment": "single_draft",
+  "samples": 1000,
+  "dataset": "cnn_dailymail",
+  "max_new_tokens": 128,
+  "lookaheads": [1, 2, 3, 4],
+  "private_key": "1234",
+  "target_model": "model/Qwen2.5-7B-Instruct",
+  "draft_model": "model/Qwen2.5-0.5B-Instruct",
+  "use_chat_template": true,
+  "process_logits": {"top_k": 50, "top_p": 1.0, "temperature": 1.0},
+  "decoders": ["mc", "basic_uwm", "mc_uwm_speed", "mc_uwm_strength", "mc_uwm_pseudo_r", "pfr", "pfr_no_watermark"],
+  "metrics": {
+    "aatps": true,
+    "token_rate": true,
+    "anlppt": {"variants": ["U", "Li", "PL"], "li_delta": 0.5, "pl_eps": 0.1},
+    "lppl": {"applies_to": ["mc", "basic_uwm", "mc_uwm_speed", "mc_uwm_strength", "mc_uwm_pseudo_r", "pfr", "pfr_no_watermark"]},
+    "kl_ratio": {"applies_to": ["mc", "basic_uwm", "mc_uwm_speed", "mc_uwm_strength", "mc_uwm_pseudo_r", "pfr", "pfr_no_watermark"]},
+    "tpr_at_n": {
+      "tokens": 64,
+      "fpr": 0.01,
+      "variants": ["U", "Li", "PL"],
+      "applies_to": ["mc", "basic_uwm", "mc_uwm_speed", "mc_uwm_strength", "mc_uwm_pseudo_r", "pfr", "pfr_no_watermark"],
+      "detector_per_decoder": {
+        "mc":               {"kind": "DeltaGumbel"},
+        "basic_uwm":        {"kind": "DeltaGumbel"},
+        "mc_uwm_speed":     {"kind": "DeltaGumbel"},
+        "mc_uwm_strength":  {"kind": "DeltaGumbel"},
+        "mc_uwm_pseudo_r":  {"kind": "DeltaGumbelDual", "accept_threshold": 0.9},
+        "pfr":              {"kind": "PFR", "labeler": "context_code"},
+        "pfr_no_watermark": {"kind": "PFR", "labeler": "context_code"}
+      }
+    }
+  },
+  "output": "outputs/2x2/2x2_n1000/qwen_cnn_n1000.json"
+}

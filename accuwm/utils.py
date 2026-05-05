@@ -33,8 +33,31 @@ uwm = _UnbiasedWatermarkProxy()
 
 def step_watermark(*args, **kwargs):
     from unbiased_watermark import step_watermark as _step_watermark
-
+    # improving_KL's mc_watermark passes a 7th positional ;
+    # the upstream signature is 6-positional. Drop the trailing temperature
+    # arg if present (it is unused by the upstream implementation).
+    if len(args) == 7:
+        args = args[:6]
+    kwargs.pop("temperature", None)
     return _step_watermark(*args, **kwargs)
+
+
+
+def get_rng(*bs) -> np.random.Generator:
+    import hashlib
+
+    m = hashlib.sha256()
+    for b in bs:
+        if isinstance(b, str):
+            b = b.encode("utf-8")
+        elif hasattr(b, "item"):
+            b = b.item()
+        if not isinstance(b, (bytes, bytearray, memoryview)):
+            b = bytes(b)
+        m.update(b)
+    full_hash = m.digest()
+    seed = int.from_bytes(full_hash, "big") % (2**32 - 1)
+    return np.random.default_rng(seed)
 
 
 def process_logits(input_ids, logits, logits_processor=None, logits_warper=None):
@@ -342,3 +365,239 @@ def fix_gen_n_token_pass_key_values(ref_output_ids, gt_output_ids, ref_past_key_
     # past_key_values includes all generated draft tokens, so drop the unmatched suffix
     keep_cached_n = cached_n - max(ref_output_ids.shape[1] - match_n, 0)
     return truncate_cache(ref_past_key_values, keep_cached_n)
+
+
+def mc_sample_synthid(
+    logits,
+    ref_logprobs,
+    ref_tokens,
+    input_ids,
+    cc_extractor,
+    mc_private_key,
+    reweight,
+    temperature,
+    psedo_r=False,
+    residual_private_key=None,
+):
+    """
+    logits: torch.tensor of shape (n,vocab_size)
+    ref_logprobs: torch.tensor of shape (n,vocab_size)
+    ref_token: torch.tensor of shape (n)
+    input_ids: torch.tensor of shape (seq_len)
+    cc_extractor: AbstractContextCodeExtractor
+    mc_private_key: bytes
+    residual_private_key: bytes, if provided, use this key for residual watermark sampling
+    reweight: AbstractReweight
+    temperature: float
+    psedo_r: bool, if True, use psedo-random number generator
+    """
+    if logits.shape[-1] != ref_logprobs.shape[-1]:
+        min_vocab = min(logits.shape[-1], ref_logprobs.shape[-1])
+        logits = logits[..., :min_vocab]
+        ref_logprobs = ref_logprobs[..., :min_vocab]
+        if ref_tokens.max() >= min_vocab:
+            ref_tokens = ref_tokens.clamp_max(min_vocab - 1)
+    logprobs = F.log_softmax(logits, dim=-1)
+    # During the accept or reject sampling, we didn't consider the temperature, we only care about the temperature influence on watermark signals.
+    # Here since we didn't consider the temperture, the result probability is not 'truely' unbiased, but this is not important for this research.
+    prob_ratio = torch.exp(
+        torch.clamp(
+            torch.gather(
+                logprobs - ref_logprobs, dim=-1, index=ref_tokens.unsqueeze(-1)
+            ).squeeze(-1),
+            max=0,
+        )
+    )   # prob_ratio: (n)
+    if psedo_r:
+        accepted = torch.zeros_like(prob_ratio)  # shape (n)
+        input_context = input_ids.unsqueeze(0)  # shape (1, seq_len)
+        for i in range(accepted.shape[0]):
+            cc_r = cc_extractor.extract(input_context)  # cc_r is a tuple
+            rng_r = get_rng(cc_r[0], mc_private_key)  # cc_r[0] is bytes
+            r = rng_r.random()
+            accepted[i] = torch.tensor(r) <= prob_ratio[i]
+            if accepted[i]:
+                input_context = torch.cat([input_context, ref_tokens[i].unsqueeze(0).unsqueeze(0)], dim=1)
+            else:
+                break
+        couple_len = int(torch.sum(accepted).item())
+    else:
+        coupled = torch.rand_like(prob_ratio) <= prob_ratio
+        # coupled: (n)
+        coupled = F.pad(coupled, (0, 1), value=False)
+        # coupled: (n+1), couple_len = accepted tokens
+        couple_len = torch.argmin(coupled.int()).item()
+    # couple_len: scalar, 0<=couple_len<=n
+    fully_coupled = couple_len == ref_tokens.shape[0]
+    if fully_coupled:
+        gen_tokens = ref_tokens
+    else:
+        tprobs = torch.clamp(
+            torch.exp(logprobs[couple_len]) - torch.exp(ref_logprobs[couple_len]),
+            min=0.0,
+        )
+        # normalize tprobs, shape (vocab_size)
+        tprobs = tprobs / tprobs.sum(dim=-1, keepdim=True)
+        t_logits = torch.log(tprobs).unsqueeze(0)
+        t_logits_processed = t_logits / temperature  # shape (1, vocab_size)
+        # input_ids: (seq_len)
+        input_ids = torch.cat([input_ids, ref_tokens[:couple_len]]).unsqueeze(0)
+        # input_ids: (1, seq_len)
+        # embed watermark based on tprobs, here we do not consider the context code history
+        cc = cc_extractor.extract(input_ids)
+        rng = np.empty(cc.shape, dtype=object)
+        residual_key = residual_private_key if residual_private_key is not None else mc_private_key
+        for index in np.ndindex(rng.shape):
+            rng[index] = get_rng(cc[index], residual_key)
+        watermark_code_type = reweight.watermark_code_type
+        watermark_code = reweight.watermark_code_type.from_random(rng, tprobs.size(-1))
+        watermark_code = watermark_code.tensor_shape_map(lambda x: x.to(input_ids.device))
+        # diff_logits: (1, vocab_size), the input is probs and the output is logits, need to convert to probs!
+        diff_logits = reweight.reweight_logits(watermark_code, t_logits_processed)
+        diff_probs = torch.exp(diff_logits[0])
+
+        gen_tokens = torch.cat(
+            [
+                ref_tokens[:couple_len],
+                torch.multinomial(
+                    diff_probs, num_samples=1
+                ),
+            ]
+        )
+        logprobs = logprobs[: couple_len + 1]   # shape (couple_len+1, vocab_size) = (gen_seq_len, vocab_size)
+
+    poverlaps = torch.exp(
+        torch.min(logprobs[: gen_tokens.shape[0]], ref_logprobs[: gen_tokens.shape[0]])
+    ).sum(dim=-1)
+    return gen_tokens, logprobs, poverlaps, fully_coupled
+
+
+def mc_sample_synthid_fast(
+    method,
+    logits,
+    ref_logprobs,
+    ref_tokens,
+    input_ids,
+    cc_extractor,
+    mc_private_key,
+    temperature,
+    top_k,
+    seed,
+    psedo_r=False,
+    residual_private_key=None,
+    residual_sampling_table_seed=None,
+    residual_watermarking_depth=30,
+):
+    """
+    method: str, 'mc_mse', 'mc_mws', 'mc_2keys'
+    logits: torch.tensor of shape (n,vocab_size)
+    ref_logprobs: torch.tensor of shape (n,vocab_size)
+    ref_token: torch.tensor of shape (n)
+    input_ids: torch.tensor of shape (seq_len)
+    cc_extractor: AbstractContextCodeExtractor
+    mc_private_key: int
+    temperature: float
+    top_k: int
+    seed: int
+    psedo_r: bool, if True, use psedo-random number generator
+    """
+    logprobs = F.log_softmax(logits, dim=-1)
+    prob_ratio = torch.exp(
+        torch.clamp(
+            torch.gather(
+                logprobs - ref_logprobs, dim=-1, index=ref_tokens.unsqueeze(-1)
+            ).squeeze(-1),
+            max=0,
+        )
+    )   # prob_ratio: (n)
+    prob_ratio_list = []
+    if psedo_r:
+        accepted = torch.zeros_like(prob_ratio)  # shape (n)
+        input_context = input_ids.unsqueeze(0)  # shape (1, seq_len)
+        for i in range(accepted.shape[0]):
+            cc_r = cc_extractor.extract(input_context)  # cc_r: [[],[],..]
+            rng_r = get_rng(cc_r[0], bytes(mc_private_key))
+            r = rng_r.random()
+            accepted[i] = torch.tensor(r) <= prob_ratio[i]
+            if accepted[i]:
+                prob_ratio_list.append(prob_ratio[i].item())
+                input_context = torch.cat([input_context, ref_tokens[i].unsqueeze(0).unsqueeze(0)], dim=1)
+            else:
+                prob_ratio_list.append(prob_ratio[i].item())   # the last prob_ratio is the prob_ratio for the rejected token, we need to save this one and then break.
+                break
+        couple_len = int(torch.sum(accepted).item())
+
+    else:
+        coupled = torch.rand_like(prob_ratio) <= prob_ratio
+        # coupled: (n)
+        coupled = F.pad(coupled, (0, 1), value=False)
+        # coupled: (n+1), couple_len = accepted tokens
+        couple_len = torch.argmin(coupled.int()).item()
+    # couple_len: scalar, 0<=couple_len<=n
+    fully_coupled = couple_len == ref_tokens.shape[0]
+    if fully_coupled:
+        gen_tokens = ref_tokens
+    else:   # tprobs = (P(x_i|x_1,...,x_{i-1}) - Q(x_i|x_1,...,x_{i-1}))+
+        tprobs = torch.clamp(
+            torch.exp(logprobs[couple_len]) - torch.exp(ref_logprobs[couple_len]),
+            min=0.0,
+        )
+        # normalize tprobs, shape (vocab_size)
+        tprobs = tprobs / tprobs.sum(dim=-1, keepdim=True)
+        if method in ['mc_mse', 'mc_mws', 'mc_comb1', 'mc_comb2']:  # directly using tprobs to sample
+            gen_tokens = torch.cat(
+            [
+                ref_tokens[:couple_len],
+                torch.multinomial(
+                    tprobs, num_samples=1
+                ),  # sum of tprobs do not need to be 1
+            ]
+            )
+        elif method == 'mc_2keys':  # conduct watermarking on tprobs to sample
+
+            t_logits = torch.log(tprobs).unsqueeze(0)
+            t_logits_processed = t_logits / temperature
+            top_k_result = torch.topk(t_logits_processed, k=top_k, dim=-1)
+            scores_top_k = top_k_result.values   # shape (1, top_k)
+            top_k_indices = top_k_result.indices  # shape (1, top_k)
+            # input_ids: (seq_len)
+            input_ids = torch.cat([input_ids, ref_tokens[:couple_len]]).unsqueeze(0)
+            # input_ids: (1, seq_len)
+            # embed watermark based on tprobs, here we do not consider the context code history
+            reweight = uwm.synthid.SynthID_Reweight_fast(
+                sampling_table_size=2**16,
+                sampling_table_seed=residual_sampling_table_seed
+                if residual_sampling_table_seed is not None
+                else seed,
+                device=input_ids.device,
+                ngram_len=cc_extractor.n,
+                private_key=residual_private_key
+                if residual_private_key is not None
+                else mc_private_key,
+                watermarking_depth=residual_watermarking_depth,
+            )
+            raw_context = input_ids[..., -cc_extractor.n:]
+            ngram_keys = reweight._compute_keys(raw_context, top_k_indices)
+            g_values_all = reweight.sample_g_values(ngram_keys)  # shape (1, top_k, depth)
+            diff_logits = reweight.reweight_logits(g_values_all, scores_top_k)
+            # diff_logits: (1, top_k)
+            diff_probs = F.softmax(diff_logits, dim=-1)  # shape (1, top_k)
+            gen_token = torch.multinomial(diff_probs, num_samples=1)
+            gen_token = torch.vmap(torch.take, in_dims=0, out_dims=0)(
+                top_k_indices, gen_token
+            )[0]  # shape (1)
+            gen_tokens = torch.cat(
+                [
+                    ref_tokens[:couple_len],
+                    gen_token,
+                ]
+            )
+        else:
+            raise ValueError(f"Invalid method: {method}")
+        
+        logprobs = logprobs[: couple_len + 1]   # shape (couple_len+1, vocab_size) = (gen_seq_len, vocab_size)
+
+    poverlaps = torch.exp(
+        torch.min(logprobs[: gen_tokens.shape[0]], ref_logprobs[: gen_tokens.shape[0]])
+    ).sum(dim=-1)
+    return gen_tokens, logprobs, poverlaps, fully_coupled, prob_ratio_list

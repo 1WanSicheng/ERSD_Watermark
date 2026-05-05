@@ -10,6 +10,7 @@ def gen_n_token_uwm(
     model,
     input_ids: LongTensor,
     n: int,
+    temperature: float = 1.0,
     past_key_values=None,
     process_logits_kwargs={},
 ) -> tuple[
