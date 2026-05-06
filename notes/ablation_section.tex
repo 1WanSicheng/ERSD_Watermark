@@ -7,128 +7,74 @@
 % =========================================================================
 % MAIN TEXT
 % =========================================================================
-\subsection{Ablation Studies}
-\label{sec:ablation}
-
-We test two claims about \textsc{PFR}/\textsc{MPFR}:
-(i)~output quality is preserved, and (ii)~detection and the realised
-output remain stable when the drafter is replaced. Both ablations use
-Qwen2.5-7B-Instruct (target) on \textsc{cnn\_dailymail}; full setup
-and per-decoder tables are in App.~\ref{app:ablation}.
-
-\paragraph{Output quality.}
-Across nine schemes (\textsc{PFR}, \textsc{MPFR}, and seven baselines)
-the spread on log-perplexity under the target and on ROUGE-L against
-the gold summary is within sampling noise
-($\Delta\textsc{lppl}\le 0.04$, $\Delta\textsc{rouge-l}\le 0.01$;
-Table~\ref{tab:exp1_quality}). \textsc{PFR} matches the
-no-watermark speedup baseline (\textsc{mc}) to within $0.001$ on
-\textsc{lppl} while delivering $2.44\times$ AATPS; \textsc{MPFR}
-delivers $3.09\times$.
-
-\begin{table}[t]
+\textbf{Improved watermark detectability.}
+Recent work~\citep{he2026improving} introduces a second pseudo-random key to control
+residual sampling and improve the trade-off under their watermark-strength metric.
+However, detection remains subtle in speculative decoding because the detector does
+not observe whether a token was produced by the draft path or by residual target
+sampling. PFR avoids this ambiguity: every accepted output token is verified through
+the target-side Poisson race, so the detector can score the realized sequence using
+the same target-keyed randomness. Empirically
+(Figure~\ref{fig:drafter_invariance}, left),
+this leads to higher TPR@1\%FPR and close to the autoregressive watermark upper bound,
+while preserving both watermark strength and speculative decoding efficiency.
+%------------------
+\begin{figure}[h]
 \centering
-\caption{\textbf{Output quality.}
-\textsc{lppl}$\downarrow$ under target.
-ROUGE-L$\uparrow$ vs.\ gold \texttt{highlights}.
-AATPS$\uparrow$ accepted target tokens per step.
-\textsc{tok/s} wall-clock throughput on A100.}
-\label{tab:exp1_quality}
-\small
-\setlength{\tabcolsep}{4.5pt}
-\begin{tabular}{lcccc}
-\toprule
-Decoder & \textsc{lppl}$\downarrow$ & ROUGE-L$\uparrow$ & AATPS$\uparrow$ & tok/s \\
-\midrule
-\multicolumn{5}{l}{\emph{Single-draft baselines}}\\
-\textsc{mc} (no wm; speedup-only)              & 0.468 & 0.226 & 2.51 & 38.3 \\
-\textsc{pfr\_no\_wm} (no wm)                   & 0.498 & 0.225 & 2.40 & 36.6 \\
-\textsc{basic\_uwm} (autoregressive)           & 0.487 & 0.227 & 1.00 & 41.1 \\
-\textsc{mse} \citep{hu2024unbiased}            & 0.466 & 0.226 & 2.50 & 35.3 \\
-\textsc{mws} \citep{hu2024unbiased}            & 0.485 & 0.229 & 2.40 & 34.0 \\
-\textsc{Algo 1} \citep{he2026watermarked}      & 0.499 & 0.228 & 2.51 & 34.7 \\
-\textbf{\textsc{PFR} (ours)}                   & \textbf{0.467} & \textbf{0.228} & \textbf{2.44} & \textbf{37.4} \\
-\midrule
-\multicolumn{5}{l}{\emph{Multi-draft ($B=4$)}}\\
-\textsc{invariant\_multi} \citep{rowan2025invariant} & 0.496 & 0.223 & 3.10 & 40.9 \\
-\textbf{\textsc{MPFR} (ours)}                  & \textbf{0.486} & \textbf{0.231} & \textbf{3.09} & \textbf{39.5} \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\paragraph{Drafter substitution.}
-We perturb the drafter along two axes — model scale
-(Qwen2.5-0.5B\,$\to$\,1.5B) and temperature ($T_\mathrm{drafter}\in
-\{0.5,1.0,1.5\}$) — yielding four conditions $D_0$--$D_3$ with the
-target and key held fixed. Fig.~\ref{fig:drafter_invariance} shows TPR
-at FPR $=1\%$ (Aaronson Gamma-tail \citep{aaronson2023watermark}) as a
-function of the detection token budget $T_{\mathrm{eval}}$, per drafter
-condition. For an unbiased verify rule the four drafter curves
-overlap; for a biased verify rule they fan out. \textsc{PFR} (ours)
-and \textsc{mws} maintain drift $\Delta\le 2\,\mathrm{pp}$ across the
-full evaluation range, whereas \textsc{mse} and Algorithm~1
-\citep{he2026watermarked} lose $15$--$23\,\mathrm{pp}$ under the most
-modest perturbation ($D_0\!\to\!D_2$). Because \textsc{PFR}'s verify
-rule depends only on the target's logits and the watermark key,
-detection invariance further implies sequence invariance: the same
-prompt yields near-identical token sequences across drafters
-(per-decoder pairwise ROUGE-L in App.~Table~\ref{tab:exp2_pairwise_rouge}).
-
-\paragraph{Implication.}
-In any deployment that may substitute the drafter — cost-driven
-distillation swaps, multi-tenant serving with heterogeneous draft
-engines, or routine drafter fine-tunes — only an unbiased verify rule
-gives a stable detection guarantee. \textsc{mse} and Algorithm~1
-silently lose $\ge 15\,\mathrm{pp}$ of TPR, an effect invisible to a
-paper-time evaluation that fixes the drafter.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.92\linewidth]{images/drafter_invariance_2x2.png}
-\caption{\textbf{Drafter substitution.} TPR at FPR $=1\%$ (Aaronson
-Gamma-tail) vs.\ detection token budget $T_{\mathrm{eval}}$, per
-drafter condition. For an invariant scheme the four drafter curves
-overlap; for a non-invariant scheme they fan out. Inset: drift
-$\Delta=\max_i\textsc{tpr}(D_i)-\min_i\textsc{tpr}(D_i)$ at
-$T_{\mathrm{eval}}\!\in\!\{64,128\}$. \textsc{PFR} (ours) maintains
-$\Delta\le 2\,\mathrm{pp}$ across the entire range; \textsc{mse} loses
-$17$--$23\,\mathrm{pp}$. Drafter conditions defined in
-App.~\ref{app:ablation}.}
+\includegraphics[width=\linewidth]{images/drafter_invariance_composite.png}
+\caption{\textbf{Drafter substitution.}
+\emph{Left:} watermark detection strength on the default drafter $D_0$ across nine
+schemes; \textsc{pfr}/\textsc{mpfr} (ours) match the autoregressive watermark
+upper bound (\textsc{basic\_uwm}) and the strong-watermark baseline \textsc{mws},
+while \textsc{mse} and \textsc{mse\_pseudo} are weaker.
+\emph{Right (2$\times$2):} TPR@1\%FPR under four drafter conditions
+($D_0$ default; $D_1$ model swap to Qwen2.5-1.5B; $D_2$ at $T_\mathrm{drafter}\!=\!0.5$;
+$D_3$ at $T_\mathrm{drafter}\!=\!1.5$) for four representative schemes;
+invariant schemes produce overlapping curves, drafter-sensitive schemes fan out.
+Inset: $\Delta=\max_i\mathrm{TPR}(D_i)-\min_i\mathrm{TPR}(D_i)$ at
+$T_{\mathrm{eval}}\in\{64,128\}$.}
 \label{fig:drafter_invariance}
 \end{figure}
+
+
+\paragraph{Ablation studies}
+We test whether \textsc{PFR}'s watermark signal is stable to drafter substitution.
+Keeping the target model and watermark key fixed, we vary the drafter by model scale
+(Qwen2.5-0.5B-Instruct $\to$ Qwen2.5-1.5B-Instruct) and sampling temperature
+($T_{\mathrm{drafter}}\in\{0.5,1.0,1.5\}$). Figure~\ref{fig:drafter_invariance}
+(right) shows TPR@1\%FPR across the resulting four drafter conditions.
+\textsc{PFR} maintains a drift $\Delta\le 1$ percentage point at
+$T_{\mathrm{eval}}\in\{64,128\}$, while \textsc{mse} drifts by $12$--$22$ pp
+and \textsc{mse\_pseudo} (algorithm~1~\citep{he2026improving})
+by $6$--$11$ pp across drafter conditions.
+This indicates that PFR's target-side Poisson-race verification is largely insensitive
+to the proposal mechanism. We further verify that output quality remains stable:
+LPPL varies by at most $0.02$ and ROUGE-L by at most $0.005$ across evaluated decoders;
+full tables are deferred to Appendix~\ref{app:ablation}.
 
 % =========================================================================
 % APPENDIX
 % =========================================================================
 % (place inside \appendix part, e.g. after \appendix:)
 
-\section{Ablation Details}
+\subsection{Ablation Details}
 \label{app:ablation}
-
-\paragraph{Setup.}
-Both ablations use Qwen2.5-7B-Instruct as the target on
-\textsc{cnn\_dailymail} with $\textrm{top-}k=50$, $T_\mathrm{target}=1$,
-$\texttt{max\_new\_tokens}=128$, lookahead $K=4$, $n=1000$ prompts,
-single seed; runs on a single A100. The watermark key is fixed across
-all decoders that use one. The default drafter is Qwen2.5-0.5B-Instruct.
-
-\paragraph{Drafter conditions (Exp~2).}
+\paragraph{Drafter conditions.}
 $D_0$: Qwen2.5-0.5B-Instruct at $T=1.0$ (default).
 $D_1$: Qwen2.5-1.5B-Instruct at $T=1.0$ ($3\!\times$ scale, model swap).
 $D_2$: Qwen2.5-0.5B-Instruct at $T=0.5$ (sharper drafter).
 $D_3$: Qwen2.5-0.5B-Instruct at $T=1.5$ (more diffuse drafter).
 Target temperature, watermark key, and all other parameters are held
 fixed across $D_0$--$D_3$.
-
 \paragraph{Detection statistic.}
-For Aaronson Gamma-tail \citep{aaronson2023watermark}, per-token score
+For Aaronson Gamma-tail , per-token score
 $s_t = -\log(1 - U_t)$ where $U_t$ is the per-token uniform recovered
 from the watermark code. Under the no-watermark null, the cumulative
 score $S_T = \sum_{t \le T} s_t$ is $\mathrm{Gamma}(T, 1)$; we declare
 detection at FPR $=\alpha$ when $\Pr_{H_0}[\mathrm{Gamma}(T,1)\!>\!S_T]
-\le \alpha$, computed via the regularised upper incomplete gamma.
+\le \alpha$, computed via the regularised upper incomplete gamma. In this paper, we report as $\alpha =1\%$
 
-\paragraph{Pairwise ROUGE-L (Exp~2).}
+\paragraph{Pairwise ROUGE-L.}
 For each prompt $p$ and decoder $d$ we have one realised output token
 sequence per drafter condition. We compute ROUGE-L F1 over each pair
 $(D_i, D_j)$ of drafter conditions on these token sequences, then
@@ -138,36 +84,49 @@ verify rule that depends only on target logits and key produces
 identical sequences across all drafters, so this quantity should
 approach $1$.
 
-\begin{table}[t]
+\begin{table}[h]
 \centering
-\caption{\textbf{Detection stability under drafter substitution
-(Exp~2).} TPR (\%) at FPR $=1\%$, Aaronson Gamma-tail,
-$T_{\mathrm{eval}}=64$. Spread $\Delta = \max_i\textsc{tpr}(D_i) -
-\min_i\textsc{tpr}(D_i)$.}
-\label{tab:exp2_invariance}
+\caption{\textbf{Output quality.}
+\textsc{lppl}$\downarrow$ under target.
+ROUGE-L$\uparrow$ vs.\ gold \texttt{highlights}.
+AATPS$\uparrow$ accepted target tokens per step.}
+\label{tab:exp1_quality}
 \small
-\setlength{\tabcolsep}{6pt}
-\begin{tabular}{lcccc c}
+\setlength{\tabcolsep}{4pt}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{l ccccccc | cc}
 \toprule
-Decoder & $D_0$ & $D_1$ & $D_2$ & $D_3$ & $\Delta\,(\mathrm{pp})$ \\
+ & \multicolumn{7}{c|}{\emph{Single-draft baselines}}
+ & \multicolumn{2}{c}{\emph{Multi-draft ($B=4$)}} \\
+\cmidrule(lr){2-8} \cmidrule(lr){9-10}
+Metric
+ & \textsc{vsps}
+ & \textsc{pfr\_no\_wm}
+ & \textsc{basic\_uwm}
+ & \textsc{mse}
+ & \textsc{mws}
+ & \textsc{mse\_pseudo}
+ & \textbf{\textsc{pfr}}
+ & \textsc{invariant\_multi}
+ & \textbf{\textsc{mpfr}} \\
 \midrule
-\textsc{basic\_uwm} (no drafter)               & 49 & 49 & 49 & 49 & \phantom{0}0 \\
-\textbf{\textsc{PFR}} (ours)                   & \textbf{53} & \textbf{53} & \textbf{53} & \textbf{53} & \textbf{\phantom{0}0} \\
-\textsc{mws} \citep{hu2024unbiased}            & 49 & 47 & 48 & 48 & \phantom{0}2 \\
-\midrule
-\textsc{Algo 1} \citep{he2026watermarked}      & 39 & 32 & 24 & 28 & 15 \\
-\textsc{mse} \citep{hu2024unbiased}            & 21 & 19 & \phantom{0}4 & 16 & 17 \\
-\midrule
-\multicolumn{6}{l}{\emph{Unwatermarked controls (empirical FPR sanity)}}\\
-\textsc{mc} (no wm)                            & \phantom{0}2 & \phantom{0}1 & \phantom{0}2 & \phantom{0}1 & \phantom{0}1 \\
-\textsc{pfr\_no\_wm} (no wm)                   & \phantom{0}0 & \phantom{0}1 & \phantom{0}0 & \phantom{0}1 & \phantom{0}1 \\
+\textsc{lppl}$\downarrow$
+ & 0.474 & 0.469 & 0.472 & 0.470 & 0.475 & 0.477 & \textbf{0.465}
+ & 0.484 & \textbf{0.474} \\
+ROUGE-L$\uparrow$
+ & 0.219 & 0.222 & 0.223 & 0.221 & 0.223 & 0.219 & \textbf{0.223}
+ & 0.222 & \textbf{0.222} \\
+AATPS$\uparrow$
+ & 2.51  & 2.46  & 1.00  & 2.53  & 2.43  & 2.52  & \textbf{2.46}
+ & 3.12  & \textbf{3.13} \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \end{table}
 
-\begin{table}[t]
+\begin{table}[h]
 \centering
-\caption{\textbf{Output stability under drafter substitution (Exp~2).}
+\caption{\textbf{Output stability under drafter substitution.}
 Pairwise ROUGE-L F1 between the realised token sequences across each
 $(D_i,D_j)$ pair, per-prompt minimum averaged over prompts. An
 unbiased verify rule produces identical sequences across all
@@ -180,13 +139,13 @@ drafters, so ROUGE-L $\to 1$.}
 Decoder & min-pair mean ROUGE-L \\
 \midrule
 \textsc{basic\_uwm} (no drafter, vacuous bound) & 1.000 \\
-\textbf{\textsc{PFR}} (ours)                    & \textbf{0.987} \\
-\textsc{mws} \citep{hu2024unbiased}             & 0.920 \\
+\textbf{\textsc{pfr}} (ours)                    & \textbf{0.990} \\
+\textsc{mws}                                    & 0.922 \\
 \midrule
-\textsc{pfr\_no\_wm} (no wm)                    & 0.434 \\
-\textsc{mse} \citep{hu2024unbiased}             & 0.413 \\
-\textsc{Algo 1} \citep{he2026watermarked}       & 0.410 \\
-\textsc{mc} (no wm)                             & 0.399 \\
+\textsc{pfr\_no\_wm} (no wm)                    & 0.436 \\
+\textsc{mse\_pseudo}                            & 0.426 \\
+\textsc{mse}                                    & 0.406 \\
+\textsc{vsps} (no wm)                           & 0.394 \\
 \bottomrule
 \end{tabular}
 \end{table}
