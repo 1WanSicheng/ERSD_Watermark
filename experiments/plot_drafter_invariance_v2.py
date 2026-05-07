@@ -39,23 +39,23 @@ plt.rcParams.update({
     "savefig.pad_inches":  0.02,
     "font.family":         "sans-serif",
     "font.sans-serif":     ["DejaVu Sans", "Helvetica", "Arial"],
-    "font.size":           9,
-    "axes.titlesize":      9.5,
-    "axes.labelsize":      9,
-    "axes.linewidth":      0.8,
+    "font.size":           8,
+    "axes.titlesize":      8,
+    "axes.labelsize":      8,
+    "axes.linewidth":      0.7,
     "axes.spines.top":     False,
     "axes.spines.right":   False,
-    "xtick.labelsize":     8,
-    "ytick.labelsize":     8,
+    "xtick.labelsize":     7,
+    "ytick.labelsize":     7,
     "xtick.direction":     "out",
     "ytick.direction":     "out",
-    "xtick.major.size":    3,
-    "ytick.major.size":    3,
-    "legend.fontsize":     7.8,
+    "xtick.major.size":    2.5,
+    "ytick.major.size":    2.5,
+    "legend.fontsize":     6.5,
     "legend.frameon":      False,
-    "lines.linewidth":     1.5,
-    "lines.markersize":    3.5,
-    "grid.linewidth":      0.5,
+    "lines.linewidth":     1.4,
+    "lines.markersize":    3.0,
+    "grid.linewidth":      0.4,
     "grid.linestyle":      ":",
     "grid.alpha":          0.5,
     "pdf.fonttype":        42,
@@ -85,17 +85,17 @@ TOP_ORDER = [
 # Right (bottom) panel: 4 drafter conditions
 # ---------------------------------------------------------------------------
 DRAFTERS = [
-    ("D0",  "default",            "#0072B2", "o", "-"),
-    ("D1",  "model swap (1.5B)",  "#D55E00", "s", "--"),
-    ("D2",  "T = 0.5 (sharp)",    "#009E73", "^", "-."),
-    ("D3",  "T = 1.5 (diffuse)",  "#E69F00", "D", ":"),
+    ("D0",  "default",       "#0072B2", "o", "-"),
+    ("D1",  "model swap",    "#D55E00", "s", "--"),
+    ("D2",  "$T\\!=\\!0.5$", "#009E73", "^", "-."),
+    ("D3",  "$T\\!=\\!1.5$", "#E69F00", "D", ":"),
 ]
 
 DECODER_PANELS = [
-    ("PFR (ours)",  "PFR  (ours)",            True),
-    ("MWS",         "MWS  (Hu & Huang)",      False),
-    ("MSE",         "MSE  (Hu & Huang)",      False),
-    ("mse_pseudo",  "mse_pseudo  (He et al.)", False),
+    ("PFR (ours)",  "PFR",        True),
+    ("MWS",         "MWS",        False),
+    ("MSE",         "MSE",        False),
+    ("mse_pseudo",  "MSE-Pseudo", False),
 ]
 
 
@@ -129,21 +129,31 @@ def main():
     drafters = right["drafters"]
     T_right  = right["T_grid"]
 
-    # Layout: (a) on the LEFT (full height), (b) 2x2 panels on the RIGHT
-    fig = plt.figure(figsize=(8.6, 3.9))
-    gs = GridSpec(
-        2, 3, figure=fig,
-        width_ratios=[1.55, 1.0, 1.0],
-        height_ratios=[1.0, 1.0],
-        hspace=0.32, wspace=0.18,
-        left=0.06, right=0.985, top=0.97, bottom=0.18,
+    # Layout (per Figure 2 revision guide):
+    # - figsize 7.2 x 3.2 (NeurIPS double-column main-text figure).
+    # - Left:right region width ratio 1.25:1.0 (left ~55%, right ~45%);
+    #   right region is a 2x2, so widths sum to [2.5, 1.0, 1.0].
+    # - Bottom margin reserved for shared right-side legend (D0..D3).
+    # - Top margin reserved for two panel titles "(a)" / "(b)".
+    fig = plt.figure(figsize=(7.4, 3.2))
+    # Outer split: left (a) | right (b) — explicit wider gap so right-side
+    # y-tick labels do not crowd the (a) panel.
+    gs_outer = GridSpec(
+        1, 2, figure=fig,
+        width_ratios=[1.25, 1.0],
+        wspace=0.32,
+        left=0.075, right=0.985, top=0.88, bottom=0.20,
     )
-    ax_top = fig.add_subplot(gs[:, 0])
+    ax_top = fig.add_subplot(gs_outer[0, 0])
+    # Inner 2x2 grid for (b)
+    gs_right = gs_outer[0, 1].subgridspec(
+        2, 2, hspace=0.30, wspace=0.20,
+    )
     axes_bot = [
-        fig.add_subplot(gs[0, 1]),  # PFR
-        fig.add_subplot(gs[0, 2]),  # MWS
-        fig.add_subplot(gs[1, 1]),  # MSE
-        fig.add_subplot(gs[1, 2]),  # mse_pseudo
+        fig.add_subplot(gs_right[0, 0]),  # PFR
+        fig.add_subplot(gs_right[0, 1]),  # MWS
+        fig.add_subplot(gs_right[1, 0]),  # MSE
+        fig.add_subplot(gs_right[1, 1]),  # MSE-Pseudo
     ]
 
     # ---- LEFT panel: TPR comparison ----
@@ -162,8 +172,9 @@ def main():
         )
         pretty = (name.replace("MC-UWM (speed)", "MSE")
                       .replace("MC-UWM (strength)", "MWS")
-                      .replace("MC-UWM (pseudo-r)", "mse_pseudo")
-                      .replace("No watermark (H_0)", "no watermark $H_0$"))
+                      .replace("MC-UWM (pseudo-r)", "MSE-Pseudo")
+                      .replace("Basic UWM", "Basic-UWM")
+                      .replace("No watermark (H_0)", "No watermark ($H_0$)"))
         legend_top.append(Line2D([0],[0],
             color=st["color"], linestyle=st["ls"], linewidth=st["lw"],
             marker=st["marker"], markersize=4.5,
@@ -181,8 +192,9 @@ def main():
     ax_top.legend(
         handles=legend_top,
         loc="upper left", ncol=2,
-        handlelength=2.2, handletextpad=0.5, columnspacing=1.0,
-        labelspacing=0.30, borderpad=0.4,
+        handlelength=1.8, handletextpad=0.4, columnspacing=0.8,
+        labelspacing=0.22, borderpad=0.3,
+        fontsize=6.5,
     )
 
     # ---- RIGHT panels: per-decoder drafter curves ----
@@ -202,30 +214,19 @@ def main():
             if ax is axes_bot[0]:
                 legend_bot.append(Line2D([0],[0],
                     color=color, linestyle=ls, marker=marker,
-                    linewidth=1.4, markersize=4,
+                    linewidth=1.3, markersize=3.5,
                     markerfacecolor=color, markeredgecolor="white",
                     markeredgewidth=0.4,
-                    label=f"$\\mathrm{{{k}}}$  {label}",
+                    label=f"{k} {label}",
                 ))
-        s64  = spread_across_drafters(drafters, dec_key, T_right, 64)
-        s128 = spread_across_drafters(drafters, dec_key, T_right, 128)
-        ax.text(
-            0.97, 0.05,
-            f"$\\Delta_{{T=64}}\\!=\\!{s64*100:.0f}$ pp\n"
-            f"$\\Delta_{{T=128}}\\!=\\!{s128*100:.0f}$ pp",
-            transform=ax.transAxes, ha="right", va="bottom",
-            fontsize=7.0,
-            bbox=dict(boxstyle="round,pad=0.22", facecolor="white",
-                      edgecolor="0.7", linewidth=0.4, alpha=0.92),
-        )
         ax.set_title(title, fontweight="bold" if is_ours else "normal",
-                     pad=3, color="#0a3d62" if is_ours else "black",
-                     fontsize=9)
+                     pad=2, color="#0a3d62" if is_ours else "black",
+                     fontsize=8)
         ax.grid(True)
-        ax.set_ylim(-0.05, 1.05)
+        ax.set_ylim(-0.03, 1.03)
         ax.set_xlim(8, 136)
         ax.set_xticks([16, 64, 128])
-        ax.set_yticks([0, 0.5, 1.0])
+        ax.set_yticks([0, 0.25, 0.5, 0.75, 1.0])
 
     # 2x2 layout: only left-column shows ylabel, only bottom-row shows xlabel.
     axes_bot[0].set_ylabel("TPR @ FPR = 1%")
@@ -240,9 +241,22 @@ def main():
     fig.legend(
         handles=legend_bot,
         loc="lower center", ncol=4,
-        bbox_to_anchor=(0.475, 0.0, 0.510, 0.05),
-        handlelength=2.4, handletextpad=0.5, columnspacing=1.2,
-        frameon=False, fontsize=7.8,
+        bbox_to_anchor=(0.645, 0.005, 0.340, 0.05),
+        handlelength=2.0, handletextpad=0.4, columnspacing=1.0,
+        frameon=False, fontsize=6.5,
+    )
+
+    # Panel (a) / (b) titles, placed via figure-level text so (b) can span
+    # the right 2x2 sub-grid (above the PFR / MWS panels).
+    fig.text(
+        0.075, 0.92,
+        "(a) Detection on the default drafter",
+        ha="left", va="bottom", fontsize=9, fontweight="bold",
+    )
+    fig.text(
+        0.645, 0.92,
+        "(b) Robustness to drafter substitution",
+        ha="left", va="bottom", fontsize=9, fontweight="bold",
     )
 
     out_png = OUT_DIR / "drafter_invariance_composite.png"
