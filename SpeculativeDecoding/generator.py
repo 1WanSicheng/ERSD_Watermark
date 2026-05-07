@@ -251,7 +251,9 @@ class SpeculativeGenerator:
             num_invocations += 1
             num_accept += verify_outputs.accept_count
 
-            if eos_token_id in input_ids[0, -self.max_draft_len:]:
+            new_token_count = input_ids.size(-1) - input_len
+            window = min(new_token_count, self.max_draft_len)
+            if window > 0 and eos_token_id in input_ids[0, -window:]:
                 break
         t_1 = perf_counter()
 
@@ -339,7 +341,9 @@ class InvariantGenerator:
             num_invocations += 1
             num_accept += verify_outputs.accept_count
 
-            if eos_token_id in input_ids[0, -self.max_draft_len:]:
+            new_token_count = input_ids.size(-1) - input_len
+            window = min(new_token_count, self.max_draft_len)
+            if window > 0 and eos_token_id in input_ids[0, -window:]:
                 break
         t_1 = perf_counter()
 
