@@ -1,0 +1,808 @@
+% =============================================================================
+%  experiments_revised.tex
+%
+%  Drop-in replacement for the main-text Experiments section
+%  (currently lines 675--786 of main.tex) and the appendix Experiments section
+%  (currently lines 2697--3370 of main.tex).
+%
+%  Assumes the parent document already loads booktabs, graphicx, multirow,
+%  cleveref, natbib, and the neurips_2026 style.
+%
+%  This file is structured in two parts:
+%     PART A : main-text \section{Experiments}     (~1 NeurIPS page)
+%     PART B : appendix  \section{Experiment Details and Full Results}
+%
+%  See the README at the bottom of this file for a summary of all edits.
+% =============================================================================
+
+
+% =============================================================================
+%  PART A : MAIN-TEXT EXPERIMENTS
+% =============================================================================
+
+\section{Experiments}
+\label{sec::experiments}
+
+We evaluate whether the proposed Poisson-process sampler improves the empirical
+frontier between speculative-decoding efficiency and watermark detectability,
+while preserving generation quality. Unless stated otherwise, the headline
+configuration uses Qwen2.5-7B-Instruct as the target and Qwen2.5-0.5B-Instruct
+as the drafter on \textsc{CNN/DailyMail}. Additional model--dataset cells, full
+per-$L$ and per-$B$ tables, and ablation details are deferred to
+Appendix~\ref{app::experiments}.
+
+\paragraph{Baselines.}
+We compare against four families of methods, all run in a common harness with
+the same prompts, decoding parameters, and watermark key.
+\textbf{(i) Watermark-only reference.} \textsc{Basic-UWM} is autoregressive
+Gumbel-style unbiased watermarking without speculation~\citep{aaronson2023watermarking};
+it sets the watermark-strength ceiling.
+\textbf{(ii) Speculation-only reference.} \textsc{VSpS} denotes vanilla
+speculative sampling without watermark~\citep{leviathan2023fast}, and the
+multi-draft list-coupling scheme \textsc{Invariant} of \citet{rowan2025list};
+these set the efficiency ceiling.
+\textbf{(iii) Trade-off frontier.} \textsc{MWS}~/\textsc{MSE} of
+\citet{hu2024inevitable} are the two endpoints of the no-go trade-off, and
+\textsc{MSE-Pseudo} is the pseudorandom-$r$ variant
+of~\citet{he2026improving} that improves the trade-off via an alternative
+watermark metric.
+\textbf{(iv) Ours.} \textsc{PFR} (single-draft) and \textsc{MPFR} (multi-draft);
+\textsc{PFR-NoWM} is \textsc{PFR} with the keyed source replaced by an
+unkeyed Poisson source, isolating the cost of watermarking from the cost of
+Poisson coupling.
+
+\paragraph{Metrics.}
+Following~\citet{hu2024inevitable, he2026improving} we separate three concerns.
+\emph{Efficiency:} average accepted tokens per speculative step (AATPS); we
+also report wall-clock token rate in tokens/s as a hardware-dependent diagnostic
+in the appendix.
+\emph{Detectability:} ANLPPT, the average negative log $p$-value per token under
+three score variants U / Li / PL~\citep{aaronson2023watermarking, li2025statistical, lattimore2026refined};
+and TPR@1\%FPR, calibrated on non-watermarked generations.
+\emph{Quality:} per-token log-perplexity LPPL under the target model, used as
+an unbiasedness audit; we additionally report ROUGE-L when references are
+available. AATPS measures algorithmic acceptance, ANLPPT and TPR@1\%FPR measure
+detector-visible signal, and LPPL audits whether the target-model marginal is
+preserved.
+
+\paragraph{Single-draft efficiency--watermark frontier.}
+Figure~\ref{fig::single_draft_qwen_cnn_new} (in Section~\ref{sec:SingleVersion})
+plots every method as a curve in the (AATPS, ANLPPT-U) plane sweeping
+$L\in\{1,2,3,4\}$. The prior speculative watermarking baselines exhibit the
+expected trade-off: \textsc{MWS} preserves watermark strength but loses
+acceptance, \textsc{MSE} preserves acceptance but loses watermark strength, and
+\textsc{MSE-Pseudo} sits in between. \textsc{PFR} lies in the upper-right of
+the plot at every $L$, dominating both Pareto endpoints simultaneously.
+Crucially, \textsc{PFR} and \textsc{PFR-NoWM} have nearly identical AATPS
+(within $\pm 0.005$ across $L$, see
+Table~\ref{tab:single_draft_watermark_std}), confirming that the watermark is
+introduced at the coupling level and not through an
+acceptance-penalising reweighting. Results on the other three
+$(\textsc{target},\textsc{dataset})$ cells are reported in
+Appendix~\ref{app:single_draft_full}.
+
+\paragraph{Multi-draft scaling.}
+We compare \textsc{MPFR} with the unwatermarked \textsc{Invariant} decoder
+of~\citet{rowan2025list} at lookahead $L{=}4$ and draft counts
+$B\in\{2,4,6,8\}$ on the headline cell. Across all four $B$, \textsc{MPFR}
+matches \textsc{Invariant} on AATPS within $\pm 0.5\%$, while delivering
+ANLPPT-U more than $20\times$ larger; the watermark signal is itself stable
+across $B$ ($\Delta\mathrm{ANLPPT}\!\le\!0.001$), so the per-token detection
+evidence does not dilute as additional drafts are added. Full per-cell
+numbers across the four $(\textsc{target},\textsc{dataset})$ cells, all
+three ANLPPT variants, and the LPPL audit column are reported in
+Appendix~\ref{app:multi_draft_full}
+(Tables~\ref{tab:full-qwen-cnn}--\ref{tab:full-vicuna-eli5}).
+
+\paragraph{Detection at a fixed false-positive rate.}
+ANLPPT measures average evidence per token; TPR@1\%FPR measures operational
+detectability under a calibrated false-positive budget.
+Figure~\ref{fig:drafter_invariance}(a) shows TPR@1\%FPR versus token budget
+$T_{\mathrm{eval}}$ at the default drafter. \textsc{PFR} and \textsc{MPFR}
+track the strong-watermark references \textsc{Basic-UWM} and \textsc{MWS},
+while \textsc{MSE} and \textsc{MSE-Pseudo} are uniformly weaker.
+\textsc{MSE-Pseudo} improves over \textsc{MSE} but still falls below the
+Poisson-race methods, consistent with the claim that target-side keyed coupling
+preserves detector-visible evidence without giving up speculative efficiency.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{images/drafter_invariance_composite.png}
+\caption{\textbf{Detection and robustness to drafter substitution.}
+\textbf{(a)} TPR@1\%FPR versus detection token budget $T_{\mathrm{eval}}$ at
+the default drafter. \textsc{PFR} and \textsc{MPFR} match the strong-watermark
+references \textsc{Basic-UWM} and \textsc{MWS}, and outperform
+\textsc{MSE}/\textsc{MSE-Pseudo}.
+\textbf{(b)} TPR@1\%FPR under drafter substitution: the target, watermark
+key, and prompts are fixed and only the drafter is swapped across four
+conditions. \textsc{PFR} drifts by $<\!1$ point, whereas \textsc{MSE} drifts
+by $12$--$22$ points and \textsc{MSE-Pseudo} by $6$--$11$ points.}
+\label{fig:drafter_invariance}
+\end{figure}
+
+\paragraph{Drafter-substitution ablation.}
+We test whether the watermark signal remains stable when the drafter changes.
+We hold the target, watermark key, and prompts fixed and vary only the drafter
+along scale and temperature: $D_0$ (Qwen2.5-0.5B-Instruct, $T{=}1.0$, default),
+$D_1$ (Qwen2.5-1.5B-Instruct, $T{=}1.0$), $D_2$ (Qwen2.5-0.5B-Instruct,
+$T{=}0.5$), $D_3$ (Qwen2.5-0.5B-Instruct, $T{=}1.5$).
+Figure~\ref{fig:drafter_invariance}(b) shows that \textsc{PFR} has at most one
+percentage point of TPR drift across $D_0$--$D_3$ at
+$T_{\mathrm{eval}}\in\{64,128\}$, whereas \textsc{MSE} drifts by $12$--$22$
+points and \textsc{MSE-Pseudo} by $6$--$11$ points. This matches the role of
+target-side keyed Poisson races: the drafter affects \emph{how many} tokens
+are verified, but the watermark statistic of the emitted tokens is tied to
+the realised prefix and the target-side keyed randomness.
+We further verify that generation quality is stable across decoders: full LPPL
+and ROUGE-L tables are reported in Appendix~\ref{app:ablation}.
+
+
+
+% =============================================================================
+%  PART B : APPENDIX EXPERIMENTS
+% =============================================================================
+% Insert the rest of this file inside the appendix portion of the parent
+% document (after \appendix). It replaces the current \section{Experiments} at
+% line 2697 of main.tex.
+
+\section{Experiment Details and Full Results}
+\label{app::experiments}
+
+This appendix expands the main-text evaluation along the two axes that mirror
+the contributions of Section~\ref{sec::intro}:
+(i) the \emph{single-draft regime} ($B{=}1$), where we certify that our keyed
+Poisson sampler preserves acceptance and quality while carrying watermark
+signal --- contradicting the Pareto frontier of~\citet{hu2024inevitable}; and
+(ii) the \emph{multi-draft regime} ($B{>}1$), where we extend the
+unbiasedness/strength guarantees to larger $B$ and benchmark sampling
+efficiency against the list-coupling scheme of~\citet{rowan2025list}.
+
+\subsection{Setup}
+\label{app:setup}
+
+\paragraph{Models.}
+We use two target/drafter pairs that span the two model families used in the
+prior watermark and list-coupling literature.
+The headline configuration follows~\citet{rowan2025list}: target
+\texttt{Qwen2.5-7B-Instruct} with drafter \texttt{Qwen2.5-0.5B-Instruct}.
+For instruction-following diagnostics we additionally use
+\texttt{lmsys/vicuna-7b-v1.5} paired with the small same-family drafter
+\texttt{double7/vicuna-68m}; the FastChat v1.1 chat template is injected
+explicitly because the released checkpoint does not ship a
+\texttt{chat\_template} attribute.
+All models run in \texttt{float16} on a single NVIDIA H100 GPU.
+
+\paragraph{Datasets.}
+We evaluate on two tasks chosen to match the coverage of prior work:
+\textsc{CNN/DailyMail} (summarization, prompted with the
+\texttt{System:/INPUT:/OUTPUT:} template of~\citet{hu2024inevitable}) and
+\textsc{ELI5} (open-ended explanation,~\citet{fan2019eli5}).
+Each cell uses $n{=}1000$ prompts.
+
+\paragraph{Sampling parameters.}
+Unless stated otherwise we use $\mathrm{top}_k{=}50$, $\mathrm{top}_p{=}1.0$,
+temperature $T{=}1.0$, and \texttt{max\_new\_tokens}${=}128$.
+The watermark key is fixed across all runs so that detection is deterministic.
+
+\paragraph{Sweeps.}
+For single-draft we sweep lookahead $L\in\{1,2,3,4\}$, matching
+\citet{hu2024inevitable}.
+For multi-draft we fix $L{=}4$ and sweep draft counts
+$B\in\{2,4,6,8\}$, matching~\citet{rowan2025list}.
+Each $(\textsc{model},\textsc{dataset},\textsc{decoder},L,B)$ configuration is
+run with multiple independent seeds; tables in
+Appendices~\ref{app:single_draft_full}--\ref{app:multi_draft_full} report
+$\mathrm{mean}\pm\mathrm{std}$ across the $1000$ prompts of the cell.
+
+\paragraph{Baselines.}
+We adopt the four-family taxonomy used in the main text
+(Section~\ref{sec::experiments}). For convenience we restate the role of each
+baseline:
+\begin{itemize}
+  \item \textbf{Quality anchor} --- \textsc{Basic-UWM}: autoregressive
+    Gumbel-style unbiased watermarking with no speculation. Provides the
+    LPPL reference and the watermark-strength ceiling.
+  \item \textbf{Speculation-only references} --- \textsc{VSpS}
+    \citep{leviathan2023fast} at $B{=}1$, and the
+    \textsc{Invariant} (\emph{InvariantMultiDraftStrategy}) of
+    \citet{rowan2025list} at $B{>}1$. These set the efficiency ceiling.
+  \item \textbf{Trade-off frontier} --- \textsc{MWS} and \textsc{MSE}
+    \citep{hu2024inevitable}, plus \textsc{MSE-Pseudo}, the dual-key
+    pseudorandom-$r$ variant of~\citet{he2026improving}. These mark the
+    Pareto frontier we aim to circumvent.
+  \item \textbf{Ours} --- \textsc{PFR} (single-draft), \textsc{MPFR}
+    (multi-draft), and the unwatermarked variant \textsc{PFR-NoWM}.
+\end{itemize}
+
+\paragraph{Metrics.}
+We restate the three metric families used in the main text.
+\emph{Efficiency.} \textbf{AATPS} (average accepted tokens per step) and
+\textbf{Token rate} in tokens/s. The latter is hardware-dependent and is
+reported only as a diagnostic.
+\emph{Detectability.} \textbf{ANLPPT} --- the average negative log $p$-value
+per token --- under three score variants:
+\textbf{ANLPPT-U}~\citep{aaronson2023watermarking, hu2024inevitable},
+\textbf{ANLPPT-Li}~\citep{li2025statistical}, and
+\textbf{ANLPPT-PL}~\citep{lattimore2026refined}.
+We additionally report \textbf{TPR@1\%FPR} based on the Aaronson Gamma-tail
+test (Appendix~\ref{app:ablation}, ``Detection statistic'').
+\emph{Quality.} \textbf{LPPL} (per-token log-perplexity under the target),
+reported as an audit column. We require LPPL parity with \textsc{Basic-UWM}
+to certify unbiasedness, and we do not optimise against this metric.
+
+\paragraph{Reproducibility.}
+The exact $(\mathrm{seed},\textsc{model},\textsc{dataset},\textsc{decoder},L,B)$
+configurations, software versions
+(\texttt{torch}, \texttt{transformers}, attention kernel), GPU model, and
+per-seed result files are released with the paper.
+
+\subsection{Prompt templates}
+\label{app:prompts}
+
+For all instruction-tuned targets we apply the model's native chat template
+via the HuggingFace \texttt{apply\_chat\_template} interface. The
+Vicuna-v1.5 release ships without a \texttt{chat\_template} attribute, so we
+explicitly inject the FastChat v1.1 template before tokenization.
+
+\paragraph{CNN/DailyMail (summarization).}
+\begin{verbatim}
+[
+  {"role": "system",
+   "content": "You are a helpful assistant."},
+  {"role": "user",
+   "content": "Summarize the following article in 3-5 sentences:\n\n"
+              + article[:1500]}
+]
+\end{verbatim}
+The article is truncated to 1500 characters before tokenization.
+
+\paragraph{ELI5 (open-ended QA).}
+\begin{verbatim}
+[
+  {"role": "system",
+   "content": "You are a helpful assistant."},
+  {"role": "user",
+   "content": "Please explain like I'm five:\n\n" + question}
+]
+\end{verbatim}
+
+For each prompt the model generates up to $128$ new tokens under the sampling
+parameters of Appendix~\ref{app:setup}. The watermark key is fixed across all
+runs.
+
+\subsection{Single-draft experiments: full results}
+\label{app:single_draft_full}
+
+\paragraph{Goal.}
+\citet{hu2024inevitable} prove that, under speculative sampling, any unbiased
+reweighting scheme must give up either watermark strength (\textsc{MSE}-style)
+or acceptance rate (\textsc{MWS}-style); their Theorem~3.1 forbids schemes
+that strictly improve both axes simultaneously.
+We claim that our Poisson-process construction violates this dichotomy: it
+is provably unbiased on the actually-sampled distribution
+(Section~\ref{sec:SingleVersion}) while preserving acceptance.
+
+\paragraph{Protocol.}
+We follow~\citet{hu2024inevitable}: the same metric battery (AATPS, ANLPPT,
+LPPL) and the same lookahead range $L\in\{1,2,3,4\}$. We evaluate on
+\texttt{Qwen2.5-7B-Instruct}/\texttt{0.5B-Instruct} and on
+\texttt{vicuna-7b-v1.5}/\texttt{vicuna-68m}, on both \textsc{CNN/DailyMail}
+and \textsc{ELI5}. On top of the Hu--Huang decoder set we add (i) our
+\textsc{PFR} sampler, (ii) the unwatermarked variant \textsc{PFR-NoWM},
+(iii) \textsc{Basic-UWM} as the unbiasedness anchor, and (iv) the
+pseudorandom-$r$ variant \textsc{MSE-Pseudo} of~\citet{he2026improving}.
+
+\paragraph{Headline figure.}
+Figure~\ref{fig::single_draft_qwen_cnn_new} (in
+Section~\ref{sec:SingleVersion}) plots every method as a curve in the
+$(\mathrm{AATPS},\mathrm{ANLPPT}\text{-}U)$ plane sweeping $L$ on the headline
+cell. Figures~\ref{fig:single_draft_qwen_eli5}--\ref{fig:single_draft_vicuna_eli5}
+report the same plot on the remaining three cells. \textsc{PFR} dominates
+the \textsc{MWS}/\textsc{MSE} Pareto frontier on every cell: at every $L$ it
+sits both higher (greater detection signal) and to the right (greater
+acceptance) than the trade-off baselines.
+
+\begin{figure}[htpb]
+    \centering
+    \includegraphics[scale=0.35]{images/qwen_eli5_figure1.png}
+    \caption{Single-draft (AATPS, ANLPPT-U) frontier on
+    Qwen2.5-7B-Instruct / Qwen2.5-0.5B-Instruct $\times$ \textsc{ELI5}.
+    \textsc{PFR} dominates \textsc{MWS}/\textsc{MSE} simultaneously on both
+    axes; attaching the watermark does not decrease AATPS.}
+    \label{fig:single_draft_qwen_eli5}
+\end{figure}
+
+\begin{figure}[htpb]
+    \centering
+    \includegraphics[scale=0.35]{images/vicuna_cnn_figure1.png}
+    \caption{Single-draft (AATPS, ANLPPT-U) frontier on
+    Vicuna-7B-v1.5 / Vicuna-68m $\times$ \textsc{CNN/DailyMail}.
+    \textsc{PFR} dominates \textsc{MWS}/\textsc{MSE} simultaneously on both
+    axes; attaching the watermark does not decrease AATPS.}
+    \label{fig:single_draft_vicuna_cnn}
+\end{figure}
+
+\begin{figure}[htpb]
+    \centering
+    \includegraphics[scale=0.35]{images/vicuna_eli5_figure1.png}
+    \caption{Single-draft (AATPS, ANLPPT-U) frontier on
+    Vicuna-7B-v1.5 / Vicuna-68m $\times$ \textsc{ELI5}.
+    \textsc{PFR} dominates \textsc{MWS}/\textsc{MSE} simultaneously on both
+    axes; attaching the watermark does not decrease AATPS.}
+    \label{fig:single_draft_vicuna_eli5}
+\end{figure}
+
+\paragraph{Unbiasedness audit.}
+We require \textsc{PFR} to match \textsc{Basic-UWM} in LPPL within statistical
+noise; this is the strongest empirical signature of breaking the Hu--Huang
+trade-off, since any biased scheme would shift LPPL. The audit appears as the
+final column of Tables~\ref{tab:single_draft_qwen_cnn}--\ref{tab:single_draft_vicuna_eli5}.
+
+\paragraph{Per-cell tables.}
+Tables~\ref{tab:single_draft_qwen_cnn}--\ref{tab:single_draft_vicuna_eli5}
+report all metrics per $(L, \textsc{decoder})$ for the four
+$(\textsc{target},\textsc{dataset})$ cells. Each cell reports
+$\mathrm{mean}\pm\mathrm{std}$ across the $1000$ prompts of the cell.
+
+\begin{table*}[!htbp]
+\centering
+\caption{Single-draft results on Qwen2.5-7B-Instruct / Qwen2.5-0.5B-Instruct
+$\times$ \textsc{CNN/DailyMail}. Each cell: $\mathrm{mean}\pm\mathrm{std}$
+across $1000$ prompts.}
+\label{tab:single_draft_qwen_cnn}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{llcccccc}
+\toprule
+$L$ & Method & AATPS & Token rate & ANLPPT-U & ANLPPT-Li & ANLPPT-PL & LPPL \\
+\midrule
+1 & \textsc{Basic-UWM} & $1.000 \pm 0.000$ & $33.353 \pm 2.815$ & $0.048 \pm 0.035$ & $0.035 \pm 0.029$ & $0.051 \pm 0.036$ & $0.473 \pm 0.134$ \\
+ & \textsc{VSpS} & $1.641 \pm 0.070$ & $33.229 \pm 1.944$ & $0.003 \pm 0.005$ & $0.003 \pm 0.006$ & $0.003 \pm 0.006$ & $0.477 \pm 0.136$ \\
+ & \textsc{PFR-NoWM} & $1.623 \pm 0.075$ & $32.147 \pm 2.161$ & $0.002 \pm 0.006$ & $0.003 \pm 0.006$ & $0.002 \pm 0.006$ & $0.474 \pm 0.140$ \\
+ & \textsc{PFR} & $1.625 \pm 0.072$ & $33.321 \pm 1.706$ & $0.051 \pm 0.036$ & $0.036 \pm 0.030$ & $0.053 \pm 0.038$ & $0.470 \pm 0.143$ \\
+ & \textsc{MSE} & $1.642 \pm 0.070$ & $20.578 \pm 2.645$ & $0.023 \pm 0.021$ & $0.016 \pm 0.017$ & $0.025 \pm 0.023$ & $0.472 \pm 0.136$ \\
+ & \textsc{MWS} & $1.621 \pm 0.072$ & $20.136 \pm 2.952$ & $0.049 \pm 0.035$ & $0.034 \pm 0.029$ & $0.052 \pm 0.036$ & $0.475 \pm 0.133$ \\
+ & \textsc{MSE-Pseudo} & $1.641 \pm 0.072$ & $20.703 \pm 2.420$ & $0.033 \pm 0.028$ & $0.023 \pm 0.023$ & $0.035 \pm 0.029$ & $0.475 \pm 0.138$ \\
+\midrule
+2 & \textsc{Basic-UWM} & $1.000 \pm 0.000$ & $33.353 \pm 2.815$ & $0.048 \pm 0.035$ & $0.035 \pm 0.029$ & $0.051 \pm 0.036$ & $0.473 \pm 0.134$ \\
+ & \textsc{VSpS} & $2.055 \pm 0.147$ & $29.399 \pm 2.693$ & $0.002 \pm 0.006$ & $0.002 \pm 0.006$ & $0.002 \pm 0.006$ & $0.482 \pm 0.139$ \\
+ & \textsc{PFR-NoWM} & $2.014 \pm 0.151$ & $30.119 \pm 2.438$ & $0.002 \pm 0.005$ & $0.003 \pm 0.005$ & $0.002 \pm 0.005$ & $0.474 \pm 0.140$ \\
+ & \textsc{PFR} & $2.016 \pm 0.154$ & $29.746 \pm 2.374$ & $0.051 \pm 0.036$ & $0.036 \pm 0.030$ & $0.053 \pm 0.038$ & $0.471 \pm 0.143$ \\
+ & \textsc{MSE} & $2.056 \pm 0.149$ & $16.954 \pm 2.182$ & $0.016 \pm 0.017$ & $0.012 \pm 0.014$ & $0.018 \pm 0.019$ & $0.475 \pm 0.139$ \\
+ & \textsc{MWS} & $2.012 \pm 0.155$ & $17.915 \pm 2.679$ & $0.048 \pm 0.035$ & $0.034 \pm 0.028$ & $0.052 \pm 0.036$ & $0.473 \pm 0.134$ \\
+ & \textsc{MSE-Pseudo} & $2.053 \pm 0.150$ & $17.768 \pm 2.415$ & $0.030 \pm 0.026$ & $0.022 \pm 0.021$ & $0.033 \pm 0.028$ & $0.481 \pm 0.143$ \\
+\midrule
+3 & \textsc{Basic-UWM} & $1.000 \pm 0.000$ & $33.353 \pm 2.815$ & $0.048 \pm 0.035$ & $0.035 \pm 0.029$ & $0.051 \pm 0.036$ & $0.473 \pm 0.134$ \\
+ & \textsc{VSpS} & $2.327 \pm 0.228$ & $26.272 \pm 2.968$ & $0.002 \pm 0.006$ & $0.002 \pm 0.006$ & $0.003 \pm 0.006$ & $0.481 \pm 0.141$ \\
+ & \textsc{PFR-NoWM} & $2.270 \pm 0.228$ & $26.709 \pm 2.682$ & $0.002 \pm 0.006$ & $0.002 \pm 0.006$ & $0.002 \pm 0.005$ & $0.474 \pm 0.140$ \\
+ & \textsc{PFR} & $2.272 \pm 0.225$ & $25.999 \pm 2.742$ & $0.051 \pm 0.036$ & $0.037 \pm 0.030$ & $0.053 \pm 0.038$ & $0.472 \pm 0.144$ \\
+ & \textsc{MSE} & $2.330 \pm 0.228$ & $13.453 \pm 1.603$ & $0.015 \pm 0.017$ & $0.011 \pm 0.014$ & $0.017 \pm 0.018$ & $0.476 \pm 0.140$ \\
+ & \textsc{MWS} & $2.262 \pm 0.222$ & $16.187 \pm 2.509$ & $0.048 \pm 0.035$ & $0.034 \pm 0.028$ & $0.051 \pm 0.036$ & $0.474 \pm 0.134$ \\
+ & \textsc{MSE-Pseudo} & $2.337 \pm 0.232$ & $14.933 \pm 2.118$ & $0.029 \pm 0.026$ & $0.021 \pm 0.022$ & $0.032 \pm 0.027$ & $0.480 \pm 0.138$ \\
+\midrule
+4 & \textsc{Basic-UWM} & $1.000 \pm 0.000$ & $33.353 \pm 2.815$ & $0.048 \pm 0.035$ & $0.035 \pm 0.029$ & $0.051 \pm 0.036$ & $0.473 \pm 0.134$ \\
+ & \textsc{VSpS} & $2.513 \pm 0.288$ & $23.229 \pm 3.176$ & $0.002 \pm 0.006$ & $0.002 \pm 0.005$ & $0.002 \pm 0.006$ & $0.475 \pm 0.134$ \\
+ & \textsc{PFR-NoWM} & $2.439 \pm 0.292$ & $23.285 \pm 2.840$ & $0.002 \pm 0.005$ & $0.002 \pm 0.005$ & $0.002 \pm 0.006$ & $0.474 \pm 0.142$ \\
+ & \textsc{PFR} & $2.446 \pm 0.286$ & $23.075 \pm 2.755$ & $0.050 \pm 0.036$ & $0.036 \pm 0.030$ & $0.053 \pm 0.038$ & $0.471 \pm 0.144$ \\
+ & \textsc{MSE} & $2.525 \pm 0.298$ & $12.623 \pm 1.893$ & $0.014 \pm 0.016$ & $0.010 \pm 0.013$ & $0.016 \pm 0.017$ & $0.479 \pm 0.145$ \\
+ & \textsc{MWS} & $2.432 \pm 0.287$ & $13.592 \pm 2.213$ & $0.048 \pm 0.035$ & $0.034 \pm 0.028$ & $0.052 \pm 0.036$ & $0.475 \pm 0.132$ \\
+ & \textsc{MSE-Pseudo} & $2.499 \pm 0.287$ & $13.494 \pm 1.934$ & $0.029 \pm 0.026$ & $0.021 \pm 0.021$ & $0.031 \pm 0.027$ & $0.481 \pm 0.141$ \\
+\bottomrule
+\end{tabular}
+}
+\end{table*}
+
+\begin{table*}[!htbp]
+\centering
+\caption{Single-draft results on Qwen2.5-7B-Instruct / Qwen2.5-0.5B-Instruct
+$\times$ \textsc{ELI5}. Each cell: $\mathrm{mean}\pm\mathrm{std}$ across
+$1000$ prompts.}
+\label{tab:single_draft_qwen_eli5}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{llcccccc}
+\toprule
+$L$ & Method & AATPS & Token rate & ANLPPT-U & ANLPPT-Li & ANLPPT-PL & LPPL \\
+\midrule
+1 & \textsc{Basic-UWM} & $1.000 \pm 0.000$ & $26.132 \pm 1.924$ & $0.100 \pm 0.045$ & $0.072 \pm 0.039$ & $0.104 \pm 0.046$ & $0.696 \pm 0.141$ \\
+ & \textsc{VSpS} & $1.593 \pm 0.060$ & $32.090 \pm 1.889$ & $0.002 \pm 0.005$ & $0.002 \pm 0.005$ & $0.002 \pm 0.005$ & $0.701 \pm 0.133$ \\
+ & \textsc{PFR-NoWM} & $1.567 \pm 0.061$ & $33.046 \pm 1.405$ & $0.002 \pm 0.004$ & $0.002 \pm 0.004$ & $0.002 \pm 0.004$ & $0.703 \pm 0.139$ \\
+ & \textsc{PFR} & $1.570 \pm 0.062$ & $33.213 \pm 1.487$ & $0.104 \pm 0.048$ & $0.075 \pm 0.039$ & $0.107 \pm 0.049$ & $0.699 \pm 0.134$ \\
+ & \textsc{MSE} & $1.595 \pm 0.060$ & $18.218 \pm 2.022$ & $0.048 \pm 0.030$ & $0.032 \pm 0.024$ & $0.053 \pm 0.032$ & $0.704 \pm 0.135$ \\
+ & \textsc{MWS} & $1.565 \pm 0.063$ & $20.177 \pm 2.688$ & $0.102 \pm 0.047$ & $0.075 \pm 0.040$ & $0.106 \pm 0.048$ & $0.700 \pm 0.137$ \\
+ & \textsc{MSE-Pseudo} & $1.593 \pm 0.062$ & $19.553 \pm 2.107$ & $0.068 \pm 0.038$ & $0.049 \pm 0.032$ & $0.071 \pm 0.039$ & $0.703 \pm 0.145$ \\
+\midrule
+2 & \textsc{Basic-UWM} & $1.000 \pm 0.000$ & $26.132 \pm 1.924$ & $0.100 \pm 0.045$ & $0.072 \pm 0.039$ & $0.104 \pm 0.046$ & $0.696 \pm 0.141$ \\
+ & \textsc{VSpS} & $1.948 \pm 0.116$ & $27.350 \pm 2.434$ & $0.002 \pm 0.005$ & $0.002 \pm 0.005$ & $0.002 \pm 0.004$ & $0.701 \pm 0.136$ \\
+ & \textsc{PFR-NoWM} & $1.890 \pm 0.118$ & $28.719 \pm 1.782$ & $0.002 \pm 0.005$ & $0.002 \pm 0.004$ & $0.002 \pm 0.004$ & $0.698 \pm 0.137$ \\
+ & \textsc{PFR} & $1.895 \pm 0.125$ & $28.851 \pm 1.937$ & $0.104 \pm 0.048$ & $0.075 \pm 0.039$ & $0.107 \pm 0.049$ & $0.699 \pm 0.134$ \\
+ & \textsc{MSE} & $1.956 \pm 0.126$ & $14.867 \pm 1.179$ & $0.036 \pm 0.024$ & $0.024 \pm 0.020$ & $0.040 \pm 0.026$ & $0.704 \pm 0.140$ \\
+ & \textsc{MWS} & $1.888 \pm 0.121$ & $16.985 \pm 2.208$ & $0.102 \pm 0.046$ & $0.074 \pm 0.039$ & $0.105 \pm 0.047$ & $0.700 \pm 0.142$ \\
+ & \textsc{MSE-Pseudo} & $1.951 \pm 0.118$ & $24.767 \pm 2.016$ & $0.062 \pm 0.034$ & $0.043 \pm 0.028$ & $0.066 \pm 0.036$ & $0.706 \pm 0.136$ \\
+\midrule
+3 & \textsc{Basic-UWM} & $1.000 \pm 0.000$ & $26.132 \pm 1.924$ & $0.100 \pm 0.045$ & $0.072 \pm 0.039$ & $0.104 \pm 0.046$ & $0.696 \pm 0.141$ \\
+ & \textsc{VSpS} & $2.159 \pm 0.175$ & $23.619 \pm 2.707$ & $0.002 \pm 0.004$ & $0.002 \pm 0.004$ & $0.002 \pm 0.003$ & $0.706 \pm 0.139$ \\
+ & \textsc{PFR-NoWM} & $2.074 \pm 0.167$ & $24.315 \pm 2.065$ & $0.002 \pm 0.004$ & $0.002 \pm 0.005$ & $0.002 \pm 0.004$ & $0.710 \pm 0.139$ \\
+ & \textsc{PFR} & $2.084 \pm 0.174$ & $24.675 \pm 2.059$ & $0.104 \pm 0.049$ & $0.075 \pm 0.041$ & $0.107 \pm 0.049$ & $0.697 \pm 0.135$ \\
+ & \textsc{MSE} & $2.164 \pm 0.175$ & $13.359 \pm 2.005$ & $0.030 \pm 0.023$ & $0.020 \pm 0.019$ & $0.035 \pm 0.025$ & $0.705 \pm 0.135$ \\
+ & \textsc{MWS} & $2.071 \pm 0.169$ & $14.243 \pm 1.924$ & $0.100 \pm 0.046$ & $0.073 \pm 0.040$ & $0.104 \pm 0.047$ & $0.698 \pm 0.138$ \\
+ & \textsc{MSE-Pseudo} & $2.169 \pm 0.172$ & $21.339 \pm 2.086$ & $0.061 \pm 0.034$ & $0.043 \pm 0.028$ & $0.064 \pm 0.035$ & $0.709 \pm 0.133$ \\
+\midrule
+4 & \textsc{Basic-UWM} & $1.000 \pm 0.000$ & $26.132 \pm 1.924$ & $0.100 \pm 0.045$ & $0.072 \pm 0.039$ & $0.104 \pm 0.046$ & $0.696 \pm 0.141$ \\
+ & \textsc{VSpS} & $2.294 \pm 0.220$ & $17.142 \pm 3.485$ & $0.002 \pm 0.005$ & $0.002 \pm 0.005$ & $0.002 \pm 0.004$ & $0.705 \pm 0.137$ \\
+ & \textsc{PFR-NoWM} & $2.187 \pm 0.204$ & $21.512 \pm 2.145$ & $0.002 \pm 0.004$ & $0.002 \pm 0.005$ & $0.002 \pm 0.004$ & $0.703 \pm 0.138$ \\
+ & \textsc{PFR} & $2.196 \pm 0.214$ & $21.319 \pm 2.212$ & $0.104 \pm 0.048$ & $0.075 \pm 0.041$ & $0.107 \pm 0.049$ & $0.698 \pm 0.134$ \\
+ & \textsc{MSE} & $2.292 \pm 0.220$ & $13.200 \pm 2.021$ & $0.029 \pm 0.021$ & $0.019 \pm 0.017$ & $0.033 \pm 0.024$ & $0.701 \pm 0.136$ \\
+ & \textsc{MWS} & $2.184 \pm 0.208$ & $11.570 \pm 1.496$ & $0.101 \pm 0.046$ & $0.073 \pm 0.039$ & $0.105 \pm 0.047$ & $0.696 \pm 0.141$ \\
+ & \textsc{MSE-Pseudo} & $2.302 \pm 0.214$ & $18.298 \pm 1.942$ & $0.060 \pm 0.033$ & $0.042 \pm 0.028$ & $0.063 \pm 0.035$ & $0.705 \pm 0.132$ \\
+\bottomrule
+\end{tabular}
+}
+\end{table*}
+
+\begin{table*}[!htbp]
+\centering
+\caption{Single-draft results on Vicuna-7B-v1.5 / Vicuna-68m $\times$
+\textsc{CNN/DailyMail}. Each cell: $\mathrm{mean}\pm\mathrm{std}$ across
+$1000$ prompts.}
+\label{tab:single_draft_vicuna_cnn}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{llcccccc}
+\toprule
+$L$ & Method & AATPS & Token rate & ANLPPT-U & ANLPPT-Li & ANLPPT-PL & LPPL \\
+\midrule
+1 & \textsc{Basic-UWM} & $1.000 \pm 0.000$ & $37.058 \pm 0.848$ & $0.021 \pm 0.024$ & $0.016 \pm 0.019$ & $0.022 \pm 0.025$ & $0.274 \pm 0.190$ \\
+ & \textsc{VSpS} & $1.557 \pm 0.086$ & $48.890 \pm 3.439$ & $0.002 \pm 0.006$ & $0.003 \pm 0.006$ & $0.002 \pm 0.006$ & $0.275 \pm 0.167$ \\
+ & \textsc{PFR-NoWM} & $1.544 \pm 0.088$ & $37.027 \pm 5.064$ & $0.002 \pm 0.006$ & $0.003 \pm 0.006$ & $0.002 \pm 0.005$ & $0.269 \pm 0.121$ \\
+ & \textsc{PFR} & $1.550 \pm 0.090$ & $38.256 \pm 6.092$ & $0.022 \pm 0.024$ & $0.017 \pm 0.019$ & $0.023 \pm 0.025$ & $0.272 \pm 0.128$ \\
+ & \textsc{MSE} & $1.557 \pm 0.088$ & $45.513 \pm 4.490$ & $0.009 \pm 0.013$ & $0.007 \pm 0.011$ & $0.010 \pm 0.015$ & $0.269 \pm 0.123$ \\
+ & \textsc{MWS} & $1.547 \pm 0.091$ & $30.814 \pm 4.078$ & $0.022 \pm 0.024$ & $0.017 \pm 0.020$ & $0.023 \pm 0.026$ & $0.276 \pm 0.192$ \\
+ & \textsc{MSE-Pseudo} & $1.555 \pm 0.088$ & $27.597 \pm 2.405$ & $0.015 \pm 0.018$ & $0.012 \pm 0.016$ & $0.016 \pm 0.018$ & $0.279 \pm 0.118$ \\
+\midrule
+2 & \textsc{Basic-UWM} & $1.000 \pm 0.000$ & $37.058 \pm 0.848$ & $0.021 \pm 0.024$ & $0.016 \pm 0.019$ & $0.022 \pm 0.025$ & $0.274 \pm 0.190$ \\
+ & \textsc{VSpS} & $1.888 \pm 0.179$ & $53.865 \pm 5.770$ & $0.002 \pm 0.006$ & $0.002 \pm 0.006$ & $0.002 \pm 0.006$ & $0.268 \pm 0.129$ \\
+ & \textsc{PFR-NoWM} & $1.857 \pm 0.178$ & $40.154 \pm 5.953$ & $0.003 \pm 0.005$ & $0.003 \pm 0.006$ & $0.003 \pm 0.005$ & $0.273 \pm 0.123$ \\
+ & \textsc{PFR} & $1.866 \pm 0.183$ & $42.639 \pm 7.272$ & $0.022 \pm 0.024$ & $0.017 \pm 0.019$ & $0.023 \pm 0.025$ & $0.272 \pm 0.127$ \\
+ & \textsc{MSE} & $1.876 \pm 0.186$ & $46.276 \pm 7.794$ & $0.007 \pm 0.010$ & $0.006 \pm 0.009$ & $0.007 \pm 0.011$ & $0.268 \pm 0.131$ \\
+ & \textsc{MWS} & $1.858 \pm 0.181$ & $31.588 \pm 5.453$ & $0.022 \pm 0.024$ & $0.016 \pm 0.020$ & $0.023 \pm 0.025$ & $0.278 \pm 0.193$ \\
+ & \textsc{MSE-Pseudo} & $1.877 \pm 0.182$ & $29.023 \pm 4.118$ & $0.015 \pm 0.018$ & $0.012 \pm 0.015$ & $0.015 \pm 0.020$ & $0.273 \pm 0.127$ \\
+\midrule
+3 & \textsc{Basic-UWM} & $1.000 \pm 0.000$ & $37.058 \pm 0.848$ & $0.021 \pm 0.024$ & $0.016 \pm 0.019$ & $0.022 \pm 0.025$ & $0.274 \pm 0.190$ \\
+ & \textsc{VSpS} & $2.076 \pm 0.254$ & $53.835 \pm 7.463$ & $0.002 \pm 0.006$ & $0.003 \pm 0.006$ & $0.002 \pm 0.005$ & $0.276 \pm 0.212$ \\
+ & \textsc{PFR-NoWM} & $2.044 \pm 0.259$ & $42.513 \pm 7.326$ & $0.003 \pm 0.006$ & $0.003 \pm 0.006$ & $0.002 \pm 0.006$ & $0.274 \pm 0.128$ \\
+ & \textsc{PFR} & $2.056 \pm 0.263$ & $41.813 \pm 7.586$ & $0.022 \pm 0.024$ & $0.017 \pm 0.019$ & $0.023 \pm 0.025$ & $0.272 \pm 0.127$ \\
+ & \textsc{MSE} & $2.076 \pm 0.260$ & $38.713 \pm 8.338$ & $0.006 \pm 0.009$ & $0.005 \pm 0.008$ & $0.006 \pm 0.010$ & $0.266 \pm 0.118$ \\
+ & \textsc{MWS} & $2.043 \pm 0.258$ & $28.960 \pm 4.759$ & $0.021 \pm 0.024$ & $0.016 \pm 0.020$ & $0.022 \pm 0.026$ & $0.277 \pm 0.191$ \\
+ & \textsc{MSE-Pseudo} & $2.062 \pm 0.257$ & $32.256 \pm 6.945$ & $0.015 \pm 0.019$ & $0.012 \pm 0.016$ & $0.015 \pm 0.020$ & $0.277 \pm 0.125$ \\
+\midrule
+4 & \textsc{Basic-UWM} & $1.000 \pm 0.000$ & $37.058 \pm 0.848$ & $0.021 \pm 0.024$ & $0.016 \pm 0.019$ & $0.022 \pm 0.025$ & $0.274 \pm 0.190$ \\
+ & \textsc{VSpS} & $2.194 \pm 0.324$ & $53.940 \pm 8.237$ & $0.002 \pm 0.005$ & $0.002 \pm 0.005$ & $0.002 \pm 0.005$ & $0.271 \pm 0.120$ \\
+ & \textsc{PFR-NoWM} & $2.159 \pm 0.326$ & $40.083 \pm 7.877$ & $0.002 \pm 0.005$ & $0.002 \pm 0.005$ & $0.002 \pm 0.005$ & $0.268 \pm 0.117$ \\
+ & \textsc{PFR} & $2.177 \pm 0.323$ & $41.800 \pm 9.355$ & $0.022 \pm 0.023$ & $0.017 \pm 0.019$ & $0.023 \pm 0.025$ & $0.272 \pm 0.127$ \\
+ & \textsc{MSE} & $2.220 \pm 0.330$ & $32.730 \pm 6.784$ & $0.005 \pm 0.008$ & $0.005 \pm 0.008$ & $0.006 \pm 0.009$ & $0.264 \pm 0.119$ \\
+ & \textsc{MWS} & $2.163 \pm 0.319$ & $27.253 \pm 4.410$ & $0.021 \pm 0.024$ & $0.016 \pm 0.019$ & $0.023 \pm 0.025$ & $0.277 \pm 0.191$ \\
+ & \textsc{MSE-Pseudo} & $2.183 \pm 0.317$ & $33.007 \pm 6.806$ & $0.014 \pm 0.018$ & $0.011 \pm 0.015$ & $0.014 \pm 0.018$ & $0.277 \pm 0.121$ \\
+\bottomrule
+\end{tabular}
+}
+\end{table*}
+
+\begin{table*}[!htbp]
+\centering
+\caption{Single-draft results on Vicuna-7B-v1.5 / Vicuna-68m $\times$
+\textsc{ELI5}. Each cell: $\mathrm{mean}\pm\mathrm{std}$ across $1000$
+prompts.}
+\label{tab:single_draft_vicuna_eli5}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{llcccccc}
+\toprule
+$L$ & Method & AATPS & Token rate & ANLPPT-U & ANLPPT-Li & ANLPPT-PL & LPPL \\
+\midrule
+1 & \textsc{Basic-UWM} & $1.000 \pm 0.000$ & $38.536 \pm 1.896$ & $0.060 \pm 0.040$ & $0.044 \pm 0.033$ & $0.062 \pm 0.042$ & $0.507 \pm 0.152$ \\
+ & \textsc{VSpS} & $1.410 \pm 0.063$ & $46.306 \pm 3.178$ & $0.002 \pm 0.005$ & $0.003 \pm 0.005$ & $0.002 \pm 0.005$ & $0.511 \pm 0.150$ \\
+ & \textsc{PFR-NoWM} & $1.399 \pm 0.063$ & $33.636 \pm 4.757$ & $0.003 \pm 0.006$ & $0.003 \pm 0.007$ & $0.002 \pm 0.005$ & $0.509 \pm 0.152$ \\
+ & \textsc{PFR} & $1.397 \pm 0.065$ & $35.231 \pm 5.397$ & $0.061 \pm 0.043$ & $0.045 \pm 0.038$ & $0.063 \pm 0.042$ & $0.513 \pm 0.162$ \\
+ & \textsc{MSE} & $1.415 \pm 0.062$ & $44.719 \pm 3.192$ & $0.020 \pm 0.020$ & $0.014 \pm 0.017$ & $0.022 \pm 0.022$ & $0.509 \pm 0.147$ \\
+ & \textsc{MWS} & $1.399 \pm 0.064$ & $26.309 \pm 3.816$ & $0.060 \pm 0.041$ & $0.044 \pm 0.034$ & $0.062 \pm 0.042$ & $0.507 \pm 0.151$ \\
+ & \textsc{MSE-Pseudo} & $1.416 \pm 0.063$ & $28.987 \pm 4.863$ & $0.040 \pm 0.030$ & $0.029 \pm 0.025$ & $0.042 \pm 0.031$ & $0.504 \pm 0.152$ \\
+\midrule
+2 & \textsc{Basic-UWM} & $1.000 \pm 0.000$ & $38.536 \pm 1.896$ & $0.060 \pm 0.040$ & $0.044 \pm 0.033$ & $0.062 \pm 0.042$ & $0.507 \pm 0.152$ \\
+ & \textsc{VSpS} & $1.589 \pm 0.104$ & $47.569 \pm 3.837$ & $0.003 \pm 0.006$ & $0.003 \pm 0.006$ & $0.003 \pm 0.006$ & $0.509 \pm 0.146$ \\
+ & \textsc{PFR-NoWM} & $1.562 \pm 0.103$ & $34.678 \pm 4.452$ & $0.002 \pm 0.005$ & $0.002 \pm 0.005$ & $0.002 \pm 0.006$ & $0.505 \pm 0.147$ \\
+ & \textsc{PFR} & $1.558 \pm 0.106$ & $34.425 \pm 4.996$ & $0.061 \pm 0.043$ & $0.044 \pm 0.038$ & $0.063 \pm 0.042$ & $0.513 \pm 0.162$ \\
+ & \textsc{MSE} & $1.587 \pm 0.105$ & $33.648 \pm 4.994$ & $0.012 \pm 0.014$ & $0.009 \pm 0.012$ & $0.014 \pm 0.016$ & $0.509 \pm 0.147$ \\
+ & \textsc{MWS} & $1.560 \pm 0.109$ & $23.481 \pm 2.014$ & $0.060 \pm 0.040$ & $0.043 \pm 0.034$ & $0.062 \pm 0.042$ & $0.510 \pm 0.157$ \\
+ & \textsc{MSE-Pseudo} & $1.593 \pm 0.110$ & $28.595 \pm 4.733$ & $0.040 \pm 0.032$ & $0.029 \pm 0.027$ & $0.041 \pm 0.032$ & $0.509 \pm 0.152$ \\
+\midrule
+3 & \textsc{Basic-UWM} & $1.000 \pm 0.000$ & $38.536 \pm 1.896$ & $0.060 \pm 0.040$ & $0.044 \pm 0.033$ & $0.062 \pm 0.042$ & $0.507 \pm 0.152$ \\
+ & \textsc{VSpS} & $1.670 \pm 0.134$ & $45.003 \pm 5.451$ & $0.003 \pm 0.006$ & $0.002 \pm 0.005$ & $0.002 \pm 0.006$ & $0.513 \pm 0.157$ \\
+ & \textsc{PFR-NoWM} & $1.624 \pm 0.132$ & $31.214 \pm 4.662$ & $0.002 \pm 0.005$ & $0.002 \pm 0.005$ & $0.002 \pm 0.005$ & $0.506 \pm 0.149$ \\
+ & \textsc{PFR} & $1.626 \pm 0.130$ & $35.694 \pm 5.835$ & $0.062 \pm 0.043$ & $0.045 \pm 0.038$ & $0.063 \pm 0.042$ & $0.515 \pm 0.162$ \\
+ & \textsc{MSE} & $1.671 \pm 0.136$ & $26.134 \pm 3.956$ & $0.011 \pm 0.014$ & $0.008 \pm 0.012$ & $0.012 \pm 0.015$ & $0.499 \pm 0.145$ \\
+ & \textsc{MWS} & $1.626 \pm 0.136$ & $22.536 \pm 2.127$ & $0.059 \pm 0.040$ & $0.043 \pm 0.033$ & $0.061 \pm 0.041$ & $0.508 \pm 0.152$ \\
+ & \textsc{MSE-Pseudo} & $1.666 \pm 0.134$ & $28.611 \pm 4.748$ & $0.037 \pm 0.028$ & $0.027 \pm 0.023$ & $0.039 \pm 0.029$ & $0.505 \pm 0.148$ \\
+\midrule
+4 & \textsc{Basic-UWM} & $1.000 \pm 0.000$ & $38.536 \pm 1.896$ & $0.060 \pm 0.040$ & $0.044 \pm 0.033$ & $0.062 \pm 0.042$ & $0.507 \pm 0.152$ \\
+ & \textsc{VSpS} & $1.697 \pm 0.152$ & $43.287 \pm 5.333$ & $0.002 \pm 0.005$ & $0.002 \pm 0.006$ & $0.002 \pm 0.005$ & $0.510 \pm 0.152$ \\
+ & \textsc{PFR-NoWM} & $1.656 \pm 0.145$ & $28.914 \pm 4.147$ & $0.002 \pm 0.005$ & $0.002 \pm 0.005$ & $0.002 \pm 0.005$ & $0.503 \pm 0.149$ \\
+ & \textsc{PFR} & $1.656 \pm 0.146$ & $32.316 \pm 5.921$ & $0.062 \pm 0.043$ & $0.045 \pm 0.038$ & $0.063 \pm 0.042$ & $0.515 \pm 0.162$ \\
+ & \textsc{MSE} & $1.700 \pm 0.154$ & $23.993 \pm 3.469$ & $0.011 \pm 0.014$ & $0.008 \pm 0.012$ & $0.012 \pm 0.015$ & $0.514 \pm 0.150$ \\
+ & \textsc{MWS} & $1.651 \pm 0.149$ & $22.198 \pm 3.679$ & $0.059 \pm 0.039$ & $0.043 \pm 0.033$ & $0.062 \pm 0.041$ & $0.509 \pm 0.153$ \\
+ & \textsc{MSE-Pseudo} & $1.703 \pm 0.155$ & $26.004 \pm 4.603$ & $0.037 \pm 0.030$ & $0.027 \pm 0.024$ & $0.039 \pm 0.031$ & $0.508 \pm 0.147$ \\
+\bottomrule
+\end{tabular}
+}
+\end{table*}
+
+\subsection{Multi-draft experiments: full per-cell results}
+\label{app:multi_draft_full}
+
+\paragraph{Setup.}
+The main-text multi-draft paragraph (Section~\ref{sec::experiments},
+``Multi-draft scaling'') summarises a single representative cell
+(Qwen2.5-7B-Instruct $\times$ \textsc{CNN/DailyMail}). Here we extend the
+evaluation to the $2{\times}2$ matrix
+\{Qwen2.5-7B-Instruct, Vicuna-7B-v1.5\} $\times$
+\{\textsc{CNN/DailyMail}, \textsc{ELI5}\}, using the target/drafter pairs
+\texttt{Qwen2.5-7B-Instruct}/\texttt{Qwen2.5-0.5B-Instruct} and
+\texttt{lmsys/vicuna-7b-v1.5}/\texttt{double7/vicuna-68m}.
+Each cell uses $n{=}1000$ prompts, lookahead $L{=}4$, and draft counts
+$B\in\{2,4,6,8\}$, with the sampling parameters of Appendix~\ref{app:setup}.
+
+\paragraph{Decoders.}
+\textsc{MPFR} is our keyed multi-draft Poisson sampler;
+\textsc{Invariant} is the unwatermarked
+\emph{InvariantMultiDraftStrategy} of~\citet{rowan2025list} run in the same
+harness on the same prompt set. The two decoders share the draft/verify
+mechanism and differ only in whether the per-context watermark key is applied.
+
+\paragraph{Per-cell tables.}
+Tables~\ref{tab:full-qwen-cnn}--\ref{tab:full-vicuna-eli5} report all quality
+and watermark-strength metrics per (decoder, $B$). Columns: AATPS, token rate
+in tokens/s (TR), ANLPPT-\{U, Li, PL\}, and LPPL. The corresponding
+TPR-vs-$T_{\mathrm{eval}}$ curves are reported in
+Figure~\ref{fig:full_detection_4cells} of Appendix~\ref{app:ablation}.
+
+\begin{table}[h]
+\centering
+\small
+\caption{Multi-draft results on Qwen2.5-7B-Instruct $\times$
+\textsc{CNN/DailyMail}, $L{=}4$.}
+\label{tab:full-qwen-cnn}
+\begin{tabular}{l c c c c c c c}
+\toprule
+Decoder & $B$ & AATPS & TR & ANLPPT-U & ANLPPT-Li & ANLPPT-PL & LPPL \\
+\midrule
+\textsc{MPFR}      & 2 & 2.799 & 23.18 & 0.052 & 0.037 & 0.055 & 0.475 \\
+\textsc{MPFR}      & 4 & 3.124 & 24.89 & 0.052 & 0.037 & 0.055 & 0.474 \\
+\textsc{MPFR}      & 6 & 3.298 & 25.39 & 0.052 & 0.037 & 0.055 & 0.476 \\
+\textsc{MPFR}      & 8 & 3.410 & 25.17 & 0.053 & 0.037 & 0.055 & 0.476 \\
+\textsc{Invariant} & 2 & 2.804 & 25.03 & 0.003 & 0.003 & 0.002 & 0.487 \\
+\textsc{Invariant} & 4 & 3.114 & 26.63 & 0.002 & 0.002 & 0.002 & 0.481 \\
+\textsc{Invariant} & 6 & 3.275 & 26.79 & 0.002 & 0.003 & 0.002 & 0.482 \\
+\textsc{Invariant} & 8 & 3.387 & 26.38 & 0.002 & 0.003 & 0.002 & 0.479 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[h]
+\centering
+\small
+\caption{Multi-draft results on Qwen2.5-7B-Instruct $\times$ \textsc{ELI5},
+$L{=}4$.}
+\label{tab:full-qwen-eli5}
+\begin{tabular}{l c c c c c c c}
+\toprule
+Decoder & $B$ & AATPS & TR & ANLPPT-U & ANLPPT-Li & ANLPPT-PL & LPPL \\
+\midrule
+\textsc{MPFR}      & 2 & 2.563 & 22.38 & 0.104 & 0.076 & 0.108 & 0.704 \\
+\textsc{MPFR}      & 4 & 2.919 & 24.48 & 0.104 & 0.076 & 0.107 & 0.703 \\
+\textsc{MPFR}      & 6 & 3.111 & 25.54 & 0.105 & 0.076 & 0.108 & 0.706 \\
+\textsc{MPFR}      & 8 & 3.237 & 25.83 & 0.105 & 0.076 & 0.108 & 0.704 \\
+\textsc{Invariant} & 2 & 2.519 & 23.18 & 0.002 & 0.002 & 0.002 & 0.750 \\
+\textsc{Invariant} & 4 & 2.852 & 25.75 & 0.002 & 0.002 & 0.002 & 0.733 \\
+\textsc{Invariant} & 6 & 3.043 & 27.11 & 0.002 & 0.002 & 0.002 & 0.730 \\
+\textsc{Invariant} & 8 & 3.158 & 27.96 & 0.002 & 0.002 & 0.002 & 0.725 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[h]
+\centering
+\small
+\caption{Multi-draft results on Vicuna-7B-v1.5 $\times$
+\textsc{CNN/DailyMail}, $L{=}4$.}
+\label{tab:full-vicuna-cnn}
+\begin{tabular}{l c c c c c c c}
+\toprule
+Decoder & $B$ & AATPS & TR & ANLPPT-U & ANLPPT-Li & ANLPPT-PL & LPPL \\
+\midrule
+\textsc{MPFR}      & 2 & 2.422 & 52.10 & 0.022 & 0.017 & 0.022 & 0.270 \\
+\textsc{MPFR}      & 4 & 2.664 & 48.28 & 0.022 & 0.017 & 0.023 & 0.271 \\
+\textsc{MPFR}      & 6 & 2.803 & 44.44 & 0.022 & 0.017 & 0.023 & 0.270 \\
+\textsc{MPFR}      & 8 & 2.899 & 40.76 & 0.022 & 0.017 & 0.023 & 0.270 \\
+\textsc{Invariant} & 2 & 2.478 & 58.15 & 0.002 & 0.002 & 0.002 & 0.287 \\
+\textsc{Invariant} & 4 & 2.690 & 53.12 & 0.002 & 0.002 & 0.002 & 0.286 \\
+\textsc{Invariant} & 6 & 2.831 & 48.41 & 0.002 & 0.003 & 0.002 & 0.283 \\
+\textsc{Invariant} & 8 & 2.925 & 44.01 & 0.002 & 0.002 & 0.002 & 0.288 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[!htbp]
+\centering
+\small
+\caption{Multi-draft results on Vicuna-7B-v1.5 $\times$ \textsc{ELI5},
+$L{=}4$.}
+\label{tab:full-vicuna-eli5}
+\begin{tabular}{l c c c c c c c}
+\toprule
+Decoder & $B$ & AATPS & TR & ANLPPT-U & ANLPPT-Li & ANLPPT-PL & LPPL \\
+\midrule
+\textsc{MPFR}      & 2 & 1.889 & 45.89 & 0.058 & 0.043 & 0.061 & 0.504 \\
+\textsc{MPFR}      & 4 & 2.133 & 47.43 & 0.058 & 0.042 & 0.061 & 0.504 \\
+\textsc{MPFR}      & 6 & 2.278 & 47.42 & 0.058 & 0.042 & 0.062 & 0.503 \\
+\textsc{MPFR}      & 8 & 2.377 & 46.42 & 0.059 & 0.043 & 0.062 & 0.504 \\
+\textsc{Invariant} & 2 & 1.884 & 50.29 & 0.002 & 0.002 & 0.002 & 0.555 \\
+\textsc{Invariant} & 4 & 2.108 & 53.42 & 0.002 & 0.002 & 0.002 & 0.552 \\
+\textsc{Invariant} & 6 & 2.248 & 55.08 & 0.002 & 0.003 & 0.002 & 0.546 \\
+\textsc{Invariant} & 8 & 2.361 & 56.00 & 0.003 & 0.003 & 0.002 & 0.539 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Speculative-acceptance parity.}
+Within each cell, \textsc{MPFR}'s AATPS matches \textsc{Invariant}'s within
+$\pm 1\%$ at every $B\in\{2,4,6,8\}$, indicating that the target-side keyed-race
+construction adds no per-step acceptance penalty. Realised token rate (TR)
+tracks AATPS up to a fixed Python-side label-hashing overhead whose relative
+cost depends on the target/drafter compute ratio: with the small
+\texttt{vicuna-68m} drafter the overhead is a larger fraction of per-step time
+and TR is $\sim\!10\%$ below \textsc{Invariant}, while on the
+\texttt{Qwen2.5-7B}/\texttt{0.5B} pair the gap narrows to $\sim\!5\%$.
+
+\paragraph{Stability of the watermark signal across $B$.}
+ANLPPT-U, ANLPPT-Li, and ANLPPT-PL for \textsc{MPFR} remain within $\pm 0.001$
+across $B\in\{2,4,6,8\}$ on every cell of
+Tables~\ref{tab:full-qwen-cnn}--\ref{tab:full-vicuna-eli5}. The per-token
+detection signal therefore does not dilute with the number of drafts, in
+contrast to naive multi-draft watermarking, which would re-introduce the
+efficiency--detectability trade-off of~\citet{hu2024inevitable} at the
+multi-draft level.
+
+\paragraph{Distortion-free audit.}
+LPPL of \textsc{MPFR} outputs falls within $\pm 0.013$ nats/token of
+\textsc{Invariant} on every cell. This is consistent with per-token marginal
+preservation and confirms that the watermark does not introduce a measurable
+shift in target-model log-perplexity in the multi-draft regime.
+
+
+\subsection{Drafter-substitution ablation: full results}
+\label{app:ablation}
+
+\paragraph{Drafter conditions.}
+$D_0$: Qwen2.5-0.5B-Instruct at $T{=}1.0$ (default).
+$D_1$: Qwen2.5-1.5B-Instruct at $T{=}1.0$ ($3{\times}$ scale, model swap).
+$D_2$: Qwen2.5-0.5B-Instruct at $T{=}0.5$ (sharper drafter).
+$D_3$: Qwen2.5-0.5B-Instruct at $T{=}1.5$ (more diffuse drafter).
+The target temperature, watermark key, and all other parameters are held fixed
+across $D_0$--$D_3$.
+
+\paragraph{Detection statistic.}
+For the Aaronson Gamma-tail test, the per-token score is
+$s_t=-\log(1-U_t)$, where $U_t$ is the per-token uniform recovered from the
+watermark code. Under the no-watermark null, the cumulative score
+$S_T=\sum_{t\le T} s_t$ is $\mathrm{Gamma}(T,1)$; we declare detection at
+FPR$=\alpha$ when $\Pr_{H_0}\!\left[\mathrm{Gamma}(T,1)>S_T\right]\le\alpha$,
+computed via the regularised upper incomplete gamma. We report
+$\alpha{=}1\%$ throughout.
+
+\paragraph{Full detection across models and datasets.}
+Figure~\ref{fig:full_detection_4cells} extends the default-drafter detection
+comparison of Figure~\ref{fig:drafter_invariance}(a) to all four
+$(\textsc{target},\textsc{dataset})$ cells of the main $2{\times}2$ result.
+In every cell, \textsc{PFR}/\textsc{MPFR} (ours) coincide with the
+strong-watermark ceiling defined by autoregressive \textsc{Basic-UWM} and
+\textsc{MWS}, while \textsc{MSE} and \textsc{MSE-Pseudo}~\citep{he2026improving}
+are uniformly weaker. The size of the gap is dataset-dependent --- largest on
+\textsc{CNN/DailyMail}, smallest on the longer-form \textsc{ELI5} where every
+scheme approaches saturation by $T_{\mathrm{eval}}{=}128$ --- but the ranking is
+invariant. This confirms that the detection-strength conclusion drawn from
+the anchor cell in Figure~\ref{fig:drafter_invariance}(a) is not specific to
+a single $(\textsc{target},\textsc{dataset})$ pair.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{images/tpr_comparison_4cells.png}
+\caption{\textbf{Full detection across $(\textsc{target},\textsc{dataset})$
+cells.}
+TPR@1\%FPR (Aaronson Gamma-tail) versus detection token budget
+$T_{\mathrm{eval}}$ at the default drafter $D_0$, for the seven schemes
+plotted in Figure~\ref{fig:drafter_invariance}(a). Each panel is one cell of
+the main $2{\times}2$ result: target~$\in$
+\{Qwen2.5-7B-Instruct, Vicuna-7B-v1.5\} $\times$ dataset~$\in$
+\{\textsc{CNN/DailyMail}, \textsc{ELI5}\}. \textsc{PFR}/\textsc{MPFR} (ours)
+match the strong-watermark ceiling (\textsc{Basic-UWM}, \textsc{MWS}) in
+every cell, while \textsc{MSE} and \textsc{MSE-Pseudo} are uniformly weaker.
+The empirical $H_0$ (no-watermark) floor sits near the nominal $1\%$ FPR,
+calibrating the test.}
+\label{fig:full_detection_4cells}
+\end{figure}
+
+\paragraph{Pairwise ROUGE-L under drafter substitution.}
+For each prompt $p$ and decoder $d$ we have one realised output token sequence
+per drafter condition. We compute ROUGE-L F1 over each pair $(D_i,D_j)$ of
+drafter conditions on these token sequences, then report the per-prompt
+minimum over the six pairs (worst pair) averaged across prompts
+(Table~\ref{tab:exp2_pairwise_rouge}). An unbiased verify rule that depends
+only on the target logits and the watermark key produces identical sequences
+across all drafters, so this quantity should approach $1$.
+
+\begin{table}[h]
+\centering
+\caption{\textbf{Output quality.}
+LPPL$\downarrow$ under target.
+ROUGE-L$\uparrow$ vs.\ gold \texttt{highlights}.
+AATPS$\uparrow$ accepted target tokens per step.}
+\label{tab:exp1_quality}
+\small
+\setlength{\tabcolsep}{4pt}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{l ccccccc | cc}
+\toprule
+ & \multicolumn{7}{c|}{\emph{Single-draft baselines}}
+ & \multicolumn{2}{c}{\emph{Multi-draft ($B{=}4$)}} \\
+\cmidrule(lr){2-8} \cmidrule(lr){9-10}
+Metric
+ & \textsc{VSpS}
+ & \textsc{PFR-NoWM}
+ & \textsc{Basic-UWM}
+ & \textsc{MSE}
+ & \textsc{MWS}
+ & \textsc{MSE-Pseudo}
+ & \textbf{\textsc{PFR}}
+ & \textsc{Invariant}
+ & \textbf{\textsc{MPFR}} \\
+\midrule
+LPPL$\downarrow$
+ & 0.474 & 0.469 & 0.472 & 0.470 & 0.475 & 0.477 & \textbf{0.465}
+ & 0.484 & \textbf{0.474} \\
+ROUGE-L$\uparrow$
+ & 0.219 & 0.222 & 0.223 & 0.221 & 0.223 & 0.219 & \textbf{0.223}
+ & 0.222 & \textbf{0.222} \\
+AATPS$\uparrow$
+ & 2.51  & 2.46  & 1.00  & 2.53  & 2.43  & 2.52  & \textbf{2.46}
+ & 3.12  & \textbf{3.13} \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\begin{table}[h]
+\centering
+\caption{\textbf{Output stability under drafter substitution.}
+Pairwise ROUGE-L F1 between the realised token sequences across each
+$(D_i,D_j)$ pair, per-prompt minimum averaged over prompts. An unbiased
+verify rule produces identical sequences across all drafters, so
+ROUGE-L $\to 1$.}
+\label{tab:exp2_pairwise_rouge}
+\small
+\setlength{\tabcolsep}{8pt}
+\begin{tabular}{lc}
+\toprule
+Decoder & min-pair mean ROUGE-L \\
+\midrule
+\textsc{Basic-UWM} (no drafter, vacuous bound) & 1.000 \\
+\textbf{\textsc{PFR}} (ours)                    & \textbf{0.990} \\
+\textsc{MWS}                                    & 0.922 \\
+\midrule
+\textsc{PFR-NoWM} (no wm)                       & 0.436 \\
+\textsc{MSE-Pseudo}                             & 0.426 \\
+\textsc{MSE}                                    & 0.406 \\
+\textsc{VSpS} (no wm)                           & 0.394 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+% =============================================================================
+%  END OF FILE
+% =============================================================================

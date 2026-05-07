@@ -1,0 +1,33 @@
+{
+  "experiment": "full_qwen_cnn_efpr_n1000",
+  "samples": 1000,
+  "dataset": "cnn_dailymail",
+  "max_new_tokens": 128,
+  "lookaheads": [4],
+  "num_drafts": [2, 4, 6, 8],
+  "private_key": "1234",
+  "target_model": "Qwen/Qwen2.5-7B-Instruct",
+  "draft_model": "Qwen/Qwen2.5-0.5B-Instruct",
+  "process_logits": {"top_k": 50, "top_p": 1.0, "temperature": 1.0},
+  "decoders": ["mpfr_torchgen_cached", "invariant_multi"],
+  "metrics": {
+    "aatps": true,
+    "token_rate": true,
+    "anlppt": {
+      "variants": ["U", "Li", "PL"],
+      "li_delta": 0.5, "pl_eps": 0.1,
+      "applies_to": ["mpfr_torchgen_cached", "invariant_multi"]
+    },
+    "lppl": { "applies_to": ["mpfr_torchgen_cached", "invariant_multi"] },
+    "tpr_at_n": {
+      "tokens": [8, 16, 24, 32, 48, 64, 96, 128],
+      "fpr": 0.01,
+      "applies_to": ["mpfr_torchgen_cached", "invariant_multi"],
+      "detector_per_decoder": {
+        "invariant_multi": { "kind": "PFR", "labeler": "mpfr_direct" }
+      }
+    },
+    "kl_ratio": { "applies_to": ["mpfr_torchgen_cached"] }
+  },
+  "output": "outputs/full_qwen_cnn_efpr_n1000_multiT.json"
+}
