@@ -1,1 +1,0 @@
-{"sample_idx": 0, "method": "pfr_mpfr_firstarrival_gaussian_mean0", "lookahead": 4, "error": "RuntimeError('finite MPFR did not terminate within max_proposals; increase max_proposals or check w_lower')", "total_time": 4.2299809996038675}

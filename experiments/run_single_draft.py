@@ -48,7 +48,6 @@ from . import _shared as S
 # Factory pattern for label functions (stateful for context_code repeated-
 # context masking; stateless labelers fit the same shape).
 _LABEL_FN_FACTORY_BY_MODE = {
-    "prefix":       lambda: S._prefix_labeler_label,
     "mpfr_direct":  lambda: S._mpfr_direct_label,
     "context_code": lambda: S.make_context_code_label_fn(n=3),
 }

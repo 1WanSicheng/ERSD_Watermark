@@ -1,13 +1,13 @@
 """
 Multi-draft experiment runner: JSON-config driven.
 
-Compares B>=1 multi-draft decoders (ms_pfr_cached, mpfr_torchgen_cached,
-invariant_multi, strong_multi) at one or more (B, lookahead) settings.
+Compares B>=1 multi-draft decoders (mpfr_torchgen_cached, invariant_multi)
+at one or more (B, lookahead) settings.
 Reports AATPS and token_rate per (decoder, B, lookahead).  ANLPPT-{U, Li, PL}
 is reported only for the PFR-family decoders configured in
 ``metrics.anlppt.applies_to``.
 
-Config schema (see experiments/configs/multi_draft_default.json):
+Config schema:
 
     {
       "experiment": "multi_draft",
@@ -18,15 +18,14 @@ Config schema (see experiments/configs/multi_draft_default.json):
       "num_drafts": [1, 2, 4, 8],
       "private_key": "1234",
       "process_logits": {"top_k": 50, "top_p": 1.0, "temperature": 1.0},
-      "decoders": ["ms_pfr_cached", "mpfr_torchgen_cached",
-                   "invariant_multi", "strong_multi"],
+      "decoders": ["mpfr_torchgen_cached", "invariant_multi"],
       "metrics": {
           "aatps": true,
           "token_rate": true,
           "anlppt": {
               "variants": ["U", "Li", "PL"],
               "li_delta": 0.5, "pl_eps": 0.1,
-              "applies_to": ["ms_pfr_cached", "mpfr_torchgen_cached"]
+              "applies_to": ["mpfr_torchgen_cached"]
           }
       },
       "output": "outputs/multi_draft.json"
@@ -51,7 +50,6 @@ from . import _shared as S
 # repeated-context masking).  Stateless labelers ignore the per-prompt fresh
 # closure but use the same factory shape for uniformity.
 _LABEL_FN_FACTORY_BY_MODE = {
-    "prefix":       lambda: S._prefix_labeler_label,
     "mpfr_direct":  lambda: S._mpfr_direct_label,
     "context_code": lambda: S.make_context_code_label_fn(n=3),
 }
@@ -109,7 +107,6 @@ _KL_LABELER_MODE_BY_DECODER = {
     # Multi-draft PFR variants — each uses a different per-context label scheme
     # at gen time, so post-hoc KL scoring must reconstruct the same per-context
     # PFR source via a matching labeler mode.
-    "ms_pfr_cached": "prefix",
     "mpfr_torchgen_cached": "mpfr_direct",
 }
 

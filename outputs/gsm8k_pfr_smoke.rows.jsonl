@@ -1,1 +1,0 @@
-{"sample_idx": 0, "lookahead": 4, "num_steps": 2, "num_invocations": 2, "num_tokens": 8, "AATPS": 4.0, "BE": 4.0, "block_efficiency": 4.0, "acceptance_rate": 4.0, "accepted_draft_mean": 3.5, "draft_len_mean": 3.5, "elapsed_sec": 0.7526988349854946, "total_time": 0.7526988349854946, "tokens_per_sec": 10.628420861252122, "token_rate": 10.628420861252122, "TR": 10.628420861252122}

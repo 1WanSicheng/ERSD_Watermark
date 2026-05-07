@@ -1,46 +1,102 @@
-{
-  "experiment": "single_qwen_eli5_efpr_n1000",
-  "samples": 1000,
-  "dataset": "eli5",
-  "max_new_tokens": 128,
-  "lookaheads": [4],
-  "private_key": "1234",
-  "target_model": "Qwen/Qwen2.5-7B-Instruct",
-  "draft_model": "Qwen/Qwen2.5-0.5B-Instruct",
-  "process_logits": {"top_k": 50, "top_p": 1.0, "temperature": 1.0},
-  "decoders": [
-    "basic_uwm",
-    "mc_uwm_speed",
-    "mc_uwm_strength",
-    "mc_uwm_pseudo_r",
-    "pfr",
-    "mc",
-    "pfr_no_watermark"
-  ],
-  "metrics": {
-    "aatps": true,
-    "token_rate": true,
-    "anlppt": {
-      "variants": ["U", "Li", "PL"],
-      "li_delta": 0.5,
-      "pl_eps": 0.1,
-      "applies_to": ["basic_uwm", "mc_uwm_speed", "mc_uwm_strength", "mc_uwm_pseudo_r", "pfr"]
-    },
-    "lppl": {
-      "applies_to": ["basic_uwm", "mc_uwm_speed", "mc_uwm_strength", "mc_uwm_pseudo_r", "pfr", "mc", "pfr_no_watermark"]
-    },
-    "tpr_at_n": {
-      "tokens": [8, 16, 24, 32, 48, 64, 96, 128],
-      "fpr": 0.01,
-      "applies_to": ["basic_uwm", "mc_uwm_speed", "mc_uwm_strength", "mc_uwm_pseudo_r", "pfr", "mc", "pfr_no_watermark"],
-      "detector_per_decoder": {
-        "mc": { "kind": "DeltaGumbel" },
-        "pfr_no_watermark": { "kind": "PFR", "labeler": "context_code" }
-      }
-    },
-    "kl_ratio": {
-      "applies_to": ["basic_uwm", "mc_uwm_speed", "mc_uwm_strength", "mc_uwm_pseudo_r", "pfr"]
-    }
-  },
-  "output": "outputs/single_qwen_eli5_efpr_n1000.json"
+﻿{
+    "experiment":  "single_qwen_eli5_efpr_n1000",
+    "samples":  1000,
+    "dataset":  "eli5",
+    "max_new_tokens":  128,
+    "lookaheads":  [
+                       4
+                   ],
+    "private_key":  "1234",
+    "target_model":  "Qwen/Qwen2.5-7B-Instruct",
+    "draft_model":  "Qwen/Qwen2.5-0.5B-Instruct",
+    "process_logits":  {
+                           "top_k":  50,
+                           "top_p":  1.0,
+                           "temperature":  1.0
+                       },
+    "decoders":  [
+                     "basic_uwm",
+                     "mc_uwm_speed",
+                     "mc_uwm_strength",
+                     "mc_uwm_pseudo_r",
+                     "pfr",
+                     "mc",
+                     "pfr_no_watermark"
+                 ],
+    "metrics":  {
+                    "aatps":  true,
+                    "token_rate":  true,
+                    "anlppt":  {
+                                   "variants":  [
+                                                    "U",
+                                                    "Li",
+                                                    "PL"
+                                                ],
+                                   "li_delta":  0.5,
+                                   "pl_eps":  0.1,
+                                   "applies_to":  [
+                                                      "basic_uwm",
+                                                      "mc_uwm_speed",
+                                                      "mc_uwm_strength",
+                                                      "mc_uwm_pseudo_r",
+                                                      "pfr"
+                                                  ]
+                               },
+                    "lppl":  {
+                                 "applies_to":  [
+                                                    "basic_uwm",
+                                                    "mc_uwm_speed",
+                                                    "mc_uwm_strength",
+                                                    "mc_uwm_pseudo_r",
+                                                    "pfr",
+                                                    "mc",
+                                                    "pfr_no_watermark"
+                                                ]
+                             },
+                    "tpr_at_n":  {
+                                     "tokens":  [
+                                                    8,
+                                                    16,
+                                                    24,
+                                                    32,
+                                                    48,
+                                                    64,
+                                                    96,
+                                                    128
+                                                ],
+                                     "fpr":  0.01,
+                                     "applies_to":  [
+                                                        "basic_uwm",
+                                                        "mc_uwm_speed",
+                                                        "mc_uwm_strength",
+                                                        "mc_uwm_pseudo_r",
+                                                        "pfr",
+                                                        "mc",
+                                                        "pfr_no_watermark"
+                                                    ],
+                                     "detector_per_decoder":  {
+                                                                  "mc":  {
+                                                                             "kind":  "DeltaGumbel"
+                                                                         },
+                                                                  "pfr_no_watermark":  {
+                                                                                           "kind":  "PFR",
+                                                                                           "labeler":  "context_code"
+                                                                                       },
+                                                                  "mc_uwm_pseudo_r":  {
+                                                                                          "kind":  "DeltaGumbelDual",
+                                                                                          "accept_threshold":  0.5
+                                                                                      }
+                                                              }
+                                 },
+                    "kl_ratio":  {
+                                     "applies_to":  [
+                                                        "basic_uwm",
+                                                        "mc_uwm_speed",
+                                                        "mc_uwm_strength",
+                                                        "mc_uwm_pseudo_r",
+                                                        "pfr"
+                                                    ]
+                                 }
+                },
+    "output":  "outputs/single/single_qwen_eli5_efpr_n1000.json"
 }

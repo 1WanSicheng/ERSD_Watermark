@@ -58,9 +58,6 @@ from unbiased_watermark.scores.pfr_watermark_strength import (  # noqa: E402
 
 # Multi-draft cached variants under MPFR_spec/.
 sys.path.insert(0, str(ROOT / "MPFR_spec"))
-from multi_draft_pfr_batched_cached import (  # noqa: E402
-    multi_draft_pfr_batched_cached_sample_generator,
-)
 from mpfr_batched_torchgen_cached import (  # noqa: E402
     finite_multi_draft_pfr_cached_sample_generator,
 )
@@ -305,8 +302,8 @@ def load_prompts(dataset: str, n: int) -> List[List[dict]]:
             for row in ds
         ]
     if dataset == "cnn_paper_summarization":
-        # Paper-exact prompt format from improving_KL/experiments/tasks.py
-        # (Hu & Huang 2024, Table 1). On a base llama, this template lands
+        # Paper-exact prompt format from prior work [hu2024inevitable]
+        # Table 1. On a base llama, this template lands
         # the model in summarization mode (recognized as instruction-tuned
         # demonstration) — much lower per-token entropy than the
         # "Summarize the following article in 3-5 sentences:" prompt, which
@@ -329,7 +326,7 @@ def load_prompts(dataset: str, n: int) -> List[List[dict]]:
     if dataset == "cnn_dailymail_basefmt":
         # Same instruction content as ``cnn_dailymail`` ("in 3-5 sentences")
         # but wrapped in the System:/INPUT:/OUTPUT: section markers from
-        # Hu & Huang's protocol so base llama recognises it as an
+        # the [hu2024inevitable] protocol so base llama recognises it as an
         # instruction-tuned demonstration (lower entropy, no early-EOS
         # pathology). Used when running base targets with the same
         # instruction wording we use elsewhere; instruction-tuned targets
@@ -623,13 +620,6 @@ LOOKAHEAD_INVARIANT = {"basic_uwm"}
 # ---------------------------------------------------------------------------
 
 
-def _prefix_labeler_label(prefix_ids: torch.LongTensor) -> bytes:
-    tokens = prefix_ids.detach().cpu().numpy().astype(np.int32, copy=False)
-    payload = tokens.tobytes()
-    length = prefix_ids.shape[-1].to_bytes(8, byteorder="big", signed=False)
-    return length + payload
-
-
 def _mpfr_direct_label(prefix_ids: torch.LongTensor) -> bytes:
     tokens = prefix_ids.detach().cpu().tolist()
     return b"MPFR_DIRECT_CLOCK_V1" + b"".join(
@@ -694,20 +684,6 @@ def finalize_labels(src_labels, masked_flags, out_ids):
     return src_labels, masked_flags
 
 
-def _run_ms_pfr_cached(target, draft, input_ids, *, lookahead, max_length,
-                      seed, base_key, plk, num_drafts: int, **_):
-    pk = seeded_private_key(seed, base_key)
-    gen = multi_draft_pfr_batched_cached_sample_generator(
-        model=target, ref_model=draft, input_ids=input_ids,
-        n=lookahead, max_length=max_length, num_drafts=num_drafts,
-        private_key=pk, return_meta=True,
-        process_logits_kwargs=plk,
-    )
-    out, blocks, _, _ = _drain(gen, max_length)
-    sentinel = (_DEFER_PREFIX_LABELS, input_ids, _prefix_labeler_label)
-    return out, blocks, pk, "PFR", sentinel, None
-
-
 def _run_mpfr_torchgen_cached(target, draft, input_ids, *, lookahead,
                               max_length, seed, base_key, plk,
                               num_drafts: int, **_):
@@ -723,37 +699,26 @@ def _run_mpfr_torchgen_cached(target, draft, input_ids, *, lookahead,
     return out, blocks, pk, "PFR", sentinel, None
 
 
-def _run_invariant_or_strong_multi(target, draft, input_ids, *,
-                                   lookahead, max_length, seed, base_key,
-                                   num_drafts: int, strategy_kind: str,
-                                   **_):
-    """Wrapper for SpeculativeDecoding.strategy.{Invariant,Strong}MultiDraftStrategy
-    + InvariantGenerator.  Both use unkeyed pre-sampled randomness, so no
+def _run_invariant_multi(target, draft, input_ids, *,
+                         lookahead, max_length, seed, base_key,
+                         num_drafts: int, **_):
+    """Wrapper for accuwm.invariant_multi.InvariantMultiDraftStrategy
+    + InvariantGenerator.  Uses unkeyed pre-sampled randomness, so no
     recoverable watermark."""
-    sys.path.insert(0, str(ROOT / "SpeculativeDecoding"))
-    from strategy import (  # noqa: E402
+    from accuwm.invariant_multi import (  # noqa: E402
         InvariantMultiDraftStrategy,
-        StrongMultiDraftStrategy,
+        InvariantGenerator,
     )
-    from generator import InvariantGenerator  # noqa: E402
 
     eff_vocab = min(int(target.config.vocab_size), int(draft.config.vocab_size))
 
     class _StubTok:
         vocab_size = eff_vocab
 
-    if strategy_kind == "invariant":
-        strategy = InvariantMultiDraftStrategy(
-            target=target, drafter=draft, tokenizer=_StubTok(),
-            max_draft_len=lookahead, max_num_drafts=num_drafts,
-        )
-    elif strategy_kind == "strong":
-        strategy = StrongMultiDraftStrategy(
-            target=target, drafter=draft, tokenizer=_StubTok(),
-            max_draft_len=lookahead, max_num_drafts=num_drafts,
-        )
-    else:
-        raise ValueError(f"unknown strategy_kind {strategy_kind}")
+    strategy = InvariantMultiDraftStrategy(
+        target=target, drafter=draft, tokenizer=_StubTok(),
+        max_draft_len=lookahead, max_num_drafts=num_drafts,
+    )
 
     generator = InvariantGenerator(strategy)
     eos = int(getattr(target.config, "eos_token_id", 0) or 0)
@@ -772,12 +737,8 @@ def _run_invariant_or_strong_multi(target, draft, input_ids, *,
 
 
 MULTI_DRAFT_DECODERS: Dict[str, Callable] = {
-    "ms_pfr_cached":         _run_ms_pfr_cached,
     "mpfr_torchgen_cached":  _run_mpfr_torchgen_cached,
-    "invariant_multi":       lambda *a, **kw: _run_invariant_or_strong_multi(
-                                  *a, strategy_kind="invariant", **kw),
-    "strong_multi":          lambda *a, **kw: _run_invariant_or_strong_multi(
-                                  *a, strategy_kind="strong", **kw),
+    "invariant_multi":       _run_invariant_multi,
 }
 
 

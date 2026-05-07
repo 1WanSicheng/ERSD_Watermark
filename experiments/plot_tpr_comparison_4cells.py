@@ -1,13 +1,17 @@
 """4-panel TPR-vs-T_eval comparison plot, one panel per (model, dataset) cell.
 
-Reads pre-computed curves from
-  data/0506 ablation_n500_qwen_cnn/tpr_vs_T_2x2_data.json
+Reads pre-computed curves (produced by experiments/aggregate_tpr_curves.py
+or hand-edited equivalents) from a JSON whose path is configurable via
+--data-file (default: data/0506 ablation_n500_qwen_cnn/tpr_vs_T_2x2_data.json).
 
-The JSON has four cells (qwen_cnn, qwen_eli5, vicuna_cnn, vicuna_eli5);
-each is rendered as one subplot.  The same 7 schemes are overlaid in each
-subplot using the colour/marker scheme as in plot_drafter_invariance_v2.py
+The JSON's `cells` block holds up to four cells (qwen_cnn, qwen_eli5,
+vicuna_cnn, vicuna_eli5); each present cell is rendered as one subplot.
+Missing cells get an empty / hidden panel.  The same 7 schemes are
+overlaid in each subplot using the colour/marker scheme as in
+plot_drafter_invariance_v2.py.
 """
 from __future__ import annotations
+import argparse
 import json
 from pathlib import Path
 import matplotlib
@@ -15,9 +19,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
-DATA_DIR = Path("data/0506 ablation_n500_qwen_cnn")
-DATA_FILE = DATA_DIR / "tpr_vs_T_2x2_data.json"
-OUT_DIR = DATA_DIR
+DEFAULT_DATA = Path("data/0506 ablation_n500_qwen_cnn") / "tpr_vs_T_2x2_data.json"
 
 # NeurIPS rcParams
 plt.rcParams.update({
@@ -76,9 +78,17 @@ CELLS = [  # (cell_key, panel_label_topleft)
 
 
 def main():
-    data = json.load(open(DATA_FILE))
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--data-file", type=Path, default=DEFAULT_DATA,
+                    help="Aggregated TPR-curves JSON (cf. aggregate_tpr_curves.py).")
+    ap.add_argument("--out-dir", type=Path, default=None,
+                    help="Folder for the .png/.pdf outputs.  Default: same "
+                         "folder as --data-file.")
+    args = ap.parse_args()
+    data = json.load(open(args.data_file))
     T_grid = data["T_grid"]
     cells = data["cells"]
+    out_dir = args.out_dir if args.out_dir is not None else args.data_file.parent
 
     fig, axes = plt.subplots(
         2, 2, figsize=(8.4, 5.6),
@@ -142,8 +152,9 @@ def main():
         handlelength=2.0, handletextpad=0.4, columnspacing=1.3,
         frameon=False, fontsize=7.5,
     )
-    out_png = OUT_DIR / "tpr_comparison_4cells.png"
-    out_pdf = OUT_DIR / "tpr_comparison_4cells.pdf"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_png = out_dir / "tpr_comparison_4cells.png"
+    out_pdf = out_dir / "tpr_comparison_4cells.pdf"
     fig.savefig(out_png)
     fig.savefig(out_pdf)
     print(f"wrote {out_png}")

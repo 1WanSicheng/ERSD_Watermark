@@ -4,6 +4,7 @@ __all__ = [
     "basic",
     "basic_watermark",
     "finite_multi_draft_pfr",
+    "invariant_multi",
     "mc",
     "mc_watermark",
     "multi_draft_utils",

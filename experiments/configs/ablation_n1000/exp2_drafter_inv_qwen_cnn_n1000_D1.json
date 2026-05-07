@@ -7,7 +7,7 @@
     4
   ],
   "private_key": "1234",
-  "target_model": "/root/PFR/ERSD_Watermark/model/Qwen2.5-7B-Instruct",
+  "target_model": "Qwen/Qwen2.5-7B-Instruct",
   "draft_model": "Qwen/Qwen2.5-1.5B-Instruct",
   "use_chat_template": true,
   "process_logits": {

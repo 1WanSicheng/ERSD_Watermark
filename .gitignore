@@ -19,3 +19,11 @@ __pycache__/
 *.log
 *.out
 .DS_Store
+
+# Secrets — never commit
+*.pem
+*.key
+*.p12
+*.pfx
+.env
+.env.*

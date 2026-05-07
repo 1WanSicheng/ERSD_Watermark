@@ -6,7 +6,7 @@ GPU torch.Generator sampling, draft tree + ONE batched target forward over
 depth-L leaves) but threads the TARGET KV cache across blocks AND within the
 batched verify forward.  Draft side remains cache-free for simplicity.
 
-Cache convention (matches multi_draft_pfr_batched_cached / StrongMultiDraft):
+Cache convention:
 - At the start of block, `target_past_key_values` covers [0, len(input_ids)-1).
 - We feed batch_ids[:, cached_n:] of shape (B, root_len + L - cached_n) to
   the target -- only the new tokens since the cache was last filled.
