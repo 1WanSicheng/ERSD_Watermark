@@ -255,17 +255,21 @@ def run_one_prompt(
 
     if tpr_applies and Us is not None:
         tpr_cfg = (metrics_cfg or {}).get("tpr_at_n") or {}
-        det = S.detector_at_first_n(
-            Us, skipped,
-            n_tokens=int(tpr_cfg.get("tokens", 64)),
-            fpr=float(tpr_cfg.get("fpr", 0.01)),
-            li_delta=float(tpr_cfg.get("li_delta",
-                anlppt_cfg.get("li_delta", 0.5))),
-            pl_eps=float(tpr_cfg.get("pl_eps",
-                anlppt_cfg.get("pl_eps", 0.1))),
-            variants=list(tpr_cfg.get("variants", ["U", "Li", "PL"])),
-        )
-        row.update(det)
+        t_raw = tpr_cfg.get("tokens", 64)
+        T_list = ([int(t_raw)] if isinstance(t_raw, (int, float))
+                  else [int(t) for t in t_raw])
+        for T_n in T_list:
+            det = S.detector_at_first_n(
+                Us, skipped,
+                n_tokens=T_n,
+                fpr=float(tpr_cfg.get("fpr", 0.01)),
+                li_delta=float(tpr_cfg.get("li_delta",
+                    anlppt_cfg.get("li_delta", 0.5))),
+                pl_eps=float(tpr_cfg.get("pl_eps",
+                    anlppt_cfg.get("pl_eps", 0.1))),
+                variants=list(tpr_cfg.get("variants", ["U", "Li", "PL"])),
+            )
+            row.update(det)
 
     if lppl_applies:
         full = torch.cat([input_ids, out_ids.to(input_ids.device)], dim=1)

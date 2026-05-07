@@ -1,0 +1,33 @@
+{
+  "experiment": "rerun_pseudo_r_dualkey_qwen_eli5_n1000",
+  "samples": 1000,
+  "dataset": "eli5",
+  "max_new_tokens": 128,
+  "lookaheads": [4],
+  "private_key": "1234",
+  "target_model": "Qwen/Qwen2.5-7B-Instruct",
+  "draft_model": "Qwen/Qwen2.5-0.5B-Instruct",
+  "process_logits": {"top_k": 50, "top_p": 1.0, "temperature": 1.0},
+  "decoders": ["mc_uwm_pseudo_r"],
+  "metrics": {
+    "aatps": true,
+    "token_rate": true,
+    "anlppt": {
+      "variants": ["U", "Li", "PL"],
+      "li_delta": 0.5,
+      "pl_eps": 0.1,
+      "applies_to": ["mc_uwm_pseudo_r"]
+    },
+    "lppl": { "applies_to": ["mc_uwm_pseudo_r"] },
+    "tpr_at_n": {
+      "tokens": [8, 16, 24, 32, 48, 64, 96, 128],
+      "fpr": 0.01,
+      "applies_to": ["mc_uwm_pseudo_r"],
+      "detector_per_decoder": {
+        "mc_uwm_pseudo_r": { "kind": "DeltaGumbelDual", "accept_threshold": 0.5 }
+      }
+    },
+    "kl_ratio": { "applies_to": ["mc_uwm_pseudo_r"] }
+  },
+  "output": "outputs/rerun_pseudo_r_dualkey_qwen_eli5_n1000.json"
+}
