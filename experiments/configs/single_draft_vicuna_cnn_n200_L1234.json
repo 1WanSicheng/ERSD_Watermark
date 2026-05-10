@@ -1,0 +1,32 @@
+{
+  "experiment": "single_draft",
+  "samples": 200,
+  "dataset": "cnn_dailymail",
+  "max_new_tokens": 128,
+  "lookaheads": [1, 2, 3, 4],
+  "private_key": "1234",
+  "target_model": "lmsys/vicuna-7b-v1.5",
+  "draft_model": "double7/vicuna-68m",
+  "use_chat_template": true,
+  "process_logits": {
+    "top_k": 50,
+    "top_p": 1.0,
+    "temperature": 1.0
+  },
+  "decoders": [
+    "mc_uwm_speed",
+    "mc_uwm_strength",
+    "pfr"
+  ],
+  "metrics": {
+    "aatps": true,
+    "token_rate": true,
+    "anlppt": {
+      "variants": ["U", "Li", "PL"],
+      "li_delta": 0.5,
+      "pl_eps": 0.1
+    },
+    "kl_ratio_pfr_only": true
+  },
+  "output": "outputs/single_draft_vicuna_cnn_n200_L1-2-3-4_3dec.json"
+}

@@ -1,0 +1,33 @@
+{
+  "experiment": "single_draft",
+  "samples": 100,
+  "dataset": "cnn_paper_summarization",
+  "max_new_tokens": 128,
+  "lookaheads": [1, 4],
+  "private_key": "1234",
+  "target_model": "huggyllama/llama-7b",
+  "draft_model": "JackFram/llama-68m",
+  "use_chat_template": false,
+  "process_logits": {
+    "top_k": 0,
+    "top_p": 1.0,
+    "temperature": 1.0
+  },
+  "decoders": [
+    "basic_uwm",
+    "pfr",
+    "pfr_no_watermark",
+    "mc_uwm_speed",
+    "mc_uwm_strength"
+  ],
+  "metrics": {
+    "aatps": true,
+    "token_rate": true,
+    "anlppt": {
+      "variants": ["U", "Li", "PL"],
+      "li_delta": 0.5,
+      "pl_eps": 0.1
+    }
+  },
+  "output": "outputs/single_draft_llama_PAPERFMT_n100_NOTOPK.json"
+}

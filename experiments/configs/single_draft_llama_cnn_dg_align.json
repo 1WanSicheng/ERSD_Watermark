@@ -1,0 +1,33 @@
+{
+  "experiment": "single_draft",
+  "samples": 30,
+  "dataset": "cnn_dailymail",
+  "max_new_tokens": 64,
+  "lookaheads": [1],
+  "private_key": "1234",
+  "target_model": "huggyllama/llama-7b",
+  "draft_model": "JackFram/llama-68m",
+  "use_chat_template": false,
+  "process_logits": {
+    "top_k": 50,
+    "top_p": 1.0,
+    "temperature": 1.0
+  },
+  "decoders": [
+    "basic_uwm",
+    "basic_uwm_torch_rng",
+    "pfr",
+    "pfr_no_watermark"
+  ],
+  "metrics": {
+    "aatps": true,
+    "token_rate": true,
+    "anlppt": {
+      "variants": ["U", "Li", "PL"],
+      "li_delta": 0.5,
+      "pl_eps": 0.1
+    },
+    "kl_ratio_pfr_only": true
+  },
+  "output": "outputs/single_draft_llama_cnn_DG_RNG_ALIGN.json"
+}

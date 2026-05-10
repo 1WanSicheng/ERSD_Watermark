@@ -1,0 +1,66 @@
+{
+  "experiment": "multi_draft",
+  "samples": 500,
+  "dataset": "eli5",
+  "max_new_tokens": 128,
+  "lookaheads": [
+    4
+  ],
+  "num_drafts": [
+    4
+  ],
+  "private_key": "1234",
+  "target_model": "/root/PFR/ERSD_Watermark/model/Qwen2.5-7B-Instruct",
+  "draft_model": "/root/PFR/ERSD_Watermark/model/Qwen2.5-0.5B-Instruct",
+  "use_chat_template": true,
+  "process_logits": {
+    "top_k": 50,
+    "top_p": 1.0,
+    "temperature": 1.0
+  },
+  "decoders": [
+    "mpfr_torchgen_cached",
+    "invariant_multi"
+  ],
+  "metrics": {
+    "aatps": true,
+    "token_rate": true,
+    "anlppt": {
+      "variants": [
+        "U",
+        "Li",
+        "PL"
+      ],
+      "li_delta": 0.5,
+      "pl_eps": 0.1,
+      "applies_to": [
+        "mpfr_torchgen_cached"
+      ]
+    },
+    "lppl": {
+      "applies_to": [
+        "mpfr_torchgen_cached",
+        "invariant_multi"
+      ]
+    },
+    "tpr_at_n": {
+      "tokens": 64,
+      "fpr": 0.01,
+      "variants": [
+        "U",
+        "Li",
+        "PL"
+      ],
+      "applies_to": [
+        "mpfr_torchgen_cached"
+      ],
+      "detector_per_decoder": {
+        "mpfr_torchgen_cached": {
+          "kind": "PFR",
+          "labeler": "mpfr_direct"
+        }
+      }
+    }
+  },
+  "output": "outputs/ablation_n500_eli5/exp1_quality_qwen_eli5_n500_multi.json"
+}

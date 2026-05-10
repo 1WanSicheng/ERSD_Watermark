@@ -1,0 +1,34 @@
+{
+  "experiment": "single_draft",
+  "samples": 2,
+  "dataset": "eli5",
+  "max_new_tokens": 32,
+  "lookaheads": [2, 4],
+  "private_key": "1234",
+  "target_model": "huggyllama/llama-7b",
+  "draft_model": "JackFram/llama-68m",
+  "process_logits": {
+    "top_k": 50,
+    "top_p": 1.0,
+    "temperature": 1.0
+  },
+  "decoders": [
+    "mc",
+    "basic_uwm",
+    "mc_uwm_speed",
+    "mc_uwm_strength",
+    "pfr",
+    "pfr_no_watermark"
+  ],
+  "metrics": {
+    "aatps": true,
+    "token_rate": true,
+    "anlppt": {
+      "variants": ["U", "Li", "PL"],
+      "li_delta": 0.5,
+      "pl_eps": 0.1
+    },
+    "kl_ratio_pfr_only": true
+  },
+  "output": "outputs/smoke_single_draft_llama.json"
+}

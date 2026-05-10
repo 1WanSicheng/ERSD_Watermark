@@ -1,0 +1,6486 @@
+{
+  "args": {
+    "samples": 100,
+    "warmup": 1,
+    "lookahead": 4,
+    "max_new_tokens": 128,
+    "num_drafts": [
+      2,
+      4,
+      6,
+      8
+    ],
+    "top_k": 50,
+    "top_p": 1.0,
+    "temperature": 1.0,
+    "target_model": "/root/PFR/ERSD_Watermark/model/Qwen2.5-7B-Instruct",
+    "draft_model": "/root/PFR/ERSD_Watermark/model/Qwen2.5-0.5B-Instruct",
+    "device": "cuda:0",
+    "methods": [
+      "ms_pfr_batched_cached",
+      "mpfr_batched_torchgen_cached"
+    ],
+    "dataset": "gsm8k",
+    "output": "outputs/mpfr_cached_benchmark_gsm8k_n100_L4_B2-4-6-8_DRAFTCACHE.json"
+  },
+  "summary": {
+    "ms_pfr_batched_cached_B2": {
+      "AATPS": 4.430764424381383,
+      "token_rate": 65.76218072907814,
+      "tokens_per_sample": 128.0
+    },
+    "mpfr_batched_torchgen_cached_B2": {
+      "AATPS": 4.372325595590661,
+      "token_rate": 64.18317777407938,
+      "tokens_per_sample": 128.0
+    },
+    "ms_pfr_batched_cached_B4": {
+      "AATPS": 4.608285883605126,
+      "token_rate": 67.11012827146583,
+      "tokens_per_sample": 128.0
+    },
+    "mpfr_batched_torchgen_cached_B4": {
+      "AATPS": 4.564174280540962,
+      "token_rate": 66.4969893235134,
+      "tokens_per_sample": 128.0
+    },
+    "ms_pfr_batched_cached_B6": {
+      "AATPS": 4.69898407084614,
+      "token_rate": 67.38935418261441,
+      "tokens_per_sample": 128.0
+    },
+    "mpfr_batched_torchgen_cached_B6": {
+      "AATPS": 4.655149005404845,
+      "token_rate": 66.67929416314608,
+      "tokens_per_sample": 128.0
+    },
+    "ms_pfr_batched_cached_B8": {
+      "AATPS": 4.734493528059713,
+      "token_rate": 66.96244397346041,
+      "tokens_per_sample": 128.0
+    },
+    "mpfr_batched_torchgen_cached_B8": {
+      "AATPS": 4.704207645360038,
+      "token_rate": 66.52810733459654,
+      "tokens_per_sample": 128.0
+    }
+  },
+  "rows": {
+    "ms_pfr_batched_cached_B2": [
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 68.75817082744607,
+        "elapsed_sec": 1.8615969340025913
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 64.8775983645691,
+        "elapsed_sec": 1.9729460280068452
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 72.82384571140263,
+        "elapsed_sec": 1.757666033008718
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 68.28216252929887,
+        "elapsed_sec": 1.8745744900079444
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 71.16965214330666,
+        "elapsed_sec": 1.7985193990025437
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 71.35373784229967,
+        "elapsed_sec": 1.7938793939974857
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.161290322580645,
+        "token_rate": 61.01267254235719,
+        "elapsed_sec": 2.0979248189978534
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.2666666666666666,
+        "token_rate": 62.09214573972548,
+        "elapsed_sec": 2.0614523539989023
+      },
+      {
+        "tokens": 128,
+        "blocks": 32,
+        "AATPS": 4.0,
+        "accepted_mean": 3.03125,
+        "token_rate": 59.96141197397186,
+        "elapsed_sec": 2.1347062349959742
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 69.71159605791435,
+        "elapsed_sec": 1.836136414000066
+      },
+      {
+        "tokens": 128,
+        "blocks": 35,
+        "AATPS": 3.657142857142857,
+        "accepted_mean": 2.6857142857142855,
+        "token_rate": 53.96063989198594,
+        "elapsed_sec": 2.372099371990771
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 70.73069002428487,
+        "elapsed_sec": 1.809681200000341
+      },
+      {
+        "tokens": 128,
+        "blocks": 32,
+        "AATPS": 4.0,
+        "accepted_mean": 3.03125,
+        "token_rate": 58.98746256425234,
+        "elapsed_sec": 2.1699526379961753
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 64.38069337309511,
+        "elapsed_sec": 1.9881736789975548
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 70.82279293724741,
+        "elapsed_sec": 1.8073277640069136
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.161290322580645,
+        "token_rate": 62.0058626251467,
+        "elapsed_sec": 2.064320930003305
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.413793103448276,
+        "token_rate": 64.95104585134519,
+        "elapsed_sec": 1.9707149949972518
+      },
+      {
+        "tokens": 128,
+        "blocks": 35,
+        "AATPS": 3.657142857142857,
+        "accepted_mean": 2.6857142857142855,
+        "token_rate": 54.36144142152995,
+        "elapsed_sec": 2.3546101179963443
+      },
+      {
+        "tokens": 128,
+        "blocks": 33,
+        "AATPS": 3.878787878787879,
+        "accepted_mean": 2.909090909090909,
+        "token_rate": 58.6636762857267,
+        "elapsed_sec": 2.181929400001536
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 68.79277354602435,
+        "elapsed_sec": 1.8606605520035373
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 68.57387752804848,
+        "elapsed_sec": 1.8666000030061696
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.129032258064516,
+        "token_rate": 60.9061500809677,
+        "elapsed_sec": 2.101594007006497
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.77970720311515,
+        "elapsed_sec": 1.834344183007488
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 62.42285790557862,
+        "elapsed_sec": 2.0505309159925673
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 70.11336908339963,
+        "elapsed_sec": 1.8256147390056867
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 66.86841972941015,
+        "elapsed_sec": 1.9142070429952582
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 64.68383697474326,
+        "elapsed_sec": 1.9788560169981793
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 72.53811730402106,
+        "elapsed_sec": 1.7645894980087178
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 64.24570093768835,
+        "elapsed_sec": 1.9923512099921936
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 65.43415157761993,
+        "elapsed_sec": 1.9561650440009544
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 66.29349165929749,
+        "elapsed_sec": 1.9308079390029889
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.5714285714285716,
+        "token_rate": 66.96691047257384,
+        "elapsed_sec": 1.9113917470094748
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 62.99739593964979,
+        "elapsed_sec": 2.0318300159997307
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 70.65050876908654,
+        "elapsed_sec": 1.8117350070097018
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 67.093042638263,
+        "elapsed_sec": 1.9077984089963138
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 68.3368900559489,
+        "elapsed_sec": 1.8730732389958575
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 70.35114660207354,
+        "elapsed_sec": 1.8194444039982045
+      },
+      {
+        "tokens": 128,
+        "blocks": 32,
+        "AATPS": 4.0,
+        "accepted_mean": 3.03125,
+        "token_rate": 59.50429726650211,
+        "elapsed_sec": 2.1511051450070227
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 67.9797515447099,
+        "elapsed_sec": 1.882913619003375
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 63.054957425604385,
+        "elapsed_sec": 2.029975202996866
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.5714285714285716,
+        "token_rate": 66.97906939538532,
+        "elapsed_sec": 1.9110447660059435
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 71.28880515108027,
+        "elapsed_sec": 1.7955133310024394
+      },
+      {
+        "tokens": 128,
+        "blocks": 33,
+        "AATPS": 3.878787878787879,
+        "accepted_mean": 2.909090909090909,
+        "token_rate": 57.94468758096223,
+        "elapsed_sec": 2.2090031950065168
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 73.02591290341411,
+        "elapsed_sec": 1.7528024630009895
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 65.48907268906427,
+        "elapsed_sec": 1.9545245449990034
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 68.68298371909006,
+        "elapsed_sec": 1.8636348199943313
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.161290322580645,
+        "token_rate": 61.03273045458114,
+        "elapsed_sec": 2.0972353530087275
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 66.57920420127637,
+        "elapsed_sec": 1.9225222280074377
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 69.22178003800327,
+        "elapsed_sec": 1.8491289869998582
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.5714285714285716,
+        "token_rate": 67.68611949813953,
+        "elapsed_sec": 1.891081967012724
+      },
+      {
+        "tokens": 128,
+        "blocks": 32,
+        "AATPS": 4.0,
+        "accepted_mean": 3.03125,
+        "token_rate": 60.01033691196583,
+        "elapsed_sec": 2.1329658619943075
+      },
+      {
+        "tokens": 128,
+        "blocks": 32,
+        "AATPS": 4.0,
+        "accepted_mean": 3.03125,
+        "token_rate": 59.479718274167794,
+        "elapsed_sec": 2.1519940529979067
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 70.84835769640249,
+        "elapsed_sec": 1.8066756119951606
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.161290322580645,
+        "token_rate": 61.05602684317563,
+        "elapsed_sec": 2.0964351370057557
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 70.24940752511668,
+        "elapsed_sec": 1.8220794240041869
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 62.68750794742392,
+        "elapsed_sec": 2.0418741180037614
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 70.58709424896149,
+        "elapsed_sec": 1.8133626459894003
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 67.93382829878803,
+        "elapsed_sec": 1.8841864679998253
+      },
+      {
+        "tokens": 128,
+        "blocks": 32,
+        "AATPS": 4.0,
+        "accepted_mean": 3.0,
+        "token_rate": 59.55878031006179,
+        "elapsed_sec": 2.1491373620083323
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 65.59736874180794,
+        "elapsed_sec": 1.9512977800040971
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.5714285714285716,
+        "token_rate": 67.71984345006082,
+        "elapsed_sec": 1.8901402229967061
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.413793103448276,
+        "token_rate": 65.64851522746194,
+        "elapsed_sec": 1.9497775320051005
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.5714285714285716,
+        "token_rate": 67.22060277011407,
+        "elapsed_sec": 1.9041781050036661
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 71.16563074513827,
+        "elapsed_sec": 1.798621028996422
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 63.65598152857019,
+        "elapsed_sec": 2.010808676990564
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 65.88131544118798,
+        "elapsed_sec": 1.9428877390018897
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 67.68193653534904,
+        "elapsed_sec": 1.891198842000449
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 66.43944201012015,
+        "elapsed_sec": 1.9265664510021452
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 66.44622432650104,
+        "elapsed_sec": 1.9263698020076845
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 69.14940417296539,
+        "elapsed_sec": 1.8510643949994119
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 64.97605400650116,
+        "elapsed_sec": 1.96995650100871
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 68.0511119931239,
+        "elapsed_sec": 1.8809391389950179
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 68.39178632132783,
+        "elapsed_sec": 1.871569772993098
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 66.35764791381912,
+        "elapsed_sec": 1.928941184989526
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 69.83208175453326,
+        "elapsed_sec": 1.8329684119962621
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 73.37372463225071,
+        "elapsed_sec": 1.744493695005076
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.5714285714285716,
+        "token_rate": 67.35671229347626,
+        "elapsed_sec": 1.9003302810015157
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 63.15205277740141,
+        "elapsed_sec": 2.0268541459954577
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 69.53636093531142,
+        "elapsed_sec": 1.8407635699986713
+      },
+      {
+        "tokens": 128,
+        "blocks": 34,
+        "AATPS": 3.764705882352941,
+        "accepted_mean": 2.7941176470588234,
+        "token_rate": 56.63294690693774,
+        "elapsed_sec": 2.2601684530091006
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 64.46758227828255,
+        "elapsed_sec": 1.9854940340010216
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 64.94740995081665,
+        "elapsed_sec": 1.9708253200078616
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 67.78299117379358,
+        "elapsed_sec": 1.8883793379936833
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 62.228832272597806,
+        "elapsed_sec": 2.0569243439967977
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.161290322580645,
+        "token_rate": 61.003506829537734,
+        "elapsed_sec": 2.0982400299981236
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.42476588315957,
+        "elapsed_sec": 1.843722457997501
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.161290322580645,
+        "token_rate": 61.09601083695954,
+        "elapsed_sec": 2.0950631349987816
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.413793103448276,
+        "token_rate": 64.73160308369323,
+        "elapsed_sec": 1.9773957989964401
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.12169558940757,
+        "elapsed_sec": 1.851806425009272
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 62.41264259659881,
+        "elapsed_sec": 2.0508665340021253
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 62.236281294352956,
+        "elapsed_sec": 2.05667815200286
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.129032258064516,
+        "token_rate": 60.94846077642472,
+        "elapsed_sec": 2.100135070999386
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 66.63349956431739,
+        "elapsed_sec": 1.9209556880086893
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 72.98960279256886,
+        "elapsed_sec": 1.7536744289973285
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.161290322580645,
+        "token_rate": 60.809315772580355,
+        "elapsed_sec": 2.1049406390084187
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 68.07428373038852,
+        "elapsed_sec": 1.8802988880051998
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 62.99183151642821,
+        "elapsed_sec": 2.0320094989874633
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 67.44755375293526,
+        "elapsed_sec": 1.8977708290040027
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 63.47893758429482,
+        "elapsed_sec": 2.0164168600022094
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 62.288444506423005,
+        "elapsed_sec": 2.0549557949998416
+      }
+    ],
+    "mpfr_batched_torchgen_cached_B2": [
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 63.5933255481816,
+        "elapsed_sec": 2.012789846994565
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 61.391624637193864,
+        "elapsed_sec": 2.084974958008388
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 67.9495997013075,
+        "elapsed_sec": 1.883749139989959
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.5714285714285716,
+        "token_rate": 65.94990475932555,
+        "elapsed_sec": 1.940867094002897
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.5714285714285716,
+        "token_rate": 66.9682319044825,
+        "elapsed_sec": 1.91135403100634
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 67.65488279320233,
+        "elapsed_sec": 1.8919550920109032
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.129032258064516,
+        "token_rate": 60.42747518575414,
+        "elapsed_sec": 2.118241737000062
+      },
+      {
+        "tokens": 128,
+        "blocks": 34,
+        "AATPS": 3.764705882352941,
+        "accepted_mean": 2.7941176470588234,
+        "token_rate": 52.76790783133376,
+        "elapsed_sec": 2.4257167900068453
+      },
+      {
+        "tokens": 128,
+        "blocks": 34,
+        "AATPS": 3.764705882352941,
+        "accepted_mean": 2.7941176470588234,
+        "token_rate": 55.58920222323523,
+        "elapsed_sec": 2.3026054499932798
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.5714285714285716,
+        "token_rate": 66.07406288474967,
+        "elapsed_sec": 1.9372200590005377
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 61.77618112451114,
+        "elapsed_sec": 2.0719959970010677
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.88464544512992,
+        "elapsed_sec": 1.831589745997917
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.161290322580645,
+        "token_rate": 60.11222563670496,
+        "elapsed_sec": 2.129350538001745
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 62.97261482448461,
+        "elapsed_sec": 2.03262958599953
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 64.18769280555065,
+        "elapsed_sec": 1.99415175098693
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 62.60844182609103,
+        "elapsed_sec": 2.044452732996433
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.161290322580645,
+        "token_rate": 60.827691079352306,
+        "elapsed_sec": 2.104304762004176
+      },
+      {
+        "tokens": 128,
+        "blocks": 32,
+        "AATPS": 4.0,
+        "accepted_mean": 3.03125,
+        "token_rate": 58.52323528793777,
+        "elapsed_sec": 2.1871654800052056
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.161290322580645,
+        "token_rate": 60.361899153245005,
+        "elapsed_sec": 2.1205429550027475
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 66.654587258548,
+        "elapsed_sec": 1.9203479499992682
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.161290322580645,
+        "token_rate": 61.732925864460846,
+        "elapsed_sec": 2.073447810995276
+      },
+      {
+        "tokens": 128,
+        "blocks": 33,
+        "AATPS": 3.878787878787879,
+        "accepted_mean": 2.909090909090909,
+        "token_rate": 57.23234717394656,
+        "elapsed_sec": 2.236497475998476
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 69.23552860304332,
+        "elapsed_sec": 1.848761793007725
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 65.92172538466747,
+        "elapsed_sec": 1.9416967510042014
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.161290322580645,
+        "token_rate": 59.80810718349095,
+        "elapsed_sec": 2.1401780799933476
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 62.18596693963838,
+        "elapsed_sec": 2.058342200005427
+      },
+      {
+        "tokens": 128,
+        "blocks": 33,
+        "AATPS": 3.878787878787879,
+        "accepted_mean": 2.909090909090909,
+        "token_rate": 56.486894431813774,
+        "elapsed_sec": 2.266012342995964
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.03268619422106,
+        "elapsed_sec": 1.854194107989315
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.413793103448276,
+        "token_rate": 64.03332130770163,
+        "elapsed_sec": 1.99895925099554
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.5714285714285716,
+        "token_rate": 66.46523901687412,
+        "elapsed_sec": 1.9258186970109819
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.413793103448276,
+        "token_rate": 64.18281721340368,
+        "elapsed_sec": 1.9943032349983696
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.161290322580645,
+        "token_rate": 59.97835989223801,
+        "elapsed_sec": 2.1341030369949294
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 71.44062300708775,
+        "elapsed_sec": 1.791697701002704
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 71.85129722866044,
+        "elapsed_sec": 1.781457050004974
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.413793103448276,
+        "token_rate": 63.704911872540656,
+        "elapsed_sec": 2.0092642189993057
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 65.57961581277333,
+        "elapsed_sec": 1.9518260119948536
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.413793103448276,
+        "token_rate": 64.04975436178728,
+        "elapsed_sec": 1.9984463839937234
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.161290322580645,
+        "token_rate": 59.56794750586165,
+        "elapsed_sec": 2.1488066210004035
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 62.34873782166637,
+        "elapsed_sec": 2.0529685840010643
+      },
+      {
+        "tokens": 128,
+        "blocks": 33,
+        "AATPS": 3.878787878787879,
+        "accepted_mean": 2.909090909090909,
+        "token_rate": 55.498014761033716,
+        "elapsed_sec": 2.306388805998722
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.413793103448276,
+        "token_rate": 63.93405113101962,
+        "elapsed_sec": 2.002063028005068
+      },
+      {
+        "tokens": 128,
+        "blocks": 32,
+        "AATPS": 4.0,
+        "accepted_mean": 3.03125,
+        "token_rate": 58.91636942600777,
+        "elapsed_sec": 2.172571073999279
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 64.30424773541866,
+        "elapsed_sec": 1.990537242993014
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.68862739037425,
+        "elapsed_sec": 1.8367415860120673
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 66.72090047295586,
+        "elapsed_sec": 1.918439335990115
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 67.94621935915141,
+        "elapsed_sec": 1.8838428570015822
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 62.479527917822075,
+        "elapsed_sec": 2.0486710489931284
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 64.2923176877508,
+        "elapsed_sec": 1.9909066060063196
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 66.86329112924705,
+        "elapsed_sec": 1.9143538679927588
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.413793103448276,
+        "token_rate": 65.19253622905543,
+        "elapsed_sec": 1.9634149460034678
+      },
+      {
+        "tokens": 128,
+        "blocks": 33,
+        "AATPS": 3.878787878787879,
+        "accepted_mean": 2.909090909090909,
+        "token_rate": 57.73301453300061,
+        "elapsed_sec": 2.2171023120026803
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.161290322580645,
+        "token_rate": 60.11386806466641,
+        "elapsed_sec": 2.1292923599976348
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 72.21784790503703,
+        "elapsed_sec": 1.7724150430003647
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.413793103448276,
+        "token_rate": 63.90821419182346,
+        "elapsed_sec": 2.0028724260046147
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 69.54007423293793,
+        "elapsed_sec": 1.8406652769917855
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 64.9963383271174,
+        "elapsed_sec": 1.9693417090020375
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.43545848179987,
+        "elapsed_sec": 1.843438537005568
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 61.26868391746028,
+        "elapsed_sec": 2.0891586340003414
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.129032258064516,
+        "token_rate": 60.132711785982025,
+        "elapsed_sec": 2.1286251060082577
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.2666666666666666,
+        "token_rate": 63.906324671578794,
+        "elapsed_sec": 2.0029316449945327
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.161290322580645,
+        "token_rate": 60.98796225883907,
+        "elapsed_sec": 2.098774828002206
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 66.30947025969887,
+        "elapsed_sec": 1.9303426719998242
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 64.18956587790258,
+        "elapsed_sec": 1.9940935609920416
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.2666666666666666,
+        "token_rate": 62.94613648992573,
+        "elapsed_sec": 2.0334846129990183
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.413793103448276,
+        "token_rate": 65.47437509063428,
+        "elapsed_sec": 1.9549632940033916
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 63.2220995757144,
+        "elapsed_sec": 2.024608497013105
+      },
+      {
+        "tokens": 128,
+        "blocks": 37,
+        "AATPS": 3.4594594594594597,
+        "accepted_mean": 2.4864864864864864,
+        "token_rate": 50.8310806430091,
+        "elapsed_sec": 2.5181443790061167
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 70.01769498657735,
+        "elapsed_sec": 1.8281093090045033
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 67.81164147427351,
+        "elapsed_sec": 1.8875815010105725
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 72.95680025129145,
+        "elapsed_sec": 1.754462908997084
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 65.46461368157094,
+        "elapsed_sec": 1.9552547979983501
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 66.53435720632471,
+        "elapsed_sec": 1.9238180899992585
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 68.07645542270443,
+        "elapsed_sec": 1.8802389049960766
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 64.92373506500459,
+        "elapsed_sec": 1.9715439949941356
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 68.48825788611609,
+        "elapsed_sec": 1.868933507008478
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 68.51787985411636,
+        "elapsed_sec": 1.868125520995818
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 68.21092033683871,
+        "elapsed_sec": 1.8765323700063163
+      },
+      {
+        "tokens": 128,
+        "blocks": 33,
+        "AATPS": 3.878787878787879,
+        "accepted_mean": 2.909090909090909,
+        "token_rate": 57.77970278267245,
+        "elapsed_sec": 2.215310807005153
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 70.62784440186687,
+        "elapsed_sec": 1.8123163900017971
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.2666666666666666,
+        "token_rate": 62.319765031640976,
+        "elapsed_sec": 2.0539230200083693
+      },
+      {
+        "tokens": 128,
+        "blocks": 32,
+        "AATPS": 4.0,
+        "accepted_mean": 3.0,
+        "token_rate": 58.334384286514364,
+        "elapsed_sec": 2.1942461819999153
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.129032258064516,
+        "token_rate": 61.13440331085618,
+        "elapsed_sec": 2.093747432998498
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.53651634543931,
+        "elapsed_sec": 1.8407594559976133
+      },
+      {
+        "tokens": 128,
+        "blocks": 32,
+        "AATPS": 4.0,
+        "accepted_mean": 3.03125,
+        "token_rate": 59.8421206277936,
+        "elapsed_sec": 2.1389616319938796
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 64.68637189077094,
+        "elapsed_sec": 1.9787784700019984
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 66.07588987848698,
+        "elapsed_sec": 1.9371664950012928
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.2666666666666666,
+        "token_rate": 63.465944894712464,
+        "elapsed_sec": 2.0168296589981765
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.5714285714285716,
+        "token_rate": 67.34880511058459,
+        "elapsed_sec": 1.900553391998983
+      },
+      {
+        "tokens": 128,
+        "blocks": 32,
+        "AATPS": 4.0,
+        "accepted_mean": 3.03125,
+        "token_rate": 59.905177713668664,
+        "elapsed_sec": 2.1367101289943093
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 67.32384986480608,
+        "elapsed_sec": 1.9012578789988765
+      },
+      {
+        "tokens": 128,
+        "blocks": 32,
+        "AATPS": 4.0,
+        "accepted_mean": 3.0,
+        "token_rate": 58.6618377339058,
+        "elapsed_sec": 2.181997785010026
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 67.03061532802327,
+        "elapsed_sec": 1.9095751899876632
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 71.29775071873897,
+        "elapsed_sec": 1.7952880520024337
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 68.26769017217562,
+        "elapsed_sec": 1.8749718890030636
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 66.82035658412113,
+        "elapsed_sec": 1.9155839110026136
+      },
+      {
+        "tokens": 128,
+        "blocks": 32,
+        "AATPS": 4.0,
+        "accepted_mean": 3.03125,
+        "token_rate": 59.048234047380575,
+        "elapsed_sec": 2.1677193579962477
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 67.50577861318452,
+        "elapsed_sec": 1.896133970003575
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.129032258064516,
+        "token_rate": 60.55631611555603,
+        "elapsed_sec": 2.1137349199998425
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 65.0295302248507,
+        "elapsed_sec": 1.9683365319942823
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 70.5529672922066,
+        "elapsed_sec": 1.8142397820047336
+      }
+    ],
+    "ms_pfr_batched_cached_B4": [
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.55940929375835,
+        "elapsed_sec": 1.840153637007461
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 67.56939437389467,
+        "elapsed_sec": 1.8943487829965306
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 72.3369442615447,
+        "elapsed_sec": 1.769496918990626
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.26343359935892,
+        "elapsed_sec": 1.8480169600079535
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.0567640348483,
+        "elapsed_sec": 1.8535476109973388
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 70.94323030208855,
+        "elapsed_sec": 1.8042595389997587
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.129032258064516,
+        "token_rate": 59.52354891450853,
+        "elapsed_sec": 2.1504094150004676
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 59.68189730572821,
+        "elapsed_sec": 2.144703935002326
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 64.62346652570338,
+        "elapsed_sec": 1.9807046399946557
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 64.14215276923866,
+        "elapsed_sec": 1.995567570993444
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 59.93394620827917,
+        "elapsed_sec": 2.1356845009868266
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.69991812762801,
+        "elapsed_sec": 1.8364440509903943
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.161290322580645,
+        "token_rate": 60.2132938519808,
+        "elapsed_sec": 2.12577641599637
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 65.87607471914265,
+        "elapsed_sec": 1.9430423039884772
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 70.9574119563192,
+        "elapsed_sec": 1.80389893699612
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.51646504149622,
+        "elapsed_sec": 1.8412904039869318
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 68.62864657802659,
+        "elapsed_sec": 1.8651103640004294
+      },
+      {
+        "tokens": 128,
+        "blocks": 32,
+        "AATPS": 4.0,
+        "accepted_mean": 3.03125,
+        "token_rate": 58.07501527209434,
+        "elapsed_sec": 2.204045912003494
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.161290322580645,
+        "token_rate": 58.41260905514662,
+        "elapsed_sec": 2.1913077000062913
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.84045368511262,
+        "elapsed_sec": 1.8327486899943324
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 67.02616509892273,
+        "elapsed_sec": 1.9097019769978942
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 68.41845529015583,
+        "elapsed_sec": 1.8708402500051307
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.51513158397043,
+        "elapsed_sec": 1.8682004550064448
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 60.637929541791706,
+        "elapsed_sec": 2.1108900149993133
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.51229560288563,
+        "elapsed_sec": 1.8414008469990222
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 67.62157601813439,
+        "elapsed_sec": 1.8928869679948548
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 66.57827679161743,
+        "elapsed_sec": 1.9225490079988958
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 72.19481305071635,
+        "elapsed_sec": 1.7729805590061005
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 66.05704222223399,
+        "elapsed_sec": 1.9377192149986513
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.60673504767065,
+        "elapsed_sec": 1.8389025129872607
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 67.57070138007893,
+        "elapsed_sec": 1.8943121409974992
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.5714285714285716,
+        "token_rate": 65.17987103370676,
+        "elapsed_sec": 1.9637964600115083
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 68.56943965367368,
+        "elapsed_sec": 1.8667208109982312
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 71.7049690354199,
+        "elapsed_sec": 1.7850924660015153
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.61577312204236,
+        "elapsed_sec": 1.8386637720104773
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 67.42400341386924,
+        "elapsed_sec": 1.898433695998392
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 70.05689158146278,
+        "elapsed_sec": 1.8270864880032605
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 62.61862232724426,
+        "elapsed_sec": 2.044120346996351
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.7047019401393,
+        "elapsed_sec": 1.8630457069957629
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 66.05957920250378,
+        "elapsed_sec": 1.9376447980030207
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.5714285714285716,
+        "token_rate": 65.48549932661057,
+        "elapsed_sec": 1.9546311979938764
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.91099164658847,
+        "elapsed_sec": 1.8308995050028898
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 63.99942957326689,
+        "elapsed_sec": 2.0000178259942913
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 72.67856512226997,
+        "elapsed_sec": 1.761179513996467
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.96658001800535,
+        "elapsed_sec": 1.8559713989961892
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.74835066997325,
+        "elapsed_sec": 1.8351688429975184
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 67.62207937342929,
+        "elapsed_sec": 1.8928728780010715
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 68.84894014589034,
+        "elapsed_sec": 1.8591426350030815
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 71.37179031017521,
+        "elapsed_sec": 1.7934256580047077
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 65.95855693271845,
+        "elapsed_sec": 1.9406124990055105
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 64.58151061812256,
+        "elapsed_sec": 1.9819914209947456
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.413793103448276,
+        "token_rate": 64.01701517867536,
+        "elapsed_sec": 1.9994684169942047
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 73.67039993174437,
+        "elapsed_sec": 1.7374685099930502
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.5714285714285716,
+        "token_rate": 66.45929852882868,
+        "elapsed_sec": 1.9259908370004268
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 72.42243439732685,
+        "elapsed_sec": 1.767408138999599
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 65.53067507624995,
+        "elapsed_sec": 1.9532837079896126
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 70.07308310497245,
+        "elapsed_sec": 1.8266643100068904
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 67.06071697616527,
+        "elapsed_sec": 1.9087180360074854
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 61.108809640594345,
+        "elapsed_sec": 2.094624338991707
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 65.86923453592652,
+        "elapsed_sec": 1.9432440789969405
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 67.84596832735717,
+        "elapsed_sec": 1.8866264739917824
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 68.54209505139985,
+        "elapsed_sec": 1.867465532006463
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.5714285714285716,
+        "token_rate": 65.46319420293146,
+        "elapsed_sec": 1.955297194988816
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 72.5005107788754,
+        "elapsed_sec": 1.765504802999203
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 67.96558413141642,
+        "elapsed_sec": 1.883306111994898
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 66.8512562857672,
+        "elapsed_sec": 1.9146984980034176
+      },
+      {
+        "tokens": 128,
+        "blocks": 32,
+        "AATPS": 4.0,
+        "accepted_mean": 3.03125,
+        "token_rate": 57.803543255480875,
+        "elapsed_sec": 2.214397125004325
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 65.66273657013569,
+        "elapsed_sec": 1.9493552460044157
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 68.28922501926765,
+        "elapsed_sec": 1.874380621011369
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 70.50390174110134,
+        "elapsed_sec": 1.815502359997481
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.45938531303719,
+        "elapsed_sec": 1.8697217250009999
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 67.19222408592324,
+        "elapsed_sec": 1.9049823359964648
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 67.58062485503939,
+        "elapsed_sec": 1.894033981996472
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.06999748365945,
+        "elapsed_sec": 1.8531924810085911
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 71.25057064478942,
+        "elapsed_sec": 1.796476839997922
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 72.83870879193498,
+        "elapsed_sec": 1.7573073730018223
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 69.1293123312079,
+        "elapsed_sec": 1.8516023909905925
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 64.9798576555908,
+        "elapsed_sec": 1.9698411879944615
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 69.08886453985426,
+        "elapsed_sec": 1.8526864039886277
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 62.221669347926756,
+        "elapsed_sec": 2.0571611360064708
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 66.31978290719239,
+        "elapsed_sec": 1.93004250600643
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 65.52726825338071,
+        "elapsed_sec": 1.9533852610038593
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.85842378905313,
+        "elapsed_sec": 1.8322772409883328
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 64.09245869142202,
+        "elapsed_sec": 1.9971148339973297
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 62.628164348848046,
+        "elapsed_sec": 2.0438089050003327
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.9742902481488,
+        "elapsed_sec": 1.8292432770103915
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 62.526558980128584,
+        "elapsed_sec": 2.047130085004028
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 69.52456177004973,
+        "elapsed_sec": 1.8410759700054768
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.03123434427589,
+        "elapsed_sec": 1.8542331049975473
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 62.28629571933171,
+        "elapsed_sec": 2.055026688001817
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 62.373621114691375,
+        "elapsed_sec": 2.0521495740104
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 65.17637381348618,
+        "elapsed_sec": 1.963901832990814
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 68.24912114593447,
+        "elapsed_sec": 1.8754820260073757
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 72.4227130392388,
+        "elapsed_sec": 1.7674013390060281
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 66.16080507923671,
+        "elapsed_sec": 1.9346802060026675
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.81114620039853,
+        "elapsed_sec": 1.8335180979920551
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 65.46775492049936,
+        "elapsed_sec": 1.9551609820045996
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 66.7902242680114,
+        "elapsed_sec": 1.9164481240004534
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 62.468345447182024,
+        "elapsed_sec": 2.049037781995139
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 70.17344273170295,
+        "elapsed_sec": 1.8240518779930426
+      }
+    ],
+    "mpfr_batched_torchgen_cached_B4": [
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 67.75113401496303,
+        "elapsed_sec": 1.8892672700021649
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 64.8788407644485,
+        "elapsed_sec": 1.972908247000305
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.60683876244235,
+        "elapsed_sec": 1.8388997730071424
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 69.2987134835113,
+        "elapsed_sec": 1.8470761369972024
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 68.54762084422693,
+        "elapsed_sec": 1.867314991002786
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 70.85212157225278,
+        "elapsed_sec": 1.806579636002425
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.413793103448276,
+        "token_rate": 63.035391280815524,
+        "elapsed_sec": 2.0306053059903206
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.161290322580645,
+        "token_rate": 58.1054635354838,
+        "elapsed_sec": 2.202890953994938
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.161290322580645,
+        "token_rate": 59.001917207246876,
+        "elapsed_sec": 2.1694210300047416
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 66.98305551262288,
+        "elapsed_sec": 1.9109310409985483
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 66.38157312642856,
+        "elapsed_sec": 1.9282459569949424
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 72.51961647292845,
+        "elapsed_sec": 1.765039670994156
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.72492660335077,
+        "elapsed_sec": 1.862497441994492
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 62.65171010650643,
+        "elapsed_sec": 2.0430408009997336
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 64.0149981058539,
+        "elapsed_sec": 1.999531419001869
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 62.81199247259543,
+        "elapsed_sec": 2.0378274109971244
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 65.73164757140152,
+        "elapsed_sec": 1.947311602998525
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.161290322580645,
+        "token_rate": 59.2274278347082,
+        "elapsed_sec": 2.1611608789971797
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 61.50929610739738,
+        "elapsed_sec": 2.0809862589958357
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 66.27654034041214,
+        "elapsed_sec": 1.931301774995518
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 65.15806338238151,
+        "elapsed_sec": 1.964453720007441
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 61.6184286022208,
+        "elapsed_sec": 2.077300620992901
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 69.12015515410337,
+        "elapsed_sec": 1.8518476949975593
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 65.78575578832616,
+        "elapsed_sec": 1.945709955994971
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 63.91583317027603,
+        "elapsed_sec": 2.002633676995174
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.5714285714285716,
+        "token_rate": 66.49305665529924,
+        "elapsed_sec": 1.9250130229920615
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 60.79831420261433,
+        "elapsed_sec": 2.105321531998925
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.8490336907635,
+        "elapsed_sec": 1.8591401089943247
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.5714285714285716,
+        "token_rate": 65.21773149344449,
+        "elapsed_sec": 1.962656428993796
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 68.42629898170374,
+        "elapsed_sec": 1.8706257960002404
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 67.4745872728378,
+        "elapsed_sec": 1.8970104920008453
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.413793103448276,
+        "token_rate": 63.17659034238276,
+        "elapsed_sec": 2.0260669229901396
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 71.24088398047397,
+        "elapsed_sec": 1.796721107995836
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 72.09756103636494,
+        "elapsed_sec": 1.7753721229964867
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.5714285714285716,
+        "token_rate": 66.09499296513735,
+        "elapsed_sec": 1.936606606002897
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 71.83423014917201,
+        "elapsed_sec": 1.7818803060072241
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 67.18704255864027,
+        "elapsed_sec": 1.9051292500080308
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 61.624400883849134,
+        "elapsed_sec": 2.077099300993723
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 67.18050166696386,
+        "elapsed_sec": 1.9053147390077356
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.161290322580645,
+        "token_rate": 60.417367213201736,
+        "elapsed_sec": 2.118596123997122
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 68.45766329186758,
+        "elapsed_sec": 1.8697687569947448
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.161290322580645,
+        "token_rate": 60.78462329423508,
+        "elapsed_sec": 2.105795726994984
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 66.73464667914155,
+        "elapsed_sec": 1.9180441700009396
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 70.66414906183047,
+        "elapsed_sec": 1.8113852880051127
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.61781895026111,
+        "elapsed_sec": 1.8386097400070867
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.97941987258032,
+        "elapsed_sec": 1.8291091900027823
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 64.8154811288874,
+        "elapsed_sec": 1.9748368409927934
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 64.8669486168957,
+        "elapsed_sec": 1.9732699430023786
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 70.5996822668527,
+        "elapsed_sec": 1.8130393210012699
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 66.2491660443281,
+        "elapsed_sec": 1.9320997929899022
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 64.44978820798583,
+        "elapsed_sec": 1.9860422130004736
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 63.695193783859565,
+        "elapsed_sec": 2.0095707760046935
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 72.76110523563202,
+        "elapsed_sec": 1.7591816339991055
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 66.22349585910865,
+        "elapsed_sec": 1.9328487320017302
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 73.17886030574896,
+        "elapsed_sec": 1.7491390200011665
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 67.25186111786991,
+        "elapsed_sec": 1.903293052004301
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.69956371657277,
+        "elapsed_sec": 1.836453389012604
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 65.10286529113753,
+        "elapsed_sec": 1.9661193010106217
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.5714285714285716,
+        "token_rate": 64.40922857444342,
+        "elapsed_sec": 1.9872928590048105
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 61.68961806732512,
+        "elapsed_sec": 2.074903428001562
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.5714285714285716,
+        "token_rate": 65.33440307864728,
+        "elapsed_sec": 1.9591515950014582
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 65.00626219307864,
+        "elapsed_sec": 1.9690410689945566
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 64.01683649238599,
+        "elapsed_sec": 1.9994739979883889
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 67.97244834089341,
+        "elapsed_sec": 1.8831159260007553
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 68.4820751163863,
+        "elapsed_sec": 1.8691022400016664
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 61.54769750993861,
+        "elapsed_sec": 2.07968787100981
+      },
+      {
+        "tokens": 128,
+        "blocks": 34,
+        "AATPS": 3.764705882352941,
+        "accepted_mean": 2.7941176470588234,
+        "token_rate": 53.50663595437392,
+        "elapsed_sec": 2.392226640993613
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 72.64418820741668,
+        "elapsed_sec": 1.7620129449933302
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 68.28271729314362,
+        "elapsed_sec": 1.8745592600025702
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 73.56978994867742,
+        "elapsed_sec": 1.7398445760045433
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 68.92048424040668,
+        "elapsed_sec": 1.8572127200022805
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.30013887051398,
+        "elapsed_sec": 1.8740811090101488
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 70.22330293824245,
+        "elapsed_sec": 1.8227567580033792
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 70.11637020578348,
+        "elapsed_sec": 1.8255365990044083
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 72.08450453891012,
+        "elapsed_sec": 1.7756936919904547
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 72.63728037876561,
+        "elapsed_sec": 1.7621805129892891
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 67.835984646925,
+        "elapsed_sec": 1.8869041360012488
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 62.117025727830104,
+        "elapsed_sec": 2.0606266719987616
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.34986108393271,
+        "elapsed_sec": 1.8457138630037662
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 64.55789519217781,
+        "elapsed_sec": 1.9827164379967144
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 66.10785483475435,
+        "elapsed_sec": 1.93622982200759
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.2666666666666666,
+        "token_rate": 62.37265364947305,
+        "elapsed_sec": 2.052181405000738
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.88912957752954,
+        "elapsed_sec": 1.831472229998326
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 64.67894000723615,
+        "elapsed_sec": 1.979005840010359
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 63.677577437776556,
+        "elapsed_sec": 2.010126722001587
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 68.32083864242206,
+        "elapsed_sec": 1.8735133019945351
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.5714285714285716,
+        "token_rate": 66.78760134164108,
+        "elapsed_sec": 1.9165233880048618
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 69.06291064357278,
+        "elapsed_sec": 1.853382645000238
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 66.83179962012157,
+        "elapsed_sec": 1.9152559219946852
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 67.1074711431496,
+        "elapsed_sec": 1.9073882210068405
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.129032258064516,
+        "token_rate": 58.41919008877059,
+        "elapsed_sec": 2.191060844997992
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 65.26247014748988,
+        "elapsed_sec": 1.9613109909987543
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 72.31986860970507,
+        "elapsed_sec": 1.769914719989174
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 68.16414894964912,
+        "elapsed_sec": 1.8778199680091348
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.80080814395514,
+        "elapsed_sec": 1.8604432629945222
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 62.50228234053788,
+        "elapsed_sec": 2.047925214996212
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 66.58282349475623,
+        "elapsed_sec": 1.9224177239957498
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.5714285714285716,
+        "token_rate": 65.66340810768136,
+        "elapsed_sec": 1.94933531001152
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 70.45947483890465,
+        "elapsed_sec": 1.8166470910073258
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 67.32894449746651,
+        "elapsed_sec": 1.9011140150105348
+      }
+    ],
+    "ms_pfr_batched_cached_B6": [
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 71.05061348725116,
+        "elapsed_sec": 1.8015326500026276
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 68.46913149498182,
+        "elapsed_sec": 1.8694555810070597
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 70.69687725193917,
+        "elapsed_sec": 1.810546730994247
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.83047985035552,
+        "elapsed_sec": 1.8596412560000317
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 70.65299458197956,
+        "elapsed_sec": 1.8116712640039623
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 69.34440896457167,
+        "elapsed_sec": 1.8458589799993206
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.2666666666666666,
+        "token_rate": 60.50076260948494,
+        "elapsed_sec": 2.1156758110009832
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 58.52157633892281,
+        "elapsed_sec": 2.187227481001173
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 66.21474444915913,
+        "elapsed_sec": 1.9331041909899795
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 68.9542613128061,
+        "elapsed_sec": 1.8563029689976247
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 58.460421924739826,
+        "elapsed_sec": 2.189515501013375
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.8480521600462,
+        "elapsed_sec": 1.8325493129959796
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 64.40513742564855,
+        "elapsed_sec": 1.9874190959963016
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 68.89879562555559,
+        "elapsed_sec": 1.8577973509964067
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 69.8939115920176,
+        "elapsed_sec": 1.8313469239947153
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 67.72637877570536,
+        "elapsed_sec": 1.88995783199789
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 65.92503593623714,
+        "elapsed_sec": 1.941599244993995
+      },
+      {
+        "tokens": 128,
+        "blocks": 32,
+        "AATPS": 4.0,
+        "accepted_mean": 3.03125,
+        "token_rate": 56.9418833329565,
+        "elapsed_sec": 2.2479059790057363
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 61.47573781335518,
+        "elapsed_sec": 2.0821222250087885
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.29135505943748,
+        "elapsed_sec": 1.847272288010572
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 69.91562595920466,
+        "elapsed_sec": 1.830778144998476
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 67.63749900712253,
+        "elapsed_sec": 1.8924413510103477
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 69.66980354205198,
+        "elapsed_sec": 1.837237849002122
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.413793103448276,
+        "token_rate": 60.27473501106652,
+        "elapsed_sec": 2.1236095019994536
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.24718306036995,
+        "elapsed_sec": 1.8755352860025596
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 67.41766429811246,
+        "elapsed_sec": 1.8986122010101099
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 64.69169531552303,
+        "elapsed_sec": 1.97861563799961
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 73.01567152041568,
+        "elapsed_sec": 1.7530483159935102
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 68.38237632173036,
+        "elapsed_sec": 1.8718273169943132
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.57998002938622,
+        "elapsed_sec": 1.8664339060051134
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 66.78464055192457,
+        "elapsed_sec": 1.9166083539894316
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 65.89470816997458,
+        "elapsed_sec": 1.942492857997422
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 67.50717302199477,
+        "elapsed_sec": 1.8960948040039511
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 71.26507629914076,
+        "elapsed_sec": 1.7961111760087078
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 67.63508715691134,
+        "elapsed_sec": 1.8925088349933503
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 70.09979822403753,
+        "elapsed_sec": 1.825968165998347
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 71.81236862510279,
+        "elapsed_sec": 1.7824227560049621
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 60.25327468706377,
+        "elapsed_sec": 2.1243658650055295
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.22477918210335,
+        "elapsed_sec": 1.8490488740062574
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 64.74949872531174,
+        "elapsed_sec": 1.9768492809962481
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.5714285714285716,
+        "token_rate": 65.13180965502707,
+        "elapsed_sec": 1.9652455640025437
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 70.22064167120045,
+        "elapsed_sec": 1.8228258380113402
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 62.69835570840912,
+        "elapsed_sec": 2.0415208429913037
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 72.34303408768307,
+        "elapsed_sec": 1.7693479629961075
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 69.88699649393989,
+        "elapsed_sec": 1.8315281300019706
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.52082267868111,
+        "elapsed_sec": 1.8411749899969436
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 69.19178642443326,
+        "elapsed_sec": 1.8499305570003344
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 68.40005772288569,
+        "elapsed_sec": 1.87134345000959
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 70.33554203352718,
+        "elapsed_sec": 1.8198480639985064
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 68.54556148402263,
+        "elapsed_sec": 1.8673710919974837
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 67.81732380019011,
+        "elapsed_sec": 1.887423342996044
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.5714285714285716,
+        "token_rate": 63.77519346342852,
+        "elapsed_sec": 2.0070499680005014
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 73.15033758034453,
+        "elapsed_sec": 1.7498210429912433
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 64.74043512670234,
+        "elapsed_sec": 1.9771260379930027
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 72.30200339355211,
+        "elapsed_sec": 1.7703520510112867
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 67.64139881153731,
+        "elapsed_sec": 1.8923322439950425
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 70.35692756957633,
+        "elapsed_sec": 1.8192949070071336
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 67.08261265114514,
+        "elapsed_sec": 1.908095032995334
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 64.41855099988734,
+        "elapsed_sec": 1.9870052649930585
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 67.68361710274132,
+        "elapsed_sec": 1.8911518840031931
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 67.942130012351,
+        "elapsed_sec": 1.8839562430075603
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 70.05649403860437,
+        "elapsed_sec": 1.827096855995478
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 66.96066545436693,
+        "elapsed_sec": 1.9115700110123726
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 71.43813321571686,
+        "elapsed_sec": 1.791760145992157
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 66.8491844383453,
+        "elapsed_sec": 1.9147578399861231
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 65.16599922579408,
+        "elapsed_sec": 1.9642144910030765
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 67.65711889318412,
+        "elapsed_sec": 1.8918925619946094
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 66.67935606023606,
+        "elapsed_sec": 1.9196346150129102
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.4761566984342,
+        "elapsed_sec": 1.8423586750141112
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 71.3652501812219,
+        "elapsed_sec": 1.7935900129959919
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.03017177083191,
+        "elapsed_sec": 1.854261646993109
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 66.56070680558516,
+        "elapsed_sec": 1.9230565019970527
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.72541478472478,
+        "elapsed_sec": 1.8624842120043468
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 71.00280764874742,
+        "elapsed_sec": 1.8027456130075734
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 70.98342718699782,
+        "elapsed_sec": 1.803237813001033
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 72.13187239944216,
+        "elapsed_sec": 1.7745276220084634
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 68.00587393305635,
+        "elapsed_sec": 1.8821903549978742
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 64.06030832777914,
+        "elapsed_sec": 1.9981171390099917
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 68.00216594961346,
+        "elapsed_sec": 1.8822929860034492
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 60.12329584789741,
+        "elapsed_sec": 2.1289584710029885
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 66.36426073373426,
+        "elapsed_sec": 1.9287489770067623
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 63.67060426752954,
+        "elapsed_sec": 2.010346869996283
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.43912925760026,
+        "elapsed_sec": 1.8702751099917805
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 62.544440879129674,
+        "elapsed_sec": 2.046544796001399
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 63.82894793001478,
+        "elapsed_sec": 2.005359702001442
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.842617235517,
+        "elapsed_sec": 1.8326919160026591
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 66.79191103198539,
+        "elapsed_sec": 1.9163997259893222
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 69.06751630567541,
+        "elapsed_sec": 1.8532590550021268
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.68667837807324,
+        "elapsed_sec": 1.8635345750080887
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.2305415605902,
+        "elapsed_sec": 1.875992731002043
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 61.346211948110344,
+        "elapsed_sec": 2.086518399999477
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 68.27801687623337,
+        "elapsed_sec": 1.8746883090061601
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.57807965306421,
+        "elapsed_sec": 1.8664856270042947
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 71.21736865153044,
+        "elapsed_sec": 1.7973143690032884
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 64.6694503902623,
+        "elapsed_sec": 1.9792962399951648
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.51220457859137,
+        "elapsed_sec": 1.8682802690018434
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 65.9656417184065,
+        "elapsed_sec": 1.9404040749941487
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 65.48260625830437,
+        "elapsed_sec": 1.954717554996023
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 60.9123772998099,
+        "elapsed_sec": 2.1013791559962556
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.88607327973251,
+        "elapsed_sec": 1.8315523249912076
+      }
+    ],
+    "mpfr_batched_torchgen_cached_B6": [
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 64.55244485816254,
+        "elapsed_sec": 1.982883844000753
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 63.708947140683364,
+        "elapsed_sec": 2.0091369539877633
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.64793020486393,
+        "elapsed_sec": 1.8645864430000074
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 71.3384691900155,
+        "elapsed_sec": 1.7942633400089107
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.17132690253794,
+        "elapsed_sec": 1.877622247004183
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.97172897049452,
+        "elapsed_sec": 1.8558328450017143
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.413793103448276,
+        "token_rate": 62.10451264134056,
+        "elapsed_sec": 2.061041855995427
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 57.74458974441179,
+        "elapsed_sec": 2.2166578820033465
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 59.96425469885652,
+        "elapsed_sec": 2.134605034996639
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 64.79144932334142,
+        "elapsed_sec": 1.975569328002166
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 65.60624544854265,
+        "elapsed_sec": 1.9510337640094804
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 71.81848528685462,
+        "elapsed_sec": 1.7822709500032943
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 67.83449447710284,
+        "elapsed_sec": 1.8869455870008096
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 64.05000893377677,
+        "elapsed_sec": 1.998438441005419
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 65.20545424321207,
+        "elapsed_sec": 1.9630259690020466
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 66.3229801544708,
+        "elapsed_sec": 1.9299494639999466
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 66.6748669109715,
+        "elapsed_sec": 1.9197638620098587
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 59.56450609176364,
+        "elapsed_sec": 2.1489307709998684
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 62.53877138164347,
+        "elapsed_sec": 2.046730326997931
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 65.06006230584039,
+        "elapsed_sec": 1.9674128100014059
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 66.12252392638472,
+        "elapsed_sec": 1.935800274994108
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 64.06763270827722,
+        "elapsed_sec": 1.99788870899647
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 70.66336249005306,
+        "elapsed_sec": 1.811405450993334
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 63.37528045445242,
+        "elapsed_sec": 2.0197149279993027
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 63.70000821942293,
+        "elapsed_sec": 2.00941889299429
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 67.23427836999569,
+        "elapsed_sec": 1.9037907909951173
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 59.3501319498397,
+        "elapsed_sec": 2.1566927620006027
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 71.00919835441235,
+        "elapsed_sec": 1.8025833690044237
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 66.16903451619022,
+        "elapsed_sec": 1.934439589997055
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.28031486047531,
+        "elapsed_sec": 1.8475666610029293
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 66.62924209745545,
+        "elapsed_sec": 1.921078432991635
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 64.85895115246134,
+        "elapsed_sec": 1.9735132580099162
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 70.48848355565543,
+        "elapsed_sec": 1.815899470995646
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 72.6040635904894,
+        "elapsed_sec": 1.7629867209907388
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.39989799461877,
+        "elapsed_sec": 1.8713478199933888
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 70.75985439799537,
+        "elapsed_sec": 1.8089353219984332
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.02108471826884,
+        "elapsed_sec": 1.854505772003904
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 64.9483708172281,
+        "elapsed_sec": 1.9707961630047066
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.01784762156316,
+        "elapsed_sec": 1.8818590190057876
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.161290322580645,
+        "token_rate": 58.6124207515768,
+        "elapsed_sec": 2.1838374590006424
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 66.77029806418703,
+        "elapsed_sec": 1.9170200480002677
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 65.95437817261192,
+        "elapsed_sec": 1.9407354529976146
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 67.15181298382451,
+        "elapsed_sec": 1.9061287299991818
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 68.47248004195123,
+        "elapsed_sec": 1.869364158003009
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.97966591545185,
+        "elapsed_sec": 1.8291027590021258
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.60575688148596,
+        "elapsed_sec": 1.838928354991367
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 67.54447095260844,
+        "elapsed_sec": 1.8950477839971427
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 68.58123356953288,
+        "elapsed_sec": 1.8663997909898171
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.87145711463667,
+        "elapsed_sec": 1.8319354609993752
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 65.4332245516309,
+        "elapsed_sec": 1.9561927579925396
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 65.09212925122414,
+        "elapsed_sec": 1.9664435849990696
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 64.75892545404912,
+        "elapsed_sec": 1.9765615180076566
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 72.1134077940775,
+        "elapsed_sec": 1.7749819890013896
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 64.68497164258562,
+        "elapsed_sec": 1.9788213050051127
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 72.0501418099669,
+        "elapsed_sec": 1.7765405700047268
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.54978348749854,
+        "elapsed_sec": 1.8672560800041538
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.76200563788228,
+        "elapsed_sec": 1.8614931140036788
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 65.91159625893991,
+        "elapsed_sec": 1.9419951460004086
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 65.74017983476938,
+        "elapsed_sec": 1.9470588660042267
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 65.38763557658883,
+        "elapsed_sec": 1.957556636989466
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 66.42943287262993,
+        "elapsed_sec": 1.9268567330000224
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 66.75769387653683,
+        "elapsed_sec": 1.9173819910065504
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 63.64941846206997,
+        "elapsed_sec": 2.0110160170006566
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 67.38846426207023,
+        "elapsed_sec": 1.8994348869891837
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 67.45940763875231,
+        "elapsed_sec": 1.897437355000875
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 62.818424446502604,
+        "elapsed_sec": 2.0376187579968246
+      },
+      {
+        "tokens": 128,
+        "blocks": 33,
+        "AATPS": 3.878787878787879,
+        "accepted_mean": 2.909090909090909,
+        "token_rate": 52.37599633919228,
+        "elapsed_sec": 2.443867591005983
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 71.28757609973253,
+        "elapsed_sec": 1.7955442870006664
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 69.32790615968646,
+        "elapsed_sec": 1.8462983680074103
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 72.3252121884043,
+        "elapsed_sec": 1.7697839539905544
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 70.199347285683,
+        "elapsed_sec": 1.823378777000471
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 69.27491652433352,
+        "elapsed_sec": 1.8477106349891983
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.02127300497752,
+        "elapsed_sec": 1.854500713001471
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.37463309335791,
+        "elapsed_sec": 1.8720392959949095
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 71.59247464925025,
+        "elapsed_sec": 1.787897409987636
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 72.36460370111695,
+        "elapsed_sec": 1.7688205759914126
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 66.8505270989027,
+        "elapsed_sec": 1.9147193829994649
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 63.3254712650174,
+        "elapsed_sec": 2.0213035519991536
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 70.78385062951718,
+        "elapsed_sec": 1.8083220799890114
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 63.24558909407552,
+        "elapsed_sec": 2.0238565540057607
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 64.56709026801691,
+        "elapsed_sec": 1.9824340769991977
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.413793103448276,
+        "token_rate": 63.179518581703036,
+        "elapsed_sec": 2.0259730190009577
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.65590923909194,
+        "elapsed_sec": 1.8643697449879255
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 63.39215892746711,
+        "elapsed_sec": 2.0191771690006135
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 61.898148644975606,
+        "elapsed_sec": 2.0679132219956955
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 71.32753426507439,
+        "elapsed_sec": 1.7945384109916631
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.5714285714285716,
+        "token_rate": 66.23831699417333,
+        "elapsed_sec": 1.9324162480043015
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 68.63550644769478,
+        "elapsed_sec": 1.8649239529913757
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 66.73091066933428,
+        "elapsed_sec": 1.9181515539967222
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 66.41987972907133,
+        "elapsed_sec": 1.9271338719991036
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 59.60846363216857,
+        "elapsed_sec": 2.147346067999024
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 65.03603717710729,
+        "elapsed_sec": 1.9681395969964797
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 72.1981716672679,
+        "elapsed_sec": 1.772898080991581
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 70.29592245466908,
+        "elapsed_sec": 1.8208737509994535
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 67.91632542688926,
+        "elapsed_sec": 1.8846720460132929
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 65.93763530664519,
+        "elapsed_sec": 1.9412282440025592
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 64.58602074260607,
+        "elapsed_sec": 1.9818530159973307
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 67.16903091567224,
+        "elapsed_sec": 1.9056401179987006
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.57117104957524,
+        "elapsed_sec": 1.8666736770101124
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.31437903238908,
+        "elapsed_sec": 1.8736904559918912
+      }
+    ],
+    "ms_pfr_batched_cached_B8": [
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 70.48479640646846,
+        "elapsed_sec": 1.8159944630024256
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 66.97148266126534,
+        "elapsed_sec": 1.911261254994315
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 69.97356868697423,
+        "elapsed_sec": 1.8292621400032658
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 67.98729963713667,
+        "elapsed_sec": 1.882704573989031
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 68.89406570638845,
+        "elapsed_sec": 1.8579248979949625
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 69.48691523006148,
+        "elapsed_sec": 1.8420734259998426
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 62.47791777819879,
+        "elapsed_sec": 2.0487238459900254
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 61.402940555046776,
+        "elapsed_sec": 2.08459071899415
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.01575097519517,
+        "elapsed_sec": 1.8819170289934846
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 67.67941018624833,
+        "elapsed_sec": 1.8912694370083045
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 59.365548904717066,
+        "elapsed_sec": 2.156132678996073
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.23685189332865,
+        "elapsed_sec": 1.8758192450040951
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 62.77131567919724,
+        "elapsed_sec": 2.039147955001681
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 68.41098893324238,
+        "elapsed_sec": 1.8710444330063183
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 69.64988920955889,
+        "elapsed_sec": 1.8377631530020153
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 67.0759701406523,
+        "elapsed_sec": 1.9082839909970062
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 64.44531860161877,
+        "elapsed_sec": 1.9861799549980788
+      },
+      {
+        "tokens": 128,
+        "blocks": 32,
+        "AATPS": 4.0,
+        "accepted_mean": 3.03125,
+        "token_rate": 56.65613598909041,
+        "elapsed_sec": 2.259243377004168
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 62.79136487134213,
+        "elapsed_sec": 2.038496858003782
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.46558448893984,
+        "elapsed_sec": 1.8426390700042248
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 70.4497219590508,
+        "elapsed_sec": 1.8168985829979647
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.34780400334661,
+        "elapsed_sec": 1.8727741420007078
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 69.3651655393313,
+        "elapsed_sec": 1.845306632007123
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 59.84820421316474,
+        "elapsed_sec": 2.1387442059931345
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.3187182429076,
+        "elapsed_sec": 1.8735714499925962
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 65.88933368372119,
+        "elapsed_sec": 1.942651303994353
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 63.71128140204532,
+        "elapsed_sec": 2.0090633429936133
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 71.98016997186994,
+        "elapsed_sec": 1.7782675429916708
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 69.25453091370653,
+        "elapsed_sec": 1.8482545230071992
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 65.02444854778807,
+        "elapsed_sec": 1.9684903579909587
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 67.71016326281774,
+        "elapsed_sec": 1.8904104469984304
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 65.23892898182899,
+        "elapsed_sec": 1.9620187209948199
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 65.95607239722975,
+        "elapsed_sec": 1.9406856010027695
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 70.78614219620316,
+        "elapsed_sec": 1.8082635390019277
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.31132518547912,
+        "elapsed_sec": 1.8467400480003562
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 69.59419081451905,
+        "elapsed_sec": 1.8392339720012387
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 70.8922926373415,
+        "elapsed_sec": 1.8055559389904374
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 59.30045201630831,
+        "elapsed_sec": 2.1584995669982163
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 67.61116595537291,
+        "elapsed_sec": 1.8931784150045132
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 63.857260026352044,
+        "elapsed_sec": 2.0044705949985655
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.5714285714285716,
+        "token_rate": 64.45456702637145,
+        "elapsed_sec": 1.985894962999737
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 68.79990341835914,
+        "elapsed_sec": 1.8604677280090982
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 60.736955964515545,
+        "elapsed_sec": 2.1074483889969997
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 70.69294072684,
+        "elapsed_sec": 1.8106475509994198
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 68.50567745873833,
+        "elapsed_sec": 1.8684582759888144
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.4218425353692,
+        "elapsed_sec": 1.8438000969908899
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 69.1678355082802,
+        "elapsed_sec": 1.8505711369944038
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.17150005275131,
+        "elapsed_sec": 1.8776174779923167
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 70.08260588578638,
+        "elapsed_sec": 1.8264161039987812
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 68.0901066231259,
+        "elapsed_sec": 1.87986194100813
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 67.37813974645603,
+        "elapsed_sec": 1.8997259419993497
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.5714285714285716,
+        "token_rate": 63.05236491667898,
+        "elapsed_sec": 2.030058668999118
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 73.11356454834657,
+        "elapsed_sec": 1.7507011289999355
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 64.23599266308787,
+        "elapsed_sec": 1.9926523229951272
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 71.32557558615346,
+        "elapsed_sec": 1.7945876909943763
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 66.75433872106574,
+        "elapsed_sec": 1.9174783609923907
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.73426268131215,
+        "elapsed_sec": 1.835539590989356
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 68.54815507694185,
+        "elapsed_sec": 1.8673004380107159
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 63.910541922097195,
+        "elapsed_sec": 2.0027994779957226
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 69.13361185650051,
+        "elapsed_sec": 1.8514872369996738
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 67.11435760346745,
+        "elapsed_sec": 1.9071925079915673
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.68482814211676,
+        "elapsed_sec": 1.8368417259916896
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 66.08425040386548,
+        "elapsed_sec": 1.9369214180042036
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 70.77823235496446,
+        "elapsed_sec": 1.8084656220016768
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 66.74841553710692,
+        "elapsed_sec": 1.917648515998735
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 63.63346908597487,
+        "elapsed_sec": 2.0115200670115883
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.161290322580645,
+        "token_rate": 55.789043891099325,
+        "elapsed_sec": 2.29435729800025
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.12574781210705,
+        "elapsed_sec": 1.8788784580101492
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.03714446883934,
+        "elapsed_sec": 1.8540743680059677
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 70.78331652161307,
+        "elapsed_sec": 1.808335724999779
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 69.04488563910864,
+        "elapsed_sec": 1.8538664930092636
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 65.16818467643729,
+        "elapsed_sec": 1.9641486199980136
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.03908597564441,
+        "elapsed_sec": 1.8812715980020585
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 69.98701804272095,
+        "elapsed_sec": 1.828910611991887
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 70.54235378225926,
+        "elapsed_sec": 1.814512744997046
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 71.91939913349466,
+        "elapsed_sec": 1.7797701530071208
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 67.1027504214422,
+        "elapsed_sec": 1.907522406996577
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 65.76246148938526,
+        "elapsed_sec": 1.9463991630036617
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.91947417323459,
+        "elapsed_sec": 1.8306773829972371
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 58.93494861332881,
+        "elapsed_sec": 2.171886173004168
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 65.61380728385001,
+        "elapsed_sec": 1.9508089120063232
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 64.77970072126762,
+        "elapsed_sec": 1.9759276219992898
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 69.58104261578379,
+        "elapsed_sec": 1.8395815180119826
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 63.14163776941768,
+        "elapsed_sec": 2.0271884690009756
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 64.95709729383964,
+        "elapsed_sec": 1.9705314019956859
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 67.75991168088593,
+        "elapsed_sec": 1.889022533010575
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 65.327965420604,
+        "elapsed_sec": 1.9593446570070228
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 70.4312603408511,
+        "elapsed_sec": 1.8173748330009403
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 67.71833132962361,
+        "elapsed_sec": 1.8901824289932847
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 67.64897044797502,
+        "elapsed_sec": 1.8921204439975554
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 63.340395042075585,
+        "elapsed_sec": 2.020827307991567
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 67.5751353836509,
+        "elapsed_sec": 1.8941878439945867
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 68.92930016764113,
+        "elapsed_sec": 1.8569751860050019
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 71.34386611429665,
+        "elapsed_sec": 1.7941276100027608
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 65.33599720045403,
+        "elapsed_sec": 1.9591037939972011
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 67.97293426480233,
+        "elapsed_sec": 1.8831024640094256
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 67.6758508221493,
+        "elapsed_sec": 1.8913689070031978
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 64.1628504474505,
+        "elapsed_sec": 1.9949238400004106
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 59.575291840217716,
+        "elapsed_sec": 2.1485417200019583
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.17271198715979,
+        "elapsed_sec": 1.8504406770080095
+      }
+    ],
+    "mpfr_batched_torchgen_cached_B8": [
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 66.23106772831477,
+        "elapsed_sec": 1.9326277590007521
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 63.16191684155468,
+        "elapsed_sec": 2.026537610014202
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 67.0305322755514,
+        "elapsed_sec": 1.909577555998112
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 70.73247666674384,
+        "elapsed_sec": 1.8096354889858048
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 69.23606278954051,
+        "elapsed_sec": 1.8487475290021393
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.85160833906279,
+        "elapsed_sec": 1.8590705880051246
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.413793103448276,
+        "token_rate": 61.36247999345049,
+        "elapsed_sec": 2.0859652350045508
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 67.33338472815721,
+        "elapsed_sec": 1.9009886480052955
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.5714285714285716,
+        "token_rate": 62.94798745628115,
+        "elapsed_sec": 2.033424819004722
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 65.36813473058561,
+        "elapsed_sec": 1.9581406219949713
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 65.01058713929616,
+        "elapsed_sec": 1.9689100749965291
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 71.42775682521552,
+        "elapsed_sec": 1.7920204370020656
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 66.92701824046057,
+        "elapsed_sec": 1.912531042995397
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 65.74336716066743,
+        "elapsed_sec": 1.946964470000239
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 64.69758998913302,
+        "elapsed_sec": 1.9784353639988694
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 65.35585792342776,
+        "elapsed_sec": 1.9585084499994991
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 65.5289244363557,
+        "elapsed_sec": 1.9533358909975505
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 60.778843346801175,
+        "elapsed_sec": 2.1059959839913063
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 62.19074906068185,
+        "elapsed_sec": 2.0581839249935
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 66.21932025509572,
+        "elapsed_sec": 1.9329706120042829
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 69.6906263172308,
+        "elapsed_sec": 1.8366889030003222
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 63.8529508368672,
+        "elapsed_sec": 2.004605868991348
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 69.21157872320072,
+        "elapsed_sec": 1.8494015360047342
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 62.88396581052786,
+        "elapsed_sec": 2.035495032003382
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 66.31931414653936,
+        "elapsed_sec": 1.930056148004951
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 66.500186981356,
+        "elapsed_sec": 1.92480661800073
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 60.9053560136796,
+        "elapsed_sec": 2.1016214070114074
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 69.81898644988921,
+        "elapsed_sec": 1.833312205009861
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 67.18547659101279,
+        "elapsed_sec": 1.9051736550027272
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.54902118204511,
+        "elapsed_sec": 1.8672768449905561
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 65.4140054627488,
+        "elapsed_sec": 1.9567675010039238
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 62.975783954356295,
+        "elapsed_sec": 2.0325272979971487
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 69.46858387257069,
+        "elapsed_sec": 1.842559512006119
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 72.29591696131689,
+        "elapsed_sec": 1.7705010930076241
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.05527793554755,
+        "elapsed_sec": 1.8808239990030415
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 70.37639530624887,
+        "elapsed_sec": 1.81879164800921
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.9298189115318,
+        "elapsed_sec": 1.8569612110004527
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 63.900229759837785,
+        "elapsed_sec": 2.003122687994619
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.2556049996327,
+        "elapsed_sec": 1.8753038669965463
+      },
+      {
+        "tokens": 128,
+        "blocks": 30,
+        "AATPS": 4.266666666666667,
+        "accepted_mean": 3.3,
+        "token_rate": 60.01868400404166,
+        "elapsed_sec": 2.1326692199945683
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 65.51148725749782,
+        "elapsed_sec": 1.953855810003006
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 64.30288556017855,
+        "elapsed_sec": 1.9905794100050116
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 65.60286768227294,
+        "elapsed_sec": 1.9511342190089636
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 67.96629551406781,
+        "elapsed_sec": 1.8832863999996334
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 70.64486590706522,
+        "elapsed_sec": 1.8118797219940461
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.21412823668008,
+        "elapsed_sec": 1.8493334130034782
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.01874013672206,
+        "elapsed_sec": 1.8818343259918038
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.68513423542102,
+        "elapsed_sec": 1.863576470001135
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.34325463273336,
+        "elapsed_sec": 1.8728988060029224
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 66.43259691248181,
+        "elapsed_sec": 1.9267649610119406
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 67.12861506313962,
+        "elapsed_sec": 1.9067874390020734
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 63.35121065375974,
+        "elapsed_sec": 2.0204823030071566
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 72.15409791492091,
+        "elapsed_sec": 1.7739810170023702
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 63.93052455726452,
+        "elapsed_sec": 2.00217346700083
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 72.0642735082134,
+        "elapsed_sec": 1.7761921930068638
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 69.47393879239475,
+        "elapsed_sec": 1.8424174910032889
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 67.7103338990084,
+        "elapsed_sec": 1.890405682992423
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 63.21551302532842,
+        "elapsed_sec": 2.0248194450105075
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 65.70456593224803,
+        "elapsed_sec": 1.94811423200008
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 66.05091754919775,
+        "elapsed_sec": 1.9378988929966
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 65.43662809149188,
+        "elapsed_sec": 1.9560910110012628
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 65.49856498591954,
+        "elapsed_sec": 1.9542412879964104
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 62.992647471393006,
+        "elapsed_sec": 2.031983178007067
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 66.67550078860322,
+        "elapsed_sec": 1.9197456109977793
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 67.27268267760941,
+        "elapsed_sec": 1.902703964005923
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 64.30595038107501,
+        "elapsed_sec": 1.990484539011959
+      },
+      {
+        "tokens": 128,
+        "blocks": 31,
+        "AATPS": 4.129032258064516,
+        "accepted_mean": 3.161290322580645,
+        "token_rate": 56.24694226218822,
+        "elapsed_sec": 2.27567926098709
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 71.78203723549319,
+        "elapsed_sec": 1.783175916003529
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 69.80430403768918,
+        "elapsed_sec": 1.833697817986831
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 72.38202740056438,
+        "elapsed_sec": 1.7683947879995685
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 69.44053502364127,
+        "elapsed_sec": 1.843303770001512
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 68.96805820906134,
+        "elapsed_sec": 1.8559316199971363
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 66.50312167045799,
+        "elapsed_sec": 1.924721678995411
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 67.63324468191448,
+        "elapsed_sec": 1.8925603910029167
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 69.54310015354957,
+        "elapsed_sec": 1.8405851869902108
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 71.43687158020013,
+        "elapsed_sec": 1.7917917899903841
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 65.91119101637652,
+        "elapsed_sec": 1.9420070859923726
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 61.94421388884213,
+        "elapsed_sec": 2.0663754039997
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 70.04413840124879,
+        "elapsed_sec": 1.8274191520031309
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 62.412080760011925,
+        "elapsed_sec": 2.0508849960024236
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.413793103448276,
+        "token_rate": 59.68222211099268,
+        "elapsed_sec": 2.144692262998433
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.413793103448276,
+        "token_rate": 62.49701665221462,
+        "elapsed_sec": 2.0480977630068082
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 69.30534115765374,
+        "elapsed_sec": 1.8468995009898208
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 62.26326806216489,
+        "elapsed_sec": 2.0557867260067724
+      },
+      {
+        "tokens": 128,
+        "blocks": 29,
+        "AATPS": 4.413793103448276,
+        "accepted_mean": 3.4482758620689653,
+        "token_rate": 61.54527406769546,
+        "elapsed_sec": 2.079769762000069
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 70.71748036827246,
+        "elapsed_sec": 1.8100192389974836
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.5714285714285716,
+        "token_rate": 65.17234238365461,
+        "elapsed_sec": 1.9640233160025673
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 69.87340761222958,
+        "elapsed_sec": 1.8318843230081256
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 65.46640893457683,
+        "elapsed_sec": 1.9552011800114997
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 65.49812006261452,
+        "elapsed_sec": 1.9542545629956294
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 62.065717356623246,
+        "elapsed_sec": 2.062330147004104
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 66.0465259075126,
+        "elapsed_sec": 1.9380277500022203
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.923076923076923,
+        "token_rate": 70.8768261866582,
+        "elapsed_sec": 1.8059499400114873
+      },
+      {
+        "tokens": 128,
+        "blocks": 26,
+        "AATPS": 4.923076923076923,
+        "accepted_mean": 3.9615384615384617,
+        "token_rate": 72.15064554690147,
+        "elapsed_sec": 1.7740659010014497
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 65.77294380352646,
+        "elapsed_sec": 1.946088962999056
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 65.77876353846587,
+        "elapsed_sec": 1.9459167839959264
+      },
+      {
+        "tokens": 128,
+        "blocks": 28,
+        "AATPS": 4.571428571428571,
+        "accepted_mean": 3.607142857142857,
+        "token_rate": 63.55924529877678,
+        "elapsed_sec": 2.013869098009309
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.740740740740741,
+        "token_rate": 65.98622179955578,
+        "elapsed_sec": 1.9397988929995336
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.04961373148323,
+        "elapsed_sec": 1.880980551999528
+      },
+      {
+        "tokens": 128,
+        "blocks": 27,
+        "AATPS": 4.7407407407407405,
+        "accepted_mean": 3.7777777777777777,
+        "token_rate": 68.01983104359434,
+        "elapsed_sec": 1.881804144999478
+      }
+    ]
+  }
+}

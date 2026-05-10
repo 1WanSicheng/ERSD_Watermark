@@ -1,0 +1,34 @@
+{
+  "experiment": "multi_draft",
+  "samples": 50,
+  "dataset": "cnn_dailymail",
+  "max_new_tokens": 128,
+  "lookaheads": [4],
+  "num_drafts": [2, 4, 8],
+  "private_key": "1234",
+  "target_model": "huggyllama/llama-7b",
+  "draft_model": "JackFram/llama-68m",
+  "use_chat_template": false,
+  "process_logits": {
+    "top_k": 50,
+    "top_p": 1.0,
+    "temperature": 1.0
+  },
+  "decoders": [
+    "ms_pfr_cached",
+    "mpfr_torchgen_cached",
+    "invariant_multi",
+    "strong_multi"
+  ],
+  "metrics": {
+    "aatps": true,
+    "token_rate": true,
+    "anlppt": {
+      "variants": ["U", "Li", "PL"],
+      "li_delta": 0.5,
+      "pl_eps": 0.1,
+      "applies_to": ["ms_pfr_cached", "mpfr_torchgen_cached"]
+    }
+  },
+  "output": "outputs/multi_draft_llama_cnn_n50_L4_B2-4-8_COMPAT.json"
+}

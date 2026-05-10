@@ -1,0 +1,42 @@
+{
+  "experiment": "multi_draft",
+  "samples": 1000,
+  "dataset": "cnn_dailymail",
+  "max_new_tokens": 128,
+  "lookaheads": [
+    4
+  ],
+  "num_drafts": [
+    4
+  ],
+  "private_key": "1234",
+  "target_model": "/root/PFR/ERSD_Watermark/model/Qwen2.5-7B-Instruct",
+  "draft_model": "/root/PFR/ERSD_Watermark/model/Qwen2.5-0.5B-Instruct",
+  "process_logits": {
+    "top_k": 50,
+    "top_p": 1.0,
+    "temperature": 1.0,
+    "draft_temperature": 1.0
+  },
+  "decoders": [
+    "mpfr_torchgen_cached"
+  ],
+  "metrics": {
+    "aatps": true,
+    "token_rate": true,
+    "save_output_ids": true,
+    "anlppt": {
+      "variants": [
+        "U",
+        "Li",
+        "PL"
+      ],
+      "li_delta": 0.5,
+      "pl_eps": 0.1,
+      "applies_to": [
+        "mpfr_torchgen_cached"
+      ]
+    }
+  },
+  "output": "outputs/multi_draft_qwen_cnn_n1000_DI_Td10.json"
+}
