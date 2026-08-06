@@ -255,9 +255,19 @@ def build_default_labeler(
 class SharedPFRSource:
     label: bytes
     private_key: bytes
+    _cached_seed: int = field(init=False, repr=False, compare=False)
+
+    def __post_init__(self):
+        # A source is immutable, and its seed depends only on these two byte
+        # strings.  Draft and target can revisit the same source, so deriving
+        # SHA-256 once avoids repeated CPU bookkeeping without changing the
+        # keyed RNG stream.
+        object.__setattr__(
+            self, "_cached_seed", _get_seed(self.label, self.private_key)
+        )
 
     def seed(self) -> int:
-        return _get_seed(self.label, self.private_key)
+        return self._cached_seed
 
     def numpy_rng(self):
         return _get_rng(self.label, self.private_key)
@@ -385,6 +395,14 @@ def _select_first_row_and_truncate_cache(cache: Any, seq_len: int) -> Any:
     if cache is None:
         return None
     seq_len = max(int(seq_len), 0)
+    # Newer Transformers DynamicCache implementations expose crop() without
+    # the legacy public key_cache/value_cache lists.  B=1 needs no row
+    # selection, so cropping the logical sequence is sufficient.
+    if hasattr(cache, "crop") and not (
+        hasattr(cache, "key_cache") and hasattr(cache, "value_cache")
+    ):
+        cache.crop(seq_len)
+        return cache
     if hasattr(cache, "key_cache") and hasattr(cache, "value_cache"):
         for i in range(len(cache.key_cache)):
             cache.key_cache[i] = cache.key_cache[i][:1, :, :seq_len, :].contiguous()

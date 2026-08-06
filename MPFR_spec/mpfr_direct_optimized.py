@@ -134,15 +134,24 @@ def _top_p(process_logits_kwargs: Optional[Dict[str, Any]]) -> float:
     return float(process_logits_kwargs.get("top_p", 1.0))
 
 
-def process_logits_exact(logits: Tensor, *, temperature: Any = 1.0, top_k: int = 50, top_p: float = 1.0) -> Tensor:
+def process_logits_exact(
+    logits: Tensor,
+    *,
+    temperature: Any = 1.0,
+    top_k: int = 50,
+    top_p: float = 1.0,
+    return_support: bool = False,
+):
     """
     Apply the same minimal top-k + temperature processing as the uploaded code.
 
     The uploaded baseline keeps top_p for API compatibility but does not use it,
     so this function intentionally does not nucleus-filter either.
     """
+    support = None
     if top_k is not None and int(top_k) > 0 and int(top_k) < logits.shape[-1]:
         vals, idx = torch.topk(logits, int(top_k), dim=-1, sorted=False)
+        support = idx
         out = torch.full_like(logits, float("-inf"))
         out.scatter_(-1, idx, vals)
     else:
@@ -150,10 +159,14 @@ def process_logits_exact(logits: Tensor, *, temperature: Any = 1.0, top_k: int =
 
     temp = temperature
     if not torch.is_tensor(temp):
-        temp = torch.tensor(float(temp), device=out.device, dtype=out.dtype)
+        temp_value = float(temp)
+        if temp_value == 1.0:
+            return (out, support) if return_support else out
+        temp = torch.tensor(temp_value, device=out.device, dtype=out.dtype)
     else:
         temp = temp.to(device=out.device, dtype=out.dtype)
-    return out / temp
+    out = out / temp
+    return (out, support) if return_support else out
 
 
 def _normalize_logprobs_from_processed_logits(processed_logits: Tensor) -> Tensor:

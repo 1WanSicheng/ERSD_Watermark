@@ -48,7 +48,7 @@ from unbiased_watermark.scores import (  # noqa: E402
     DeltaGumbel_A,
     DeltaGumbel_Li,
     DeltaGumbel_PL,
-    DeltaGumbel_U,
+    PFR_Aaronson_U_Score,
 )
 from unbiased_watermark.scores.pfr_aaronson import _uniform_for_token  # noqa: E402
 from accuwm.utils import process_logits  # noqa: E402
@@ -205,9 +205,14 @@ def encode_prompt(tokenizer, prompt, device, use_chat_template: bool = True):
     them to generate chat-template artifacts in the output.
     """
     if use_chat_template and getattr(tokenizer, "chat_template", None):
-        return tokenizer.apply_chat_template(
+        encoded = tokenizer.apply_chat_template(
             prompt, add_generation_prompt=True, return_tensors="pt"
-        ).to(device)
+        )
+        # Transformers 4 returns a tensor here, while Transformers 5 returns
+        # a BatchEncoding.  Normalize both APIs without changing token ids.
+        if hasattr(encoded, "input_ids"):
+            encoded = encoded.input_ids
+        return encoded.to(device)
     user_msgs = [m["content"] for m in prompt if m["role"] == "user"]
     text = (
         user_msgs[-1]
@@ -692,7 +697,7 @@ def _run_mpfr_torchgen_cached(target, draft, input_ids, *, lookahead,
         model=target, ref_model=draft, input_ids=input_ids,
         n=lookahead, max_length=max_length, num_drafts=num_drafts,
         private_key=pk, return_meta=True,
-        process_logits_kwargs=plk,
+        process_logits_kwargs=plk, return_logprobs=False,
     )
     out, blocks, _, _ = _drain(gen, max_length)
     sentinel = (_DEFER_PREFIX_LABELS, input_ids, _mpfr_direct_label)
@@ -701,7 +706,7 @@ def _run_mpfr_torchgen_cached(target, draft, input_ids, *, lookahead,
 
 def _run_invariant_multi(target, draft, input_ids, *,
                          lookahead, max_length, seed, base_key,
-                         num_drafts: int, **_):
+                         num_drafts: int, plk, **_):
     """Wrapper for accuwm.invariant_multi.InvariantMultiDraftStrategy
     + InvariantGenerator.  Uses unkeyed pre-sampled randomness, so no
     recoverable watermark."""
@@ -722,9 +727,17 @@ def _run_invariant_multi(target, draft, input_ids, *,
 
     generator = InvariantGenerator(strategy)
     eos = int(getattr(target.config, "eos_token_id", 0) or 0)
+    top_k = int((plk or {}).get("top_k", 50) or 0)
+    top_p = float((plk or {}).get("top_p", 1.0) or 1.0)
+    temperature = float((plk or {}).get("temperature", 1.0) or 1.0)
     out_full = generator(
         input_ids=input_ids, eos_token_id=eos,
-        max_new_tokens=max_length, temperature=1.0,
+        max_new_tokens=max_length,
+        temperature=temperature,
+        top_p=top_p,
+        # Passing zero is the explicit no-truncation path supported by
+        # accuwm.invariant_multi.LogitsProcessor.
+        top_k=top_k,
     )
     L_in = int(input_ids.shape[-1])
     out = out_full.sequences[:, L_in:].detach().cpu()
@@ -964,7 +977,12 @@ def anlppt_metrics(
     if variants is None:
         variants = ["U", "A", "Li", "PL"]
     if "U" in variants:
-        s = DeltaGumbel_U.from_watermarkcode(code_fake, ids_fake, skipped)
+        # Closed-form Chernoff optimizer for the same per-token U statistic.
+        # This is numerically equivalent to DeltaGumbel_U's generic scipy
+        # optimization path and keeps signal-only detection self-contained.
+        s = PFR_Aaronson_U_Score.from_watermarkcode(
+            code_fake, ids_fake, skipped
+        )
         out["ANLPPT_U"] = -float(s.get_log_p_value()) / n_added
     if "A" in variants:
         s = DeltaGumbel_A.from_watermarkcode(code_fake, ids_fake, skipped)

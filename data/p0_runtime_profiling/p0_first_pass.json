@@ -1,0 +1,264 @@
+{
+  "hardware": {
+    "gpu": "NVIDIA A100-SXM4-40GB",
+    "torch": "2.11.0+cu130"
+  },
+  "config": {
+    "target": "Qwen/Qwen2.5-7B-Instruct",
+    "draft": "Qwen/Qwen2.5-0.5B-Instruct",
+    "device": "cuda:0",
+    "samples": 5,
+    "warmup": 1,
+    "lookahead": 4,
+    "max_new_tokens": 64,
+    "draft_counts": [
+      2,
+      4,
+      8
+    ],
+    "top_k": 50,
+    "temperature": 1.0
+  },
+  "results": [
+    {
+      "num_drafts": 2,
+      "lookahead": 4,
+      "samples": 5,
+      "max_new_tokens": 64,
+      "end_to_end": {
+        "tokens": 320,
+        "elapsed_sec": 11.2503689348232,
+        "token_rate_global": 28.443511662049225,
+        "token_rate": {
+          "mean": 28.617696068559916,
+          "std": 2.135719916280287
+        },
+        "peak_allocated_gib": 15.219954013824463,
+        "rows": [
+          {
+            "tokens": 64,
+            "elapsed_sec": 2.1777410639915615,
+            "token_rate": 29.38825054007798,
+            "peak_allocated_bytes": 16340451840
+          },
+          {
+            "tokens": 64,
+            "elapsed_sec": 2.0756032878998667,
+            "token_rate": 30.834408662339502,
+            "peak_allocated_bytes": 16340042240
+          },
+          {
+            "tokens": 64,
+            "elapsed_sec": 2.2331321260426193,
+            "token_rate": 28.659298414830364,
+            "peak_allocated_bytes": 16336331264
+          },
+          {
+            "tokens": 64,
+            "elapsed_sec": 2.603495913092047,
+            "token_rate": 24.58233165574294,
+            "peak_allocated_bytes": 16340974080
+          },
+          {
+            "tokens": 64,
+            "elapsed_sec": 2.1603965437971056,
+            "token_rate": 29.624191069808795,
+            "peak_allocated_bytes": 16342301184
+          }
+        ]
+      },
+      "instrumented": {
+        "tokens": 320,
+        "elapsed_sec": 11.365100905066356,
+        "token_rate": 28.15637121684945,
+        "peak_allocated_gib": 15.219954013824463,
+        "phase_sec": {
+          "draft_forward": 7.491859914502129,
+          "keyed_uniform_rng": 0.034675442148,
+          "pfr_arrival_sampling": 0.2815754981711507,
+          "target_forward": 2.494163847528398
+        },
+        "phase_calls": {
+          "draft_forward": 372,
+          "keyed_uniform_rng": 838,
+          "pfr_arrival_sampling": 838,
+          "target_forward": 95
+        },
+        "derived_sec": {
+          "target_forward": 2.494163847528398,
+          "draft_forward": 7.491859914502129,
+          "pfr_arrival_sampling_including_rng": 0.2815754981711507,
+          "keyed_uniform_rng_subset": 0.034675442148,
+          "remainder_tree_cache_python": 1.0975016448646784
+        },
+        "derived_fraction": {
+          "target_forward": 0.2194581348957971,
+          "draft_forward": 0.6591987151792373,
+          "pfr_arrival_sampling_including_rng": 0.024775450787738226,
+          "keyed_uniform_rng_subset": 0.003051045691335861,
+          "remainder_tree_cache_python": 0.09656769913722738
+        }
+      }
+    },
+    {
+      "num_drafts": 4,
+      "lookahead": 4,
+      "samples": 5,
+      "max_new_tokens": 64,
+      "end_to_end": {
+        "tokens": 320,
+        "elapsed_sec": 10.94048336474225,
+        "token_rate_global": 29.24916471526841,
+        "token_rate": {
+          "mean": 29.352881530490755,
+          "std": 1.7368774222618442
+        },
+        "peak_allocated_gib": 15.261213302612305,
+        "rows": [
+          {
+            "tokens": 64,
+            "elapsed_sec": 2.1854846419300884,
+            "token_rate": 29.28412251091321,
+            "peak_allocated_bytes": 16370720768
+          },
+          {
+            "tokens": 64,
+            "elapsed_sec": 1.9982265729922801,
+            "token_rate": 32.02840001480015,
+            "peak_allocated_bytes": 16375224320
+          },
+          {
+            "tokens": 64,
+            "elapsed_sec": 2.147313575958833,
+            "token_rate": 29.80468279832967,
+            "peak_allocated_bytes": 16386603008
+          },
+          {
+            "tokens": 64,
+            "elapsed_sec": 2.406837756978348,
+            "token_rate": 26.590907432143858,
+            "peak_allocated_bytes": 16374437888
+          },
+          {
+            "tokens": 64,
+            "elapsed_sec": 2.2026208168826997,
+            "token_rate": 29.05629489626689,
+            "peak_allocated_bytes": 16380151808
+          }
+        ]
+      },
+      "instrumented": {
+        "tokens": 320,
+        "elapsed_sec": 11.084372193319723,
+        "token_rate": 28.869474465396973,
+        "peak_allocated_gib": 15.261213302612305,
+        "phase_sec": {
+          "draft_forward": 7.207686242414638,
+          "keyed_uniform_rng": 0.041617380920797586,
+          "pfr_arrival_sampling": 0.34858734579756856,
+          "target_forward": 2.363930152496323
+        },
+        "phase_calls": {
+          "draft_forward": 357,
+          "keyed_uniform_rng": 1023,
+          "pfr_arrival_sampling": 1023,
+          "target_forward": 91
+        },
+        "derived_sec": {
+          "target_forward": 2.363930152496323,
+          "draft_forward": 7.207686242414638,
+          "pfr_arrival_sampling_including_rng": 0.34858734579756856,
+          "keyed_uniform_rng_subset": 0.041617380920797586,
+          "remainder_tree_cache_python": 1.164168452611193
+        },
+        "derived_fraction": {
+          "target_forward": 0.21326694117335804,
+          "draft_forward": 0.6502566060311952,
+          "pfr_arrival_sampling_including_rng": 0.03144854212019816,
+          "keyed_uniform_rng_subset": 0.0037545997369052035,
+          "remainder_tree_cache_python": 0.10502791067524858
+        }
+      }
+    },
+    {
+      "num_drafts": 8,
+      "lookahead": 4,
+      "samples": 5,
+      "max_new_tokens": 64,
+      "end_to_end": {
+        "tokens": 320,
+        "elapsed_sec": 10.218646279303357,
+        "token_rate_global": 31.31530256097832,
+        "token_rate": {
+          "mean": 31.466716577017042,
+          "std": 2.2321357294311936
+        },
+        "peak_allocated_gib": 15.325653076171875,
+        "rows": [
+          {
+            "tokens": 64,
+            "elapsed_sec": 1.9904637751169503,
+            "token_rate": 32.15331060030955,
+            "peak_allocated_bytes": 16419212800
+          },
+          {
+            "tokens": 64,
+            "elapsed_sec": 1.809416766045615,
+            "token_rate": 35.37051341680039,
+            "peak_allocated_bytes": 16455794688
+          },
+          {
+            "tokens": 64,
+            "elapsed_sec": 2.067012350074947,
+            "token_rate": 30.96256294631208,
+            "peak_allocated_bytes": 16436208640
+          },
+          {
+            "tokens": 64,
+            "elapsed_sec": 2.216322378953919,
+            "token_rate": 28.876665510279842,
+            "peak_allocated_bytes": 16439563264
+          },
+          {
+            "tokens": 64,
+            "elapsed_sec": 2.135431009111926,
+            "token_rate": 29.970530411383344,
+            "peak_allocated_bytes": 16431735296
+          }
+        ]
+      },
+      "instrumented": {
+        "tokens": 320,
+        "elapsed_sec": 10.3949019392021,
+        "token_rate": 30.78432118663765,
+        "peak_allocated_gib": 15.325653076171875,
+        "phase_sec": {
+          "draft_forward": 6.6065856060013175,
+          "keyed_uniform_rng": 0.04981898982077837,
+          "pfr_arrival_sampling": 0.41827582428231835,
+          "target_forward": 2.1567307361401618
+        },
+        "phase_calls": {
+          "draft_forward": 325,
+          "keyed_uniform_rng": 1226,
+          "pfr_arrival_sampling": 1226,
+          "target_forward": 83
+        },
+        "derived_sec": {
+          "target_forward": 2.1567307361401618,
+          "draft_forward": 6.6065856060013175,
+          "pfr_arrival_sampling_including_rng": 0.41827582428231835,
+          "keyed_uniform_rng_subset": 0.04981898982077837,
+          "remainder_tree_cache_python": 1.2133097727783024
+        },
+        "derived_fraction": {
+          "target_forward": 0.2074796615451006,
+          "draft_forward": 0.6355601663817553,
+          "pfr_arrival_sampling_including_rng": 0.04023855412285156,
+          "keyed_uniform_rng_subset": 0.004792636824489603,
+          "remainder_tree_cache_python": 0.11672161795029252
+        }
+      }
+    }
+  ]
+}

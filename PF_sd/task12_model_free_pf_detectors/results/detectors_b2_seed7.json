@@ -1,0 +1,109 @@
+{
+  "source_config": {
+    "target_model": "/data/wansicheng3/hf_cache/hub/models--lmsys--vicuna-7b-v1.5/snapshots/3321f76e3f527bd14065daf69dad9344000a201d",
+    "draft_model": "/data/wansicheng3/hf_cache/hub/models--double7--vicuna-68m/snapshots/f35c45e548302e8edd0a31db7490b42ea2ddd109",
+    "device": "cuda:0",
+    "dtype": "float16",
+    "dataset": "cnn_dailymail",
+    "dataset_arrow": "/data/wansicheng3/hf_cache/datasets/cnn_dailymail/3.0.0/0.0.0/96df5e686bee6baa90b8bee7c28b81fa3fa6223d/cnn_dailymail-test.arrow",
+    "samples": 100,
+    "seed": 7,
+    "private_key": "latin-pf-v1",
+    "max_new_tokens": 128,
+    "lookahead": 4,
+    "widths": [
+      2
+    ],
+    "temperature": 1.0,
+    "top_k": 50,
+    "top_p": 1.0,
+    "methods": [
+      "latin_pf_counter_fused",
+      "latin_pf_counter_tree_free",
+      "invariant"
+    ],
+    "full_generation_warmup": true,
+    "rotate_method_order": true,
+    "rotate_width_order": false,
+    "store_output_tokens": true,
+    "pf_detector_rho": 0.5,
+    "pf_detector_eps": 0.05
+  },
+  "evaluated_method": "latin_pf_counter_tree_free",
+  "n_null": 200000,
+  "model_access": false,
+  "detectors": {
+    "Original": {
+      "n_sequences": 100,
+      "mean_score_per_token": 1.188739343524541,
+      "mean_ANLPPT": 0.0444447380439227,
+      "median_ANLPPT": 0.02643387824344867,
+      "TPR@FPR=0.01": 0.26,
+      "TPR@FPR=0.001": 0.14
+    },
+    "Li-rho=0.05": {
+      "n_sequences": 100,
+      "mean_score_per_token": 0.010752913140438388,
+      "mean_ANLPPT": 0.03691093356849398,
+      "median_ANLPPT": 0.020046439553472063,
+      "TPR@FPR=0.01": 0.21,
+      "TPR@FPR=0.001": 0.1
+    },
+    "Li-rho=0.1": {
+      "n_sequences": 100,
+      "mean_score_per_token": 0.013363326769342368,
+      "mean_ANLPPT": 0.03904391779494518,
+      "median_ANLPPT": 0.022692149541605644,
+      "TPR@FPR=0.01": 0.26,
+      "TPR@FPR=0.001": 0.1
+    },
+    "Li-rho=0.2": {
+      "n_sequences": 100,
+      "mean_score_per_token": 0.00829579549350291,
+      "mean_ANLPPT": 0.03643217593894441,
+      "median_ANLPPT": 0.021927618615080767,
+      "TPR@FPR=0.01": 0.26,
+      "TPR@FPR=0.001": 0.12
+    },
+    "Li-rho=0.5": {
+      "n_sequences": 100,
+      "mean_score_per_token": -0.03562227640471523,
+      "mean_ANLPPT": 0.03243425357345003,
+      "median_ANLPPT": 0.019369998695300615,
+      "TPR@FPR=0.01": 0.24,
+      "TPR@FPR=0.001": 0.03
+    },
+    "PowerLaw-eps=0.01": {
+      "n_sequences": 100,
+      "mean_score_per_token": 0.2585686247966177,
+      "mean_ANLPPT": 0.039925328974900386,
+      "median_ANLPPT": 0.023993494865999526,
+      "TPR@FPR=0.01": 0.23,
+      "TPR@FPR=0.001": 0.1
+    },
+    "PowerLaw-eps=0.02": {
+      "n_sequences": 100,
+      "mean_score_per_token": 0.21682488907943273,
+      "mean_ANLPPT": 0.039624689735925554,
+      "median_ANLPPT": 0.024807844962639714,
+      "TPR@FPR=0.01": 0.24,
+      "TPR@FPR=0.001": 0.11
+    },
+    "PowerLaw-eps=0.05": {
+      "n_sequences": 100,
+      "mean_score_per_token": 0.1550073809698059,
+      "mean_ANLPPT": 0.037257474899897565,
+      "median_ANLPPT": 0.0244516133816316,
+      "TPR@FPR=0.01": 0.26,
+      "TPR@FPR=0.001": 0.11
+    },
+    "PowerLaw-eps=0.1": {
+      "n_sequences": 100,
+      "mean_score_per_token": 0.10459436866484852,
+      "mean_ANLPPT": 0.0335182773411401,
+      "median_ANLPPT": 0.02202553097079206,
+      "TPR@FPR=0.01": 0.24,
+      "TPR@FPR=0.001": 0.07
+    }
+  }
+}

@@ -1,0 +1,9069 @@
+{
+  "config": {
+    "target": "Qwen/Qwen2.5-7B-Instruct",
+    "draft": "Qwen/Qwen2.5-0.5B-Instruct",
+    "device": "cuda:0",
+    "samples": 10,
+    "widths": [
+      4,
+      8
+    ],
+    "lookahead": 4,
+    "max_new_tokens": 128,
+    "top_k": 50,
+    "output": "data/p0_runtime_profiling/mpfr_optimization/results/optimized_n10.json"
+  },
+  "summary": {
+    "4": {
+      "tokens": 1047,
+      "blocks": 350,
+      "AATPS": 2.9914285714285715,
+      "token_rate": 24.894332586145296,
+      "ms_per_block": 120.16504403469818
+    },
+    "8": {
+      "tokens": 1034,
+      "blocks": 309,
+      "AATPS": 3.3462783171521036,
+      "token_rate": 27.130520647405177,
+      "ms_per_block": 123.33999633258601
+    }
+  },
+  "rows": [
+    {
+      "prompt_idx": 0,
+      "width": 4,
+      "output_ids": [
+        32,
+        1682,
+        504,
+        42062,
+        11,
+        23219,
+        11,
+        702,
+        18163,
+        916,
+        220,
+        18,
+        11,
+        15,
+        15,
+        15,
+        6271,
+        20119,
+        553,
+        11560,
+        9185,
+        323,
+        6803,
+        59694,
+        13179,
+        2272,
+        11,
+        2670,
+        51904,
+        448,
+        31553,
+        323,
+        10975,
+        11,
+        323,
+        1667,
+        15183,
+        4128,
+        13,
+        17715,
+        806,
+        13812,
+        3908,
+        4231,
+        11,
+        304,
+        1045,
+        6803,
+        566,
+        7952,
+        311,
+        3705,
+        16362,
+        93972,
+        398,
+        1393,
+        12598,
+        12550,
+        26,
+        1657,
+        315,
+        806,
+        7999,
+        1083,
+        2924,
+        7244,
+        15057,
+        13,
+        1096,
+        702,
+        40444,
+        18817,
+        504,
+        6271,
+        3847,
+        879,
+        1977,
+        279,
+        1682,
+        594,
+        7709,
+        374,
+        330,
+        82114,
+        1,
+        323,
+        4190,
+        566,
+        3880,
+        1492,
+        323,
+        458,
+        6731,
+        11,
+        18860,
+        4643,
+        369,
+        806,
+        1632,
+        32751,
+        13,
+        151645
+      ],
+      "blocks": [
+        {
+          "tokens": [
+            32,
+            1682,
+            504
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 9,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            42062,
+            11,
+            23219,
+            11,
+            702
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 6
+        },
+        {
+          "tokens": [
+            18163
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            916,
+            220,
+            18,
+            11,
+            15
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 8,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            15,
+            15,
+            6271,
+            20119,
+            553
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            11560,
+            9185,
+            323
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            6803,
+            59694
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 8,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            13179,
+            2272,
+            11
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            2670,
+            51904
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            448,
+            31553
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 5,
+          "target_context_count": 7
+        },
+        {
+          "tokens": [
+            323,
+            10975
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 8,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            11,
+            323
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            1667,
+            15183,
+            4128,
+            13,
+            17715
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            806
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            13812,
+            3908
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            4231,
+            11,
+            304
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 7,
+          "target_context_count": 10
+        },
+        {
+          "tokens": [
+            1045,
+            6803
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            566,
+            7952,
+            311,
+            3705
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            16362
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            93972
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            398,
+            1393
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 9,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            12598
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 7,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            12550,
+            26,
+            1657
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            315,
+            806,
+            7999,
+            1083
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            2924,
+            7244,
+            15057,
+            13,
+            1096
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            702,
+            40444,
+            18817,
+            504,
+            6271
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 9,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            3847,
+            879,
+            1977
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 8,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            279,
+            1682,
+            594,
+            7709
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            374,
+            330
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 8,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            82114,
+            1,
+            323,
+            4190
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 6,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            566,
+            3880
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            1492,
+            323
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 9,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            458
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 7,
+          "target_context_count": 10
+        },
+        {
+          "tokens": [
+            6731,
+            11,
+            18860
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 7,
+          "target_context_count": 10
+        },
+        {
+          "tokens": [
+            4643
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            369
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            806
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            1632,
+            32751,
+            13,
+            151645
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        }
+      ],
+      "tokens": 102,
+      "num_blocks": 38,
+      "AATPS": 2.6842105263157894,
+      "elapsed_sec": 4.598375590052456,
+      "token_rate": 22.181746141105545
+    },
+    {
+      "prompt_idx": 1,
+      "width": 4,
+      "output_ids": [
+        3564,
+        15849,
+        23358,
+        11266,
+        43306,
+        16601,
+        18817,
+        369,
+        806,
+        7709,
+        2337,
+        264,
+        6290,
+        13994,
+        6438,
+        11,
+        1380,
+        566,
+        2684,
+        1119,
+        264,
+        31713,
+        5693,
+        448,
+        264,
+        20820,
+        11079,
+        11,
+        64198,
+        6050,
+        2534,
+        13,
+        576,
+        26718,
+        11668,
+        10024,
+        374,
+        48479,
+        43306,
+        315,
+        44547,
+        11,
+        26305,
+        806,
+        98522,
+        16232,
+        6974,
+        49694,
+        13,
+        43306,
+        22378,
+        264,
+        3484,
+        448,
+        76027,
+        44,
+        27929,
+        369,
+        400,
+        17,
+        17,
+        20,
+        3526,
+        11,
+        1753,
+        4722,
+        1091,
+        279,
+        400,
+        23,
+        13,
+        24,
+        7094,
+        13214,
+        16105,
+        11,
+        892,
+        1045,
+        13336,
+        17585,
+        75625,
+        7567,
+        27894,
+        7775,
+        916,
+        1584,
+        7337,
+        13,
+        1096,
+        10455,
+        702,
+        9226,
+        10520,
+        911,
+        43306,
+        594,
+        5486,
+        323,
+        1410,
+        13581,
+        5421,
+        806,
+        13318,
+        50466,
+        13,
+        151645
+      ],
+      "blocks": [
+        {
+          "tokens": [
+            3564,
+            15849,
+            23358,
+            11266,
+            43306
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 5,
+          "target_context_count": 7
+        },
+        {
+          "tokens": [
+            16601,
+            18817,
+            369
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            806,
+            7709,
+            2337,
+            264
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            6290,
+            13994,
+            6438,
+            11
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            1380,
+            566,
+            2684,
+            1119,
+            264
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            31713,
+            5693,
+            448,
+            264,
+            20820
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 6,
+          "target_context_count": 8
+        },
+        {
+          "tokens": [
+            11079,
+            11
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 7,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            64198
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            6050,
+            2534,
+            13,
+            576,
+            26718
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 5,
+          "target_context_count": 8
+        },
+        {
+          "tokens": [
+            11668,
+            10024,
+            374
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 7,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            48479,
+            43306,
+            315,
+            44547,
+            11
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            26305
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            806,
+            98522
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            16232,
+            6974
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 9,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            49694
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            13,
+            43306,
+            22378
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            264,
+            3484
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            448,
+            76027,
+            44,
+            27929,
+            369
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 9,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            400,
+            17,
+            17,
+            20,
+            3526
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            11,
+            1753
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            4722,
+            1091,
+            279,
+            400
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            23,
+            13,
+            24
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            7094,
+            13214,
+            16105
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 9,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            11,
+            892
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            1045,
+            13336,
+            17585
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            75625,
+            7567
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            27894,
+            7775,
+            916
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 8,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            1584,
+            7337,
+            13,
+            1096
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 4,
+          "target_context_count": 8
+        },
+        {
+          "tokens": [
+            10455
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            702,
+            9226
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            10520,
+            911,
+            43306,
+            594,
+            5486
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            323
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 8,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            1410
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            13581,
+            5421,
+            806,
+            13318,
+            50466
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 9,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            13,
+            151645
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        }
+      ],
+      "tokens": 106,
+      "num_blocks": 35,
+      "AATPS": 3.0285714285714285,
+      "elapsed_sec": 4.188920707907528,
+      "token_rate": 25.304847570855475
+    },
+    {
+      "prompt_idx": 2,
+      "width": 4,
+      "output_ids": [
+        55999,
+        1225,
+        86,
+        34971,
+        33780,
+        25673,
+        12514,
+        11,
+        13214,
+        504,
+        24242,
+        746,
+        11,
+        6424,
+        11,
+        686,
+        4009,
+        54163,
+        12660,
+        518,
+        279,
+        220,
+        17,
+        15,
+        16,
+        21,
+        26961,
+        31963,
+        1283,
+        1660,
+        11676,
+        32679,
+        553,
+        279,
+        3146,
+        323,
+        10773,
+        504,
+        46694,
+        80998,
+        358,
+        5197,
+        823,
+        859,
+        3375,
+        13,
+        12514,
+        11,
+        264,
+        2326,
+        7246,
+        7513,
+        18319,
+        11,
+        6476,
+        566,
+        572,
+        75625,
+        44436,
+        369,
+        279,
+        7855,
+        2083,
+        518,
+        7148,
+        220,
+        17,
+        15,
+        16,
+        17,
+        11,
+        7945,
+        2701,
+        444,
+        332,
+        12529,
+        35731,
+        594,
+        39807,
+        36612,
+        3164,
+        13,
+        12514,
+        702,
+        1012,
+        10805,
+        369,
+        279,
+        54265,
+        315,
+        2363,
+        2474,
+        4124,
+        220,
+        17,
+        15,
+        16,
+        18,
+        323,
+        374,
+        1431,
+        7967,
+        33452,
+        389,
+        264,
+        501,
+        12453,
+        304,
+        806,
+        6931,
+        13,
+        151645
+      ],
+      "blocks": [
+        {
+          "tokens": [
+            55999
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            1225,
+            86,
+            34971,
+            33780
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 4,
+          "target_context_count": 6
+        },
+        {
+          "tokens": [
+            25673,
+            12514,
+            11,
+            13214
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 5,
+          "target_context_count": 8
+        },
+        {
+          "tokens": [
+            504,
+            24242,
+            746,
+            11,
+            6424
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 6
+        },
+        {
+          "tokens": [
+            11,
+            686
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 7,
+          "target_context_count": 10
+        },
+        {
+          "tokens": [
+            4009,
+            54163,
+            12660,
+            518,
+            279
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            220,
+            17,
+            15,
+            16,
+            21
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            26961
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 7,
+          "target_context_count": 10
+        },
+        {
+          "tokens": [
+            31963,
+            1283
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 7,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            1660,
+            11676,
+            32679,
+            553,
+            279
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 10
+        },
+        {
+          "tokens": [
+            3146,
+            323
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            10773
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 10,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            504,
+            46694
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            80998,
+            358,
+            5197,
+            823,
+            859
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            3375,
+            13,
+            12514,
+            11
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 6,
+          "target_context_count": 10
+        },
+        {
+          "tokens": [
+            264
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            2326,
+            7246,
+            7513,
+            18319,
+            11
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            6476
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            566,
+            572,
+            75625,
+            44436,
+            369
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 10
+        },
+        {
+          "tokens": [
+            279,
+            7855,
+            2083
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            518,
+            7148,
+            220,
+            17,
+            15
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 9,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            16,
+            17,
+            11,
+            7945
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 6,
+          "target_context_count": 10
+        },
+        {
+          "tokens": [
+            2701,
+            444,
+            332,
+            12529,
+            35731
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            594,
+            39807
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 8,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            36612,
+            3164,
+            13
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            12514,
+            702,
+            1012,
+            10805
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            369,
+            279,
+            54265,
+            315,
+            2363
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            2474,
+            4124,
+            220,
+            17,
+            15
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 6,
+          "target_context_count": 8
+        },
+        {
+          "tokens": [
+            16,
+            18,
+            323,
+            374,
+            1431
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 5,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            7967
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            33452,
+            389,
+            264,
+            501,
+            12453
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 5,
+          "target_context_count": 8
+        },
+        {
+          "tokens": [
+            304,
+            806,
+            6931
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            13,
+            151645
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 7,
+          "target_context_count": 9
+        }
+      ],
+      "tokens": 112,
+      "num_blocks": 33,
+      "AATPS": 3.393939393939394,
+      "elapsed_sec": 3.942084049805999,
+      "token_rate": 28.411367841208722
+    },
+    {
+      "prompt_idx": 3,
+      "width": 4,
+      "output_ids": [
+        37,
+        25796,
+        97334,
+        594,
+        9803,
+        11,
+        358,
+        88,
+        12642,
+        97334,
+        11,
+        21191,
+        911,
+        1059,
+        23722,
+        315,
+        1059,
+        6981,
+        594,
+        46899,
+        4862,
+        17484,
+        8305,
+        315,
+        806,
+        1550,
+        24194,
+        4367,
+        448,
+        94155,
+        12637,
+        446,
+        22516,
+        13,
+        576,
+        4367,
+        374,
+        738,
+        311,
+        6923,
+        916,
+        400,
+        18,
+        15,
+        15,
+        3526,
+        323,
+        374,
+        6509,
+        279,
+        1429,
+        50206,
+        304,
+        45229,
+        3840,
+        13,
+        358,
+        88,
+        12642,
+        14591,
+        3861,
+        1059,
+        6981,
+        594,
+        975,
+        64847,
+        323,
+        9947,
+        11,
+        7945,
+        806,
+        7784,
+        33420,
+        14762,
+        11,
+        892,
+        1340,
+        702,
+        2581,
+        3884,
+        5489,
+        2432,
+        13,
+        2932,
+        6194,
+        279,
+        14487,
+        4367,
+        438,
+        1101,
+        2441,
+        4862,
+        3797,
+        11,
+        38586,
+        1059,
+        43917,
+        3602,
+        32345,
+        13057,
+        438,
+        264,
+        78457,
+        594,
+        1682,
+        13,
+        151645
+      ],
+      "blocks": [
+        {
+          "tokens": [
+            37,
+            25796,
+            97334,
+            594
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 10,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            9803,
+            11,
+            358,
+            88,
+            12642
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 6,
+          "target_context_count": 8
+        },
+        {
+          "tokens": [
+            97334,
+            11,
+            21191,
+            911,
+            1059
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            23722
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 6,
+          "target_context_count": 8
+        },
+        {
+          "tokens": [
+            315,
+            1059,
+            6981,
+            594,
+            46899
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 6
+        },
+        {
+          "tokens": [
+            4862,
+            17484,
+            8305
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 8,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            315,
+            806,
+            1550
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 8,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            24194,
+            4367,
+            448,
+            94155,
+            12637
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 9,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            446,
+            22516,
+            13
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            576
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            4367,
+            374
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            738
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            311,
+            6923,
+            916,
+            400,
+            18
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 5,
+          "target_context_count": 7
+        },
+        {
+          "tokens": [
+            15,
+            15,
+            3526,
+            323
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            374
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            6509,
+            279
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 10,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            1429,
+            50206,
+            304,
+            45229,
+            3840
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 5,
+          "target_context_count": 7
+        },
+        {
+          "tokens": [
+            13,
+            358
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 8,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            88,
+            12642,
+            14591
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 5,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            3861,
+            1059,
+            6981,
+            594,
+            975
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            64847,
+            323,
+            9947
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 8,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            11
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 8,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            7945
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            806,
+            7784,
+            33420,
+            14762
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 8,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            11,
+            892,
+            1340
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            702
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            2581,
+            3884,
+            5489,
+            2432
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 9,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            13,
+            2932
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 9,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            6194
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            279
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            14487
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            4367,
+            438,
+            1101
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            2441,
+            4862,
+            3797,
+            11
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            38586
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            1059,
+            43917
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 9,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            3602
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            32345
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            13057
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            438
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            264,
+            78457,
+            594
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            1682
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 7,
+          "target_context_count": 10
+        },
+        {
+          "tokens": [
+            13,
+            151645
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        }
+      ],
+      "tokens": 107,
+      "num_blocks": 42,
+      "AATPS": 2.5476190476190474,
+      "elapsed_sec": 5.031751223374158,
+      "token_rate": 21.264962286479786
+    },
+    {
+      "prompt_idx": 4,
+      "width": 4,
+      "output_ids": [
+        32,
+        220,
+        16,
+        18,
+        4666,
+        6284,
+        7748,
+        3743,
+        6941,
+        422,
+        23602,
+        472,
+        8858,
+        441,
+        6139,
+        311,
+        1059,
+        11079,
+        59106,
+        311,
+        2936,
+        1059,
+        27802,
+        10866,
+        11,
+        892,
+        572,
+        311,
+        1896,
+        1992,
+        304,
+        1378,
+        2849,
+        13,
+        422,
+        23602,
+        3867,
+        458,
+        47942,
+        518,
+        1059,
+        2906,
+        27798,
+        1340,
+        1035,
+        537,
+        31818,
+        1573,
+        13054,
+        220,
+        16,
+        23,
+        13,
+        17715,
+        1059,
+        24240,
+        11,
+        1059,
+        6981,
+        11,
+        879,
+        6305,
+        304,
+        264,
+        3942,
+        1380,
+        1682,
+        10866,
+        374,
+        4185,
+        11,
+        6801,
+        311,
+        1477,
+        264,
+        14452,
+        2432,
+        369,
+        1059,
+        438,
+        264,
+        14700,
+        5239,
+        13,
+        6747,
+        702,
+        279,
+        2086,
+        2832,
+        7504,
+        1372,
+        315,
+        1682,
+        46351,
+        30450,
+        11,
+        448,
+        7009,
+        220,
+        20,
+        17,
+        4,
+        315,
+        7571,
+        12224,
+        1573,
+        220,
+        16,
+        23,
+        11,
+        4092,
+        311,
+        6643,
+        6682,
+        13,
+        151645
+      ],
+      "blocks": [
+        {
+          "tokens": [
+            32,
+            220,
+            16,
+            18,
+            4666
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            6284,
+            7748,
+            3743,
+            6941
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 6,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            422,
+            23602,
+            472
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 6,
+          "target_context_count": 10
+        },
+        {
+          "tokens": [
+            8858,
+            441,
+            6139,
+            311
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 6,
+          "target_context_count": 10
+        },
+        {
+          "tokens": [
+            1059,
+            11079,
+            59106,
+            311,
+            2936
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            1059,
+            27802,
+            10866,
+            11,
+            892
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            572,
+            311
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 9,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            1896,
+            1992,
+            304,
+            1378,
+            2849
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            13,
+            422,
+            23602,
+            3867
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 9,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            458,
+            47942,
+            518,
+            1059,
+            2906
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 6
+        },
+        {
+          "tokens": [
+            27798
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 6,
+          "target_context_count": 8
+        },
+        {
+          "tokens": [
+            1340,
+            1035,
+            537,
+            31818
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 8,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            1573,
+            13054,
+            220,
+            16,
+            23
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 9,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            13,
+            17715
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            1059,
+            24240
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            11,
+            1059,
+            6981,
+            11,
+            879
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 6,
+          "target_context_count": 10
+        },
+        {
+          "tokens": [
+            6305,
+            304,
+            264,
+            3942
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            1380
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            1682,
+            10866,
+            374,
+            4185,
+            11
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            6801
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            311
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 4,
+          "target_context_count": 7
+        },
+        {
+          "tokens": [
+            1477
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 7,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            264,
+            14452,
+            2432,
+            369,
+            1059
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            438
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 9,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            264
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            14700,
+            5239,
+            13,
+            6747
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            702,
+            279,
+            2086,
+            2832,
+            7504
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            1372,
+            315,
+            1682,
+            46351,
+            30450
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            11,
+            448
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            7009,
+            220,
+            20,
+            17,
+            4
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 10,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            315,
+            7571,
+            12224,
+            1573,
+            220
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 6,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            16,
+            23,
+            11,
+            4092,
+            311
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 6,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            6643,
+            6682
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            13,
+            151645
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 6,
+          "target_context_count": 8
+        }
+      ],
+      "tokens": 116,
+      "num_blocks": 34,
+      "AATPS": 3.411764705882353,
+      "elapsed_sec": 4.0616294289939106,
+      "token_rate": 28.559966394751548
+    },
+    {
+      "prompt_idx": 5,
+      "width": 4,
+      "output_ids": [
+        75331,
+        89,
+        28718,
+        268,
+        65,
+        27097,
+        13605,
+        38798,
+        4370,
+        93831,
+        11,
+        879,
+        5926,
+        2115,
+        22918,
+        28478,
+        71450,
+        11,
+        1410,
+        11996,
+        52986,
+        12262,
+        80439,
+        438,
+        7247,
+        315,
+        55591,
+        46204,
+        13,
+        93831,
+        2765,
+        1378,
+        84803,
+        15311,
+        304,
+        8094,
+        1635,
+        518,
+        71450,
+        323,
+        28718,
+        268,
+        65,
+        27097,
+        31138,
+        1435,
+        264,
+        3746,
+        9144,
+        369,
+        279,
+        3476,
+        13,
+        10328,
+        12262,
+        80439,
+        702,
+        264,
+        5116,
+        3080,
+        220,
+        17,
+        15,
+        16,
+        21,
+        11,
+        28718,
+        268,
+        65,
+        27097,
+        38917,
+        566,
+        686,
+        5274,
+        46204,
+        438,
+        566,
+        374,
+        6247,
+        448,
+        806,
+        2393,
+        518,
+        279,
+        6335,
+        13,
+        151645
+      ],
+      "blocks": [
+        {
+          "tokens": [
+            75331,
+            89,
+            28718,
+            268,
+            65
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            27097,
+            13605,
+            38798
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 8,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            4370,
+            93831,
+            11,
+            879,
+            5926
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 5,
+          "target_context_count": 7
+        },
+        {
+          "tokens": [
+            2115,
+            22918,
+            28478,
+            71450,
+            11
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            1410,
+            11996,
+            52986,
+            12262,
+            80439
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 6,
+          "target_context_count": 8
+        },
+        {
+          "tokens": [
+            438
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            7247
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 5,
+          "target_context_count": 8
+        },
+        {
+          "tokens": [
+            315,
+            55591,
+            46204,
+            13,
+            93831
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            2765
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 10,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            1378,
+            84803,
+            15311,
+            304,
+            8094
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 8,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            1635,
+            518
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            71450
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 4,
+          "target_context_count": 6
+        },
+        {
+          "tokens": [
+            323
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            28718
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            268,
+            65,
+            27097,
+            31138,
+            1435
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 8
+        },
+        {
+          "tokens": [
+            264,
+            3746,
+            9144,
+            369,
+            279
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 10
+        },
+        {
+          "tokens": [
+            3476,
+            13,
+            10328,
+            12262,
+            80439
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            702,
+            264,
+            5116,
+            3080,
+            220
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 8,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            17,
+            15,
+            16,
+            21,
+            11
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            28718,
+            268,
+            65,
+            27097,
+            38917
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 10,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            566
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 8,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            686,
+            5274
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            46204,
+            438,
+            566
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            374
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            6247
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            448,
+            806
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 8,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            2393
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            518,
+            279,
+            6335,
+            13,
+            151645
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        }
+      ],
+      "tokens": 87,
+      "num_blocks": 28,
+      "AATPS": 3.107142857142857,
+      "elapsed_sec": 3.3572999727912247,
+      "token_rate": 25.913680846239394
+    },
+    {
+      "prompt_idx": 6,
+      "width": 4,
+      "output_ids": [
+        22202,
+        304,
+        19361,
+        614,
+        902,
+        53011,
+        311,
+        7270,
+        594,
+        19361,
+        90670,
+        518,
+        10621,
+        94646,
+        39194,
+        1007,
+        518,
+        220,
+        19,
+        8836,
+        13,
+        14344,
+        67884,
+        3757,
+        506,
+        66970,
+        546,
+        8201,
+        419,
+        9128,
+        311,
+        279,
+        1661,
+        7709,
+        315,
+        15511,
+        304,
+        3681,
+        2694,
+        56673,
+        13,
+        1096,
+        3309,
+        13354,
+        1191,
+        702,
+        9226,
+        10520,
+        4221,
+        1045,
+        429,
+        432,
+        1231,
+        2990,
+        311,
+        15511,
+        16163,
+        803,
+        1573,
+        279,
+        2432,
+        11,
+        714,
+        506,
+        66970,
+        546,
+        13605,
+        279,
+        6785,
+        7709,
+        315,
+        7211,
+        25351,
+        279,
+        12507,
+        686,
+        7146,
+        6092,
+        323,
+        31080,
+        13,
+        1096,
+        5480,
+        82279,
+        448,
+        264,
+        3681,
+        8645,
+        553,
+        8755,
+        36423,
+        577,
+        10082,
+        879,
+        75779,
+        311,
+        264,
+        4428,
+        11458,
+        1191,
+        369,
+        458,
+        62439,
+        6165,
+        24688,
+        2432,
+        13,
+        151645
+      ],
+      "blocks": [
+        {
+          "tokens": [
+            22202,
+            304,
+            19361,
+            614
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            902,
+            53011,
+            311,
+            7270
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            594,
+            19361,
+            90670,
+            518,
+            10621
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 8
+        },
+        {
+          "tokens": [
+            94646,
+            39194
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 8,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            1007,
+            518,
+            220,
+            19,
+            8836
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 6,
+          "target_context_count": 8
+        },
+        {
+          "tokens": [
+            13,
+            14344,
+            67884,
+            3757,
+            506
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            66970,
+            546,
+            8201
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 4,
+          "target_context_count": 6
+        },
+        {
+          "tokens": [
+            419,
+            9128
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 10,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            311,
+            279,
+            1661,
+            7709
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 8,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            315,
+            15511,
+            304
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 9,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            3681,
+            2694
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 9,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            56673,
+            13,
+            1096
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 8,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            3309
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            13354,
+            1191
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            702,
+            9226
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            10520,
+            4221,
+            1045,
+            429
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 8,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            432,
+            1231
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            2990
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            311,
+            15511
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 8,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            16163
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            803,
+            1573
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            279,
+            2432,
+            11,
+            714,
+            506
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            66970,
+            546,
+            13605
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 7,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            279
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            6785
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            7709,
+            315,
+            7211,
+            25351
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 8,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            279,
+            12507
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 8,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            686,
+            7146,
+            6092,
+            323,
+            31080
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            13,
+            1096
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            5480,
+            82279
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            448,
+            264,
+            3681,
+            8645
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 9,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            553,
+            8755
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            36423,
+            577,
+            10082,
+            879
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 4,
+          "target_context_count": 7
+        },
+        {
+          "tokens": [
+            75779
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            311,
+            264,
+            4428
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 6,
+          "target_context_count": 8
+        },
+        {
+          "tokens": [
+            11458
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            1191,
+            369,
+            458
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 8,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            62439,
+            6165
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            24688,
+            2432,
+            13
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 8,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            151645
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 7,
+          "target_context_count": 11
+        }
+      ],
+      "tokens": 108,
+      "num_blocks": 40,
+      "AATPS": 2.7,
+      "elapsed_sec": 4.8147983006201684,
+      "token_rate": 22.430846165682393
+    },
+    {
+      "prompt_idx": 7,
+      "width": 4,
+      "output_ids": [
+        42215,
+        9087,
+        84831,
+        11,
+        264,
+        220,
+        17,
+        15,
+        4666,
+        6284,
+        20280,
+        5220,
+        504,
+        26589,
+        12987,
+        11,
+        23219,
+        11,
+        11052,
+        1119,
+        264,
+        3040,
+        22289,
+        69298,
+        1283,
+        264,
+        1803,
+        11423,
+        304,
+        6652,
+        13,
+        53843,
+        6551,
+        1059,
+        1172,
+        264,
+        220,
+        17,
+        4,
+        6012,
+        315,
+        13351,
+        11,
+        3602,
+        1059,
+        6554,
+        14616,
+        37550,
+        6814,
+        279,
+        73681,
+        13,
+        29141,
+        678,
+        20785,
+        11,
+        35116,
+        9087,
+        84925,
+        24875,
+        6788,
+        419,
+        2254,
+        11,
+        3498,
+        1340,
+        8458,
+        2477,
+        423,
+        13313,
+        13,
+        3197,
+        1059,
+        6981,
+        8542,
+        1059,
+        264,
+        6548,
+        315,
+        862,
+        45297,
+        4438,
+        11,
+        1967,
+        87773,
+        2160,
+        19310,
+        84831,
+        11,
+        1340,
+        16441,
+        553,
+        2701,
+        279,
+        6802,
+        11,
+        18860,
+        264,
+        1841,
+        315,
+        17843,
+        323,
+        74049,
+        13,
+        151645
+      ],
+      "blocks": [
+        {
+          "tokens": [
+            42215
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            9087,
+            84831,
+            11,
+            264,
+            220
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 7
+        },
+        {
+          "tokens": [
+            17,
+            15,
+            4666,
+            6284,
+            20280
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            5220,
+            504
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 8,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            26589,
+            12987,
+            11,
+            23219,
+            11
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            11052
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 9,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            1119,
+            264,
+            3040
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 4,
+          "target_context_count": 8
+        },
+        {
+          "tokens": [
+            22289,
+            69298,
+            1283,
+            264,
+            1803
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 6,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            11423,
+            304
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 8,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            6652,
+            13,
+            53843
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 9,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            6551
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            1059,
+            1172
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 7,
+          "target_context_count": 10
+        },
+        {
+          "tokens": [
+            264,
+            220,
+            17,
+            4
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 6,
+          "target_context_count": 8
+        },
+        {
+          "tokens": [
+            6012,
+            315,
+            13351,
+            11,
+            3602
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 5,
+          "target_context_count": 8
+        },
+        {
+          "tokens": [
+            1059
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            6554,
+            14616
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            37550,
+            6814
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 9,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            279,
+            73681,
+            13,
+            29141
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            678,
+            20785,
+            11,
+            35116,
+            9087
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            84925
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 7,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            24875,
+            6788
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            419,
+            2254,
+            11,
+            3498,
+            1340
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 8,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            8458
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            2477,
+            423,
+            13313,
+            13,
+            3197
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 6
+        },
+        {
+          "tokens": [
+            1059
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            6981,
+            8542
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            1059,
+            264,
+            6548,
+            315,
+            862
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 10
+        },
+        {
+          "tokens": [
+            45297
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            4438,
+            11,
+            1967
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 7,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            87773,
+            2160,
+            19310,
+            84831,
+            11
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 6,
+          "target_context_count": 8
+        },
+        {
+          "tokens": [
+            1340,
+            16441
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            553,
+            2701
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            279,
+            6802
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            11
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            18860,
+            264
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            1841
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            315,
+            17843
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            323
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            74049
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            13,
+            151645
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 9,
+          "target_context_count": 13
+        }
+      ],
+      "tokens": 105,
+      "num_blocks": 40,
+      "AATPS": 2.625,
+      "elapsed_sec": 4.830320756882429,
+      "token_rate": 21.737686850379845
+    },
+    {
+      "prompt_idx": 8,
+      "width": 4,
+      "output_ids": [
+        2304,
+        50677,
+        4311,
+        43967,
+        9403,
+        3065,
+        276,
+        33796,
+        72,
+        28863,
+        13605,
+        13997,
+        806,
+        2083,
+        504,
+        58682,
+        367,
+        1035,
+        387,
+        264,
+        5089,
+        25426,
+        11,
+        26297,
+        432,
+        311,
+        10987,
+        264,
+        3598,
+        37682,
+        13,
+        576,
+        81722,
+        11,
+        879,
+        8597,
+        2765,
+        12114,
+        15311,
+        448,
+        5665,
+        38755,
+        11,
+        10859,
+        57749,
+        389,
+        264,
+        1910,
+        8317,
+        323,
+        15634,
+        30426,
+        58682,
+        367,
+        438,
+        862,
+        6028,
+        16538,
+        13,
+        24150,
+        518,
+        279,
+        5622,
+        315,
+        279,
+        19637,
+        8953,
+        1965,
+        11,
+        57749,
+        12300,
+        264,
+        17003,
+        3383,
+        11,
+        714,
+        33796,
+        72,
+        28863,
+        8458,
+        35936,
+        911,
+        862,
+        16963,
+        315,
+        19429,
+        304,
+        279,
+        1909,
+        10971,
+        13,
+        151645
+      ],
+      "blocks": [
+        {
+          "tokens": [
+            2304
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 7,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            50677,
+            4311,
+            43967,
+            9403,
+            3065
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            276,
+            33796,
+            72,
+            28863,
+            13605
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            13997
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 7,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            806,
+            2083
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 9,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            504,
+            58682,
+            367,
+            1035,
+            387
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            264
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            5089,
+            25426,
+            11,
+            26297
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 9,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            432,
+            311,
+            10987,
+            264,
+            3598
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 6
+        },
+        {
+          "tokens": [
+            37682,
+            13,
+            576
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 4,
+          "target_context_count": 8
+        },
+        {
+          "tokens": [
+            81722
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            11
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            879,
+            8597,
+            2765,
+            12114
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            15311,
+            448,
+            5665,
+            38755,
+            11
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 6,
+          "target_context_count": 8
+        },
+        {
+          "tokens": [
+            10859
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            57749,
+            389
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 9,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            264,
+            1910,
+            8317,
+            323,
+            15634
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 6,
+          "target_context_count": 8
+        },
+        {
+          "tokens": [
+            30426
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            58682,
+            367,
+            438,
+            862
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 7,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            6028
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            16538,
+            13,
+            24150
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 8,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            518
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            279,
+            5622,
+            315,
+            279,
+            19637
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 9,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            8953,
+            1965,
+            11,
+            57749,
+            12300
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            264,
+            17003,
+            3383
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            11,
+            714
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            33796,
+            72,
+            28863,
+            8458
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 4,
+          "target_context_count": 6
+        },
+        {
+          "tokens": [
+            35936,
+            911
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            862,
+            16963,
+            315,
+            19429
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            304,
+            279,
+            1909,
+            10971,
+            13
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 5,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            151645
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 7,
+          "target_context_count": 11
+        }
+      ],
+      "tokens": 92,
+      "num_blocks": 31,
+      "AATPS": 2.967741935483871,
+      "elapsed_sec": 3.708341818768531,
+      "token_rate": 24.808931996067027
+    },
+    {
+      "prompt_idx": 9,
+      "width": 4,
+      "output_ids": [
+        44787,
+        59195,
+        11,
+        264,
+        220,
+        20,
+        18,
+        4666,
+        6284,
+        67966,
+        879,
+        607,
+        38940,
+        323,
+        25574,
+        315,
+        806,
+        11734,
+        594,
+        2487,
+        220,
+        17,
+        15,
+        1635,
+        4134,
+        11,
+        572,
+        14639,
+        3927,
+        291,
+        304,
+        4882,
+        7148,
+        1283,
+        2326,
+        5555,
+        389,
+        279,
+        1598,
+        13,
+        59195,
+        11,
+        879,
+        8597,
+        3949,
+        264,
+        2272,
+        11652,
+        369,
+        279,
+        220,
+        16,
+        24,
+        24,
+        21,
+        9901,
+        315,
+        11331,
+        95572,
+        43742,
+        11,
+        1030,
+        3647,
+        1297,
+        291,
+        504,
+        264,
+        24479,
+        80811,
+        304,
+        57386,
+        13,
+        576,
+        584,
+        572,
+        18683,
+        537,
+        311,
+        5486,
+        1435,
+        4152,
+        311,
+        806,
+        11406,
+        6993,
+        11,
+        323,
+        264,
+        6938,
+        20,
+        11,
+        15,
+        15,
+        15,
+        11313,
+        572,
+        8900,
+        369,
+        1995,
+        6388,
+        311,
+        806,
+        8004,
+        389,
+        18096,
+        594,
+        4553,
+        318,
+        365,
+        754,
+        13,
+        151645
+      ],
+      "blocks": [
+        {
+          "tokens": [
+            44787,
+            59195,
+            11,
+            264,
+            220
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 5,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            20,
+            18,
+            4666,
+            6284,
+            67966
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            879,
+            607,
+            38940,
+            323
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            25574
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            315,
+            806,
+            11734
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 8,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            594,
+            2487,
+            220,
+            17,
+            15
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 9,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            1635,
+            4134,
+            11,
+            572,
+            14639
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 7
+        },
+        {
+          "tokens": [
+            3927,
+            291,
+            304
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 7,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            4882
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 7,
+          "target_context_count": 10
+        },
+        {
+          "tokens": [
+            7148,
+            1283,
+            2326,
+            5555,
+            389
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 6,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            279,
+            1598,
+            13,
+            59195,
+            11
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 8,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            879,
+            8597,
+            3949,
+            264,
+            2272
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            11652,
+            369,
+            279,
+            220
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 6,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            16,
+            24,
+            24,
+            21
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 4,
+          "target_context_count": 6
+        },
+        {
+          "tokens": [
+            9901,
+            315,
+            11331,
+            95572,
+            43742
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            11,
+            1030
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 8,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            3647,
+            1297,
+            291,
+            504,
+            264
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            24479,
+            80811,
+            304,
+            57386,
+            13
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 10
+        },
+        {
+          "tokens": [
+            576,
+            584
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            572,
+            18683,
+            537,
+            311,
+            5486
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            1435,
+            4152,
+            311,
+            806,
+            11406
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            6993,
+            11
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 7,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            323,
+            264
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 9,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            6938,
+            20,
+            11,
+            15
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            15,
+            15,
+            11313,
+            572,
+            8900
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 6
+        },
+        {
+          "tokens": [
+            369,
+            1995,
+            6388
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 6,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            311,
+            806,
+            8004,
+            389
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 5,
+          "target_context_count": 7
+        },
+        {
+          "tokens": [
+            18096,
+            594,
+            4553,
+            318,
+            365
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            754,
+            13,
+            151645
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 6,
+          "target_context_count": 9
+        }
+      ],
+      "tokens": 112,
+      "num_blocks": 29,
+      "AATPS": 3.8620689655172415,
+      "elapsed_sec": 3.5242435629479587,
+      "token_rate": 31.779869353386648
+    },
+    {
+      "prompt_idx": 0,
+      "width": 8,
+      "output_ids": [
+        32,
+        1682,
+        504,
+        42062,
+        11,
+        23219,
+        11,
+        702,
+        18163,
+        916,
+        220,
+        18,
+        11,
+        15,
+        15,
+        15,
+        6271,
+        20119,
+        553,
+        11560,
+        9185,
+        323,
+        6803,
+        59694,
+        13179,
+        2272,
+        11,
+        2670,
+        51904,
+        448,
+        31553,
+        323,
+        10975,
+        11,
+        323,
+        1667,
+        15183,
+        4128,
+        13,
+        17715,
+        806,
+        13812,
+        3908,
+        4231,
+        11,
+        304,
+        1045,
+        6803,
+        566,
+        7952,
+        311,
+        3705,
+        16362,
+        93972,
+        398,
+        1393,
+        12598,
+        12550,
+        26,
+        1657,
+        315,
+        806,
+        7999,
+        1083,
+        2924,
+        7244,
+        15057,
+        13,
+        1096,
+        702,
+        40444,
+        18817,
+        504,
+        6271,
+        3847,
+        879,
+        1977,
+        279,
+        1682,
+        594,
+        7709,
+        374,
+        330,
+        82114,
+        1,
+        323,
+        4190,
+        566,
+        3880,
+        1492,
+        323,
+        458,
+        6731,
+        11,
+        18860,
+        4643,
+        369,
+        806,
+        1632,
+        32751,
+        13,
+        151645
+      ],
+      "blocks": [
+        {
+          "tokens": [
+            32,
+            1682,
+            504
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 14,
+          "target_context_count": 20
+        },
+        {
+          "tokens": [
+            42062,
+            11,
+            23219,
+            11,
+            702
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            18163
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 6,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            916,
+            220,
+            18,
+            11,
+            15
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 8,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            15,
+            15,
+            6271,
+            20119,
+            553
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 5,
+          "target_context_count": 7
+        },
+        {
+          "tokens": [
+            11560,
+            9185,
+            323
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 20,
+          "target_context_count": 27
+        },
+        {
+          "tokens": [
+            6803,
+            59694,
+            13179
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 11,
+          "target_context_count": 18
+        },
+        {
+          "tokens": [
+            2272,
+            11,
+            2670,
+            51904
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 11,
+          "target_context_count": 18
+        },
+        {
+          "tokens": [
+            448,
+            31553
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 5,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            323,
+            10975
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 17,
+          "target_context_count": 24
+        },
+        {
+          "tokens": [
+            11,
+            323
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 16,
+          "target_context_count": 24
+        },
+        {
+          "tokens": [
+            1667,
+            15183,
+            4128,
+            13,
+            17715
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 24,
+          "target_context_count": 32
+        },
+        {
+          "tokens": [
+            806,
+            13812
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 20,
+          "target_context_count": 28
+        },
+        {
+          "tokens": [
+            3908
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 20,
+          "target_context_count": 28
+        },
+        {
+          "tokens": [
+            4231,
+            11,
+            304
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 8,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            1045,
+            6803
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 18,
+          "target_context_count": 26
+        },
+        {
+          "tokens": [
+            566,
+            7952,
+            311,
+            3705
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 13,
+          "target_context_count": 20
+        },
+        {
+          "tokens": [
+            16362
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 18,
+          "target_context_count": 26
+        },
+        {
+          "tokens": [
+            93972
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 22,
+          "target_context_count": 30
+        },
+        {
+          "tokens": [
+            398,
+            1393
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 12,
+          "target_context_count": 20
+        },
+        {
+          "tokens": [
+            12598
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 9,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            12550,
+            26,
+            1657
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 16,
+          "target_context_count": 22
+        },
+        {
+          "tokens": [
+            315,
+            806,
+            7999,
+            1083
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 18,
+          "target_context_count": 26
+        },
+        {
+          "tokens": [
+            2924,
+            7244,
+            15057,
+            13,
+            1096
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 20,
+          "target_context_count": 28
+        },
+        {
+          "tokens": [
+            702,
+            40444,
+            18817,
+            504,
+            6271
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 15,
+          "target_context_count": 22
+        },
+        {
+          "tokens": [
+            3847,
+            879,
+            1977
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 11,
+          "target_context_count": 18
+        },
+        {
+          "tokens": [
+            279,
+            1682,
+            594,
+            7709
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 16,
+          "target_context_count": 23
+        },
+        {
+          "tokens": [
+            374,
+            330,
+            82114,
+            1,
+            323
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 16,
+          "target_context_count": 24
+        },
+        {
+          "tokens": [
+            4190
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            566,
+            3880
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 16,
+          "target_context_count": 23
+        },
+        {
+          "tokens": [
+            1492,
+            323
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 15,
+          "target_context_count": 22
+        },
+        {
+          "tokens": [
+            458
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 10,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            6731,
+            11,
+            18860,
+            4643
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 10,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            369,
+            806
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 18,
+          "target_context_count": 26
+        },
+        {
+          "tokens": [
+            1632,
+            32751,
+            13,
+            151645
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 20,
+          "target_context_count": 28
+        }
+      ],
+      "tokens": 102,
+      "num_blocks": 35,
+      "AATPS": 2.914285714285714,
+      "elapsed_sec": 4.358383238781244,
+      "token_rate": 23.403173702669335
+    },
+    {
+      "prompt_idx": 1,
+      "width": 8,
+      "output_ids": [
+        3564,
+        15849,
+        23358,
+        11266,
+        43306,
+        16601,
+        18817,
+        369,
+        806,
+        7709,
+        2337,
+        264,
+        6290,
+        13994,
+        6438,
+        11,
+        1380,
+        566,
+        2684,
+        1119,
+        264,
+        31713,
+        5693,
+        448,
+        264,
+        20820,
+        11079,
+        11,
+        64198,
+        6050,
+        2534,
+        13,
+        576,
+        26718,
+        11668,
+        10024,
+        374,
+        48479,
+        43306,
+        315,
+        44547,
+        11,
+        26305,
+        806,
+        98522,
+        16232,
+        6974,
+        49694,
+        13,
+        43306,
+        22378,
+        264,
+        3484,
+        448,
+        76027,
+        44,
+        27929,
+        369,
+        400,
+        17,
+        17,
+        20,
+        3526,
+        11,
+        1753,
+        4722,
+        1091,
+        279,
+        400,
+        23,
+        13,
+        24,
+        7094,
+        13214,
+        16105,
+        11,
+        892,
+        1045,
+        13336,
+        17585,
+        75625,
+        7567,
+        27894,
+        7775,
+        916,
+        1584,
+        7337,
+        13,
+        1096,
+        10455,
+        702,
+        9226,
+        10520,
+        911,
+        43306,
+        594,
+        5486,
+        323,
+        1410,
+        13581,
+        5421,
+        806,
+        13318,
+        50466,
+        13,
+        151645
+      ],
+      "blocks": [
+        {
+          "tokens": [
+            3564,
+            15849,
+            23358,
+            11266,
+            43306
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 8,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            16601,
+            18817,
+            369
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 23,
+          "target_context_count": 31
+        },
+        {
+          "tokens": [
+            806,
+            7709,
+            2337,
+            264
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 15,
+          "target_context_count": 23
+        },
+        {
+          "tokens": [
+            6290,
+            13994,
+            6438,
+            11,
+            1380
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 10,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            566,
+            2684,
+            1119,
+            264
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 17,
+          "target_context_count": 25
+        },
+        {
+          "tokens": [
+            31713,
+            5693,
+            448,
+            264,
+            20820
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 6,
+          "target_context_count": 8
+        },
+        {
+          "tokens": [
+            11079,
+            11
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 13,
+          "target_context_count": 20
+        },
+        {
+          "tokens": [
+            64198
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 21,
+          "target_context_count": 29
+        },
+        {
+          "tokens": [
+            6050,
+            2534,
+            13,
+            576,
+            26718
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 5,
+          "target_context_count": 10
+        },
+        {
+          "tokens": [
+            11668,
+            10024,
+            374
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 9,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            48479,
+            43306,
+            315,
+            44547,
+            11
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 14,
+          "target_context_count": 22
+        },
+        {
+          "tokens": [
+            26305
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 19,
+          "target_context_count": 27
+        },
+        {
+          "tokens": [
+            806,
+            98522
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 19,
+          "target_context_count": 26
+        },
+        {
+          "tokens": [
+            16232,
+            6974
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 13,
+          "target_context_count": 20
+        },
+        {
+          "tokens": [
+            49694,
+            13
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 17,
+          "target_context_count": 25
+        },
+        {
+          "tokens": [
+            43306,
+            22378
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 16,
+          "target_context_count": 24
+        },
+        {
+          "tokens": [
+            264,
+            3484,
+            448,
+            76027
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 18,
+          "target_context_count": 26
+        },
+        {
+          "tokens": [
+            44,
+            27929,
+            369,
+            400,
+            17
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            17,
+            20,
+            3526,
+            11,
+            1753
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 7
+        },
+        {
+          "tokens": [
+            4722,
+            1091,
+            279,
+            400
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 20,
+          "target_context_count": 27
+        },
+        {
+          "tokens": [
+            23,
+            13,
+            24
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 6,
+          "target_context_count": 8
+        },
+        {
+          "tokens": [
+            7094,
+            13214,
+            16105
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 13,
+          "target_context_count": 20
+        },
+        {
+          "tokens": [
+            11,
+            892
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 15,
+          "target_context_count": 21
+        },
+        {
+          "tokens": [
+            1045,
+            13336,
+            17585
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 21,
+          "target_context_count": 29
+        },
+        {
+          "tokens": [
+            75625,
+            7567
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 18,
+          "target_context_count": 25
+        },
+        {
+          "tokens": [
+            27894,
+            7775,
+            916
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 13,
+          "target_context_count": 21
+        },
+        {
+          "tokens": [
+            1584,
+            7337,
+            13,
+            1096
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 4,
+          "target_context_count": 10
+        },
+        {
+          "tokens": [
+            10455,
+            702,
+            9226
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 22,
+          "target_context_count": 30
+        },
+        {
+          "tokens": [
+            10520,
+            911,
+            43306,
+            594,
+            5486
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            323
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 11,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            1410
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 21,
+          "target_context_count": 29
+        },
+        {
+          "tokens": [
+            13581,
+            5421,
+            806,
+            13318,
+            50466
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 17,
+          "target_context_count": 25
+        },
+        {
+          "tokens": [
+            13,
+            151645
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        }
+      ],
+      "tokens": 106,
+      "num_blocks": 33,
+      "AATPS": 3.212121212121212,
+      "elapsed_sec": 4.028209228999913,
+      "token_rate": 26.31442260667198
+    },
+    {
+      "prompt_idx": 2,
+      "width": 8,
+      "output_ids": [
+        55999,
+        1225,
+        86,
+        34971,
+        33780,
+        25673,
+        12514,
+        11,
+        13214,
+        504,
+        24242,
+        746,
+        11,
+        6424,
+        11,
+        686,
+        4009,
+        54163,
+        12660,
+        518,
+        279,
+        220,
+        17,
+        15,
+        16,
+        21,
+        26961,
+        31963,
+        1283,
+        1660,
+        11676,
+        32679,
+        553,
+        279,
+        3146,
+        323,
+        10773,
+        504,
+        46694,
+        80998,
+        358,
+        5197,
+        823,
+        859,
+        3375,
+        13,
+        12514,
+        11,
+        264,
+        2326,
+        7246,
+        7513,
+        18319,
+        11,
+        6476,
+        566,
+        572,
+        75625,
+        44436,
+        369,
+        279,
+        7855,
+        2083,
+        518,
+        7148,
+        220,
+        17,
+        15,
+        16,
+        17,
+        11,
+        7945,
+        2701,
+        444,
+        332,
+        12529,
+        35731,
+        594,
+        39807,
+        36612,
+        3164,
+        13,
+        12514,
+        702,
+        1012,
+        10805,
+        369,
+        279,
+        54265,
+        315,
+        2363,
+        2474,
+        4124,
+        220,
+        17,
+        15,
+        16,
+        18,
+        323,
+        374,
+        1431,
+        7967,
+        33452,
+        389,
+        264,
+        501,
+        12453,
+        304,
+        806,
+        6931,
+        13,
+        151645
+      ],
+      "blocks": [
+        {
+          "tokens": [
+            55999
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 7,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            1225,
+            86,
+            34971,
+            33780,
+            25673
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 7
+        },
+        {
+          "tokens": [
+            12514,
+            11,
+            13214,
+            504,
+            24242
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 11,
+          "target_context_count": 18
+        },
+        {
+          "tokens": [
+            746,
+            11,
+            6424,
+            11,
+            686
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 9,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            4009,
+            54163,
+            12660,
+            518,
+            279
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 16,
+          "target_context_count": 22
+        },
+        {
+          "tokens": [
+            220,
+            17,
+            15,
+            16,
+            21
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            26961,
+            31963,
+            1283
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 15,
+          "target_context_count": 22
+        },
+        {
+          "tokens": [
+            1660,
+            11676,
+            32679,
+            553,
+            279
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 11,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            3146,
+            323
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 22,
+          "target_context_count": 30
+        },
+        {
+          "tokens": [
+            10773,
+            504
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 14,
+          "target_context_count": 20
+        },
+        {
+          "tokens": [
+            46694,
+            80998,
+            358,
+            5197,
+            823
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 16,
+          "target_context_count": 22
+        },
+        {
+          "tokens": [
+            859,
+            3375,
+            13,
+            12514,
+            11
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 7
+        },
+        {
+          "tokens": [
+            264,
+            2326,
+            7246,
+            7513,
+            18319
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 15,
+          "target_context_count": 22
+        },
+        {
+          "tokens": [
+            11,
+            6476
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 16,
+          "target_context_count": 24
+        },
+        {
+          "tokens": [
+            566,
+            572,
+            75625,
+            44436,
+            369
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 12,
+          "target_context_count": 18
+        },
+        {
+          "tokens": [
+            279,
+            7855,
+            2083
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 19,
+          "target_context_count": 26
+        },
+        {
+          "tokens": [
+            518,
+            7148,
+            220,
+            17,
+            15
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 21,
+          "target_context_count": 28
+        },
+        {
+          "tokens": [
+            16,
+            17,
+            11,
+            7945
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 9,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            2701,
+            444,
+            332,
+            12529,
+            35731
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 19,
+          "target_context_count": 27
+        },
+        {
+          "tokens": [
+            594,
+            39807
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 12,
+          "target_context_count": 18
+        },
+        {
+          "tokens": [
+            36612,
+            3164,
+            13
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 17,
+          "target_context_count": 25
+        },
+        {
+          "tokens": [
+            12514,
+            702,
+            1012,
+            10805
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 22,
+          "target_context_count": 30
+        },
+        {
+          "tokens": [
+            369,
+            279,
+            54265,
+            315,
+            2363
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            2474,
+            4124,
+            220,
+            17,
+            15
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 9,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            16,
+            18,
+            323,
+            374,
+            1431
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 5,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            7967
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 20,
+          "target_context_count": 27
+        },
+        {
+          "tokens": [
+            33452,
+            389,
+            264,
+            501,
+            12453
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 5,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            304,
+            806,
+            6931
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 25,
+          "target_context_count": 33
+        },
+        {
+          "tokens": [
+            13,
+            151645
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 16,
+          "target_context_count": 22
+        }
+      ],
+      "tokens": 112,
+      "num_blocks": 29,
+      "AATPS": 3.8620689655172415,
+      "elapsed_sec": 3.5483873491175473,
+      "token_rate": 31.563634118990255
+    },
+    {
+      "prompt_idx": 3,
+      "width": 8,
+      "output_ids": [
+        37,
+        25796,
+        97334,
+        594,
+        9803,
+        11,
+        358,
+        88,
+        12642,
+        97334,
+        11,
+        21191,
+        911,
+        1059,
+        23722,
+        315,
+        1059,
+        6981,
+        594,
+        46899,
+        4862,
+        17484,
+        8305,
+        315,
+        806,
+        1550,
+        24194,
+        4367,
+        448,
+        94155,
+        12637,
+        446,
+        22516,
+        13,
+        576,
+        4367,
+        374,
+        738,
+        311,
+        6923,
+        916,
+        400,
+        18,
+        15,
+        15,
+        3526,
+        323,
+        374,
+        6509,
+        279,
+        1429,
+        50206,
+        304,
+        45229,
+        3840,
+        13,
+        358,
+        88,
+        12642,
+        14591,
+        3861,
+        1059,
+        6981,
+        594,
+        975,
+        64847,
+        323,
+        9947,
+        11,
+        7945,
+        806,
+        7784,
+        33420,
+        14762,
+        11,
+        892,
+        1340,
+        702,
+        2581,
+        3884,
+        5489,
+        2432,
+        13,
+        2932,
+        6194,
+        279,
+        14487,
+        4367,
+        438,
+        1101,
+        2441,
+        4862,
+        3797,
+        11,
+        38586,
+        1059,
+        43917,
+        3602,
+        32345,
+        13057,
+        438,
+        264,
+        2997,
+        4462,
+        13,
+        151645
+      ],
+      "blocks": [
+        {
+          "tokens": [
+            37,
+            25796,
+            97334,
+            594
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            9803,
+            11,
+            358,
+            88,
+            12642
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 6,
+          "target_context_count": 8
+        },
+        {
+          "tokens": [
+            97334,
+            11,
+            21191,
+            911,
+            1059
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 10,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            23722
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 9,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            315,
+            1059,
+            6981,
+            594,
+            46899
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 8
+        },
+        {
+          "tokens": [
+            4862,
+            17484,
+            8305
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 11,
+          "target_context_count": 18
+        },
+        {
+          "tokens": [
+            315,
+            806,
+            1550
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 9,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            24194,
+            4367,
+            448,
+            94155,
+            12637
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 14,
+          "target_context_count": 22
+        },
+        {
+          "tokens": [
+            446,
+            22516,
+            13,
+            576
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 6,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            4367,
+            374
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 23,
+          "target_context_count": 31
+        },
+        {
+          "tokens": [
+            738,
+            311,
+            6923,
+            916,
+            400
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 14,
+          "target_context_count": 19
+        },
+        {
+          "tokens": [
+            18,
+            15,
+            15,
+            3526,
+            323
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            374,
+            6509
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 22,
+          "target_context_count": 30
+        },
+        {
+          "tokens": [
+            279,
+            1429,
+            50206,
+            304,
+            45229
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 10,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            3840,
+            13,
+            358
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 9,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            88,
+            12642,
+            14591
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 6,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            3861,
+            1059,
+            6981,
+            594,
+            975
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            64847,
+            323,
+            9947
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 8,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            11,
+            7945
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 11,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            806,
+            7784,
+            33420,
+            14762
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 16,
+          "target_context_count": 24
+        },
+        {
+          "tokens": [
+            11,
+            892,
+            1340
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 20,
+          "target_context_count": 28
+        },
+        {
+          "tokens": [
+            702
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 23,
+          "target_context_count": 31
+        },
+        {
+          "tokens": [
+            2581,
+            3884,
+            5489,
+            2432
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 16,
+          "target_context_count": 24
+        },
+        {
+          "tokens": [
+            13,
+            2932
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 13,
+          "target_context_count": 21
+        },
+        {
+          "tokens": [
+            6194
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 23,
+          "target_context_count": 31
+        },
+        {
+          "tokens": [
+            279,
+            14487
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 20,
+          "target_context_count": 28
+        },
+        {
+          "tokens": [
+            4367,
+            438,
+            1101
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 13,
+          "target_context_count": 20
+        },
+        {
+          "tokens": [
+            2441,
+            4862,
+            3797,
+            11
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 13,
+          "target_context_count": 19
+        },
+        {
+          "tokens": [
+            38586
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 25,
+          "target_context_count": 33
+        },
+        {
+          "tokens": [
+            1059,
+            43917
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 15,
+          "target_context_count": 22
+        },
+        {
+          "tokens": [
+            3602
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 16,
+          "target_context_count": 21
+        },
+        {
+          "tokens": [
+            32345
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 25,
+          "target_context_count": 33
+        },
+        {
+          "tokens": [
+            13057,
+            438
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 18,
+          "target_context_count": 26
+        },
+        {
+          "tokens": [
+            264,
+            2997
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 17,
+          "target_context_count": 24
+        },
+        {
+          "tokens": [
+            4462,
+            13,
+            151645
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 13,
+          "target_context_count": 19
+        }
+      ],
+      "tokens": 106,
+      "num_blocks": 35,
+      "AATPS": 3.0285714285714285,
+      "elapsed_sec": 4.296711402013898,
+      "token_rate": 24.670030188743205
+    },
+    {
+      "prompt_idx": 4,
+      "width": 8,
+      "output_ids": [
+        32,
+        220,
+        16,
+        18,
+        4666,
+        6284,
+        7748,
+        3743,
+        6941,
+        422,
+        23602,
+        472,
+        8858,
+        441,
+        6139,
+        311,
+        1059,
+        11079,
+        59106,
+        311,
+        2936,
+        1059,
+        27802,
+        10866,
+        11,
+        892,
+        572,
+        311,
+        1896,
+        1992,
+        304,
+        1378,
+        2849,
+        13,
+        422,
+        23602,
+        3867,
+        458,
+        47942,
+        518,
+        1059,
+        2906,
+        27798,
+        1340,
+        1035,
+        537,
+        31818,
+        1573,
+        13054,
+        220,
+        16,
+        23,
+        13,
+        17715,
+        1059,
+        24240,
+        11,
+        1059,
+        6981,
+        11,
+        879,
+        6305,
+        304,
+        264,
+        3942,
+        1380,
+        1682,
+        10866,
+        374,
+        4185,
+        11,
+        6801,
+        311,
+        1477,
+        264,
+        14452,
+        2432,
+        369,
+        1059,
+        438,
+        264,
+        14700,
+        5239,
+        13,
+        6747,
+        702,
+        279,
+        2086,
+        2832,
+        7504,
+        1372,
+        315,
+        1682,
+        46351,
+        30450,
+        11,
+        448,
+        7009,
+        220,
+        20,
+        17,
+        4,
+        315,
+        7571,
+        12224,
+        1573,
+        220,
+        16,
+        23,
+        11,
+        4092,
+        311,
+        6643,
+        6682,
+        13,
+        151645
+      ],
+      "blocks": [
+        {
+          "tokens": [
+            32,
+            220,
+            16,
+            18,
+            4666
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            6284,
+            7748,
+            3743,
+            6941
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 6,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            422,
+            23602,
+            472,
+            8858,
+            441
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            6139,
+            311
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 12,
+          "target_context_count": 18
+        },
+        {
+          "tokens": [
+            1059,
+            11079,
+            59106,
+            311,
+            2936
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 9,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            1059,
+            27802,
+            10866,
+            11,
+            892
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 18,
+          "target_context_count": 26
+        },
+        {
+          "tokens": [
+            572,
+            311
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            1896,
+            1992,
+            304,
+            1378,
+            2849
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 8,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            13,
+            422,
+            23602,
+            3867
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 11,
+          "target_context_count": 18
+        },
+        {
+          "tokens": [
+            458,
+            47942,
+            518,
+            1059,
+            2906
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 8,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            27798
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            1340,
+            1035,
+            537,
+            31818,
+            1573
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 9,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            13054,
+            220,
+            16,
+            23,
+            13
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 9,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            17715
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 20,
+          "target_context_count": 28
+        },
+        {
+          "tokens": [
+            1059,
+            24240
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 14,
+          "target_context_count": 22
+        },
+        {
+          "tokens": [
+            11,
+            1059,
+            6981,
+            11,
+            879
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 11,
+          "target_context_count": 19
+        },
+        {
+          "tokens": [
+            6305,
+            304,
+            264,
+            3942
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 16,
+          "target_context_count": 23
+        },
+        {
+          "tokens": [
+            1380
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 18,
+          "target_context_count": 26
+        },
+        {
+          "tokens": [
+            1682,
+            10866,
+            374,
+            4185,
+            11
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 6
+        },
+        {
+          "tokens": [
+            6801
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 25,
+          "target_context_count": 33
+        },
+        {
+          "tokens": [
+            311
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 10,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            1477
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 11,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            264,
+            14452,
+            2432,
+            369,
+            1059
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 11,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            438,
+            264
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 13,
+          "target_context_count": 19
+        },
+        {
+          "tokens": [
+            14700,
+            5239,
+            13,
+            6747
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 20,
+          "target_context_count": 28
+        },
+        {
+          "tokens": [
+            702,
+            279,
+            2086,
+            2832,
+            7504
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 14,
+          "target_context_count": 21
+        },
+        {
+          "tokens": [
+            1372,
+            315,
+            1682,
+            46351,
+            30450
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            11,
+            448
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 11,
+          "target_context_count": 18
+        },
+        {
+          "tokens": [
+            7009,
+            220,
+            20,
+            17,
+            4
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 13,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            315,
+            7571,
+            12224,
+            1573,
+            220
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 8,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            16,
+            23,
+            11,
+            4092,
+            311
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 6,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            6643,
+            6682,
+            13,
+            151645
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 22,
+          "target_context_count": 30
+        }
+      ],
+      "tokens": 116,
+      "num_blocks": 32,
+      "AATPS": 3.625,
+      "elapsed_sec": 3.8871889980509877,
+      "token_rate": 29.84161564003234
+    },
+    {
+      "prompt_idx": 5,
+      "width": 8,
+      "output_ids": [
+        75331,
+        89,
+        28718,
+        268,
+        65,
+        27097,
+        13605,
+        38798,
+        4370,
+        93831,
+        11,
+        879,
+        5926,
+        2115,
+        22918,
+        28478,
+        71450,
+        11,
+        1410,
+        11996,
+        52986,
+        12262,
+        80439,
+        438,
+        7247,
+        315,
+        55591,
+        46204,
+        13,
+        93831,
+        2765,
+        1378,
+        84803,
+        15311,
+        304,
+        8094,
+        1635,
+        518,
+        71450,
+        323,
+        28718,
+        268,
+        65,
+        27097,
+        31138,
+        1435,
+        264,
+        3746,
+        9144,
+        369,
+        279,
+        3476,
+        13,
+        10328,
+        12262,
+        80439,
+        702,
+        264,
+        5116,
+        3080,
+        220,
+        17,
+        15,
+        16,
+        21,
+        11,
+        28718,
+        268,
+        65,
+        27097,
+        38917,
+        566,
+        686,
+        5274,
+        46204,
+        438,
+        566,
+        374,
+        6247,
+        448,
+        806,
+        2393,
+        518,
+        279,
+        6335,
+        13,
+        151645
+      ],
+      "blocks": [
+        {
+          "tokens": [
+            75331,
+            89,
+            28718,
+            268,
+            65
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            27097,
+            13605,
+            38798
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 11,
+          "target_context_count": 18
+        },
+        {
+          "tokens": [
+            4370,
+            93831,
+            11,
+            879,
+            5926
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 5,
+          "target_context_count": 8
+        },
+        {
+          "tokens": [
+            2115,
+            22918,
+            28478,
+            71450,
+            11
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 20,
+          "target_context_count": 28
+        },
+        {
+          "tokens": [
+            1410,
+            11996,
+            52986,
+            12262,
+            80439
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 9,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            438,
+            7247
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 7,
+          "target_context_count": 10
+        },
+        {
+          "tokens": [
+            315,
+            55591,
+            46204,
+            13,
+            93831
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 10
+        },
+        {
+          "tokens": [
+            2765,
+            1378,
+            84803,
+            15311,
+            304
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 22,
+          "target_context_count": 29
+        },
+        {
+          "tokens": [
+            8094,
+            1635,
+            518
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 12,
+          "target_context_count": 19
+        },
+        {
+          "tokens": [
+            71450
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 8,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            323,
+            28718
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 17,
+          "target_context_count": 25
+        },
+        {
+          "tokens": [
+            268,
+            65,
+            27097,
+            31138,
+            1435
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 10
+        },
+        {
+          "tokens": [
+            264,
+            3746,
+            9144,
+            369,
+            279
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 14,
+          "target_context_count": 21
+        },
+        {
+          "tokens": [
+            3476,
+            13,
+            10328,
+            12262,
+            80439
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 17,
+          "target_context_count": 25
+        },
+        {
+          "tokens": [
+            702,
+            264,
+            5116,
+            3080,
+            220
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 16,
+          "target_context_count": 23
+        },
+        {
+          "tokens": [
+            17,
+            15,
+            16,
+            21,
+            11
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            28718,
+            268,
+            65,
+            27097,
+            38917
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 16,
+          "target_context_count": 21
+        },
+        {
+          "tokens": [
+            566
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 8,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            686,
+            5274
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 18,
+          "target_context_count": 26
+        },
+        {
+          "tokens": [
+            46204,
+            438,
+            566
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 18,
+          "target_context_count": 24
+        },
+        {
+          "tokens": [
+            374,
+            6247
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 23,
+          "target_context_count": 31
+        },
+        {
+          "tokens": [
+            448,
+            806
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 15,
+          "target_context_count": 23
+        },
+        {
+          "tokens": [
+            2393,
+            518,
+            279,
+            6335,
+            13
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 23,
+          "target_context_count": 31
+        },
+        {
+          "tokens": [
+            151645
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 19,
+          "target_context_count": 25
+        }
+      ],
+      "tokens": 87,
+      "num_blocks": 24,
+      "AATPS": 3.625,
+      "elapsed_sec": 2.920334553346038,
+      "token_rate": 29.791107289511686
+    },
+    {
+      "prompt_idx": 6,
+      "width": 8,
+      "output_ids": [
+        22202,
+        304,
+        19361,
+        614,
+        902,
+        53011,
+        311,
+        279,
+        3309,
+        13354,
+        10323,
+        12462,
+        320,
+        19,
+        5187,
+        8,
+        369,
+        7270,
+        594,
+        19637,
+        8953,
+        19361,
+        90670,
+        1948,
+        19361,
+        3639,
+        323,
+        19361,
+        4311,
+        518,
+        10621,
+        94646,
+        13,
+        14344,
+        67884,
+        3757,
+        506,
+        66970,
+        546,
+        20141,
+        279,
+        5480,
+        311,
+        279,
+        1661,
+        7709,
+        315,
+        15511,
+        304,
+        3681,
+        2694,
+        56673,
+        13,
+        1096,
+        374,
+        304,
+        12872,
+        311,
+        8755,
+        36423,
+        577,
+        10082,
+        594,
+        8645,
+        8826,
+        264,
+        4428,
+        5480,
+        369,
+        458,
+        62439,
+        6165,
+        13,
+        24688,
+        2432,
+        11,
+        892,
+        807,
+        2937,
+        61665,
+        13,
+        576,
+        6438,
+        1948,
+        4282,
+        323,
+        15511,
+        5203,
+        504,
+        2176,
+        18890,
+        58654,
+        279,
+        9128,
+        13,
+        151645
+      ],
+      "blocks": [
+        {
+          "tokens": [
+            22202,
+            304,
+            19361,
+            614
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 17,
+          "target_context_count": 25
+        },
+        {
+          "tokens": [
+            902,
+            53011,
+            311,
+            279,
+            3309
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 22,
+          "target_context_count": 29
+        },
+        {
+          "tokens": [
+            13354,
+            10323,
+            12462,
+            320
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 5,
+          "target_context_count": 8
+        },
+        {
+          "tokens": [
+            19,
+            5187,
+            8,
+            369,
+            7270
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 9,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            594,
+            19637,
+            8953,
+            19361
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            90670,
+            1948,
+            19361,
+            3639,
+            323
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            19361,
+            4311,
+            518
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 17,
+          "target_context_count": 24
+        },
+        {
+          "tokens": [
+            10621,
+            94646,
+            13,
+            14344,
+            67884
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 8,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            3757,
+            506,
+            66970,
+            546,
+            20141
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            279,
+            5480,
+            311,
+            279
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 14,
+          "target_context_count": 21
+        },
+        {
+          "tokens": [
+            1661,
+            7709,
+            315,
+            15511,
+            304
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 14,
+          "target_context_count": 20
+        },
+        {
+          "tokens": [
+            3681,
+            2694
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 13,
+          "target_context_count": 20
+        },
+        {
+          "tokens": [
+            56673,
+            13,
+            1096
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 15,
+          "target_context_count": 23
+        },
+        {
+          "tokens": [
+            374,
+            304
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 24,
+          "target_context_count": 32
+        },
+        {
+          "tokens": [
+            12872,
+            311,
+            8755
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 13,
+          "target_context_count": 21
+        },
+        {
+          "tokens": [
+            36423,
+            577,
+            10082,
+            594,
+            8645
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 6
+        },
+        {
+          "tokens": [
+            8826
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 19,
+          "target_context_count": 26
+        },
+        {
+          "tokens": [
+            264,
+            4428
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 22,
+          "target_context_count": 30
+        },
+        {
+          "tokens": [
+            5480
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 23,
+          "target_context_count": 31
+        },
+        {
+          "tokens": [
+            369
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 19,
+          "target_context_count": 26
+        },
+        {
+          "tokens": [
+            458
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 19,
+          "target_context_count": 26
+        },
+        {
+          "tokens": [
+            62439
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 15,
+          "target_context_count": 23
+        },
+        {
+          "tokens": [
+            6165,
+            13,
+            24688,
+            2432
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 19,
+          "target_context_count": 27
+        },
+        {
+          "tokens": [
+            11,
+            892,
+            807,
+            2937,
+            61665
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 24,
+          "target_context_count": 32
+        },
+        {
+          "tokens": [
+            13,
+            576,
+            6438
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 12,
+          "target_context_count": 18
+        },
+        {
+          "tokens": [
+            1948,
+            4282
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 18,
+          "target_context_count": 25
+        },
+        {
+          "tokens": [
+            323,
+            15511,
+            5203
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 14,
+          "target_context_count": 21
+        },
+        {
+          "tokens": [
+            504
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 23,
+          "target_context_count": 31
+        },
+        {
+          "tokens": [
+            2176,
+            18890,
+            58654
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 15,
+          "target_context_count": 23
+        },
+        {
+          "tokens": [
+            279,
+            9128,
+            13,
+            151645
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 19,
+          "target_context_count": 27
+        }
+      ],
+      "tokens": 96,
+      "num_blocks": 30,
+      "AATPS": 3.2,
+      "elapsed_sec": 3.7812986187636852,
+      "token_rate": 25.388103315518542
+    },
+    {
+      "prompt_idx": 7,
+      "width": 8,
+      "output_ids": [
+        42215,
+        9087,
+        84831,
+        11,
+        264,
+        220,
+        17,
+        15,
+        4666,
+        6284,
+        20280,
+        5220,
+        504,
+        26589,
+        12987,
+        11,
+        23219,
+        11,
+        11052,
+        1119,
+        264,
+        3040,
+        22289,
+        69298,
+        1283,
+        264,
+        1803,
+        11423,
+        304,
+        6652,
+        13,
+        53843,
+        6551,
+        1059,
+        1172,
+        264,
+        220,
+        17,
+        4,
+        6012,
+        315,
+        13351,
+        11,
+        3602,
+        1059,
+        6554,
+        14616,
+        37550,
+        6814,
+        279,
+        73681,
+        13,
+        29141,
+        678,
+        20785,
+        11,
+        35116,
+        9087,
+        84925,
+        24875,
+        6788,
+        419,
+        2254,
+        11,
+        3498,
+        1340,
+        8458,
+        2477,
+        423,
+        13313,
+        13,
+        3197,
+        1059,
+        6981,
+        8542,
+        1059,
+        264,
+        6548,
+        315,
+        862,
+        45297,
+        4438,
+        11,
+        1967,
+        87773,
+        2160,
+        19310,
+        84831,
+        11,
+        1340,
+        16441,
+        553,
+        2701,
+        279,
+        6802,
+        11,
+        18860,
+        264,
+        1841,
+        315,
+        17843,
+        323,
+        74049,
+        13,
+        151645
+      ],
+      "blocks": [
+        {
+          "tokens": [
+            42215
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 21,
+          "target_context_count": 28
+        },
+        {
+          "tokens": [
+            9087,
+            84831,
+            11,
+            264,
+            220
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 5,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            17,
+            15,
+            4666,
+            6284,
+            20280
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            5220,
+            504
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 14,
+          "target_context_count": 21
+        },
+        {
+          "tokens": [
+            26589,
+            12987,
+            11,
+            23219,
+            11
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            11052
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 18,
+          "target_context_count": 24
+        },
+        {
+          "tokens": [
+            1119,
+            264,
+            3040
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 7,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            22289,
+            69298,
+            1283,
+            264,
+            1803
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            11423,
+            304
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 11,
+          "target_context_count": 19
+        },
+        {
+          "tokens": [
+            6652,
+            13,
+            53843,
+            6551
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 13,
+          "target_context_count": 20
+        },
+        {
+          "tokens": [
+            1059,
+            1172
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 9,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            264,
+            220,
+            17,
+            4
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 12,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            6012,
+            315,
+            13351,
+            11,
+            3602
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 6,
+          "target_context_count": 10
+        },
+        {
+          "tokens": [
+            1059,
+            6554,
+            14616
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 18,
+          "target_context_count": 26
+        },
+        {
+          "tokens": [
+            37550,
+            6814
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 18,
+          "target_context_count": 25
+        },
+        {
+          "tokens": [
+            279,
+            73681,
+            13,
+            29141
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 16,
+          "target_context_count": 24
+        },
+        {
+          "tokens": [
+            678,
+            20785,
+            11,
+            35116,
+            9087
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 21,
+          "target_context_count": 28
+        },
+        {
+          "tokens": [
+            84925,
+            24875,
+            6788
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 12,
+          "target_context_count": 20
+        },
+        {
+          "tokens": [
+            419,
+            2254,
+            11,
+            3498,
+            1340
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 11,
+          "target_context_count": 18
+        },
+        {
+          "tokens": [
+            8458
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 18,
+          "target_context_count": 26
+        },
+        {
+          "tokens": [
+            2477,
+            423,
+            13313,
+            13,
+            3197
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 7
+        },
+        {
+          "tokens": [
+            1059,
+            6981
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 23,
+          "target_context_count": 31
+        },
+        {
+          "tokens": [
+            8542
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 21,
+          "target_context_count": 28
+        },
+        {
+          "tokens": [
+            1059,
+            264,
+            6548,
+            315,
+            862
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 11,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            45297
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 14,
+          "target_context_count": 22
+        },
+        {
+          "tokens": [
+            4438,
+            11,
+            1967
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 8,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            87773,
+            2160,
+            19310,
+            84831,
+            11
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 10
+        },
+        {
+          "tokens": [
+            1340,
+            16441
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 15,
+          "target_context_count": 22
+        },
+        {
+          "tokens": [
+            553,
+            2701,
+            279,
+            6802
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 21,
+          "target_context_count": 29
+        },
+        {
+          "tokens": [
+            11,
+            18860
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 20,
+          "target_context_count": 28
+        },
+        {
+          "tokens": [
+            264
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 18,
+          "target_context_count": 26
+        },
+        {
+          "tokens": [
+            1841
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 24,
+          "target_context_count": 32
+        },
+        {
+          "tokens": [
+            315,
+            17843,
+            323
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 21,
+          "target_context_count": 29
+        },
+        {
+          "tokens": [
+            74049
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 23,
+          "target_context_count": 31
+        },
+        {
+          "tokens": [
+            13,
+            151645
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 17,
+          "target_context_count": 25
+        }
+      ],
+      "tokens": 105,
+      "num_blocks": 35,
+      "AATPS": 3.0,
+      "elapsed_sec": 4.371416554786265,
+      "token_rate": 24.019673870941325
+    },
+    {
+      "prompt_idx": 8,
+      "width": 8,
+      "output_ids": [
+        2304,
+        50677,
+        4311,
+        43967,
+        9403,
+        3065,
+        276,
+        33796,
+        72,
+        28863,
+        13605,
+        13997,
+        806,
+        2083,
+        504,
+        58682,
+        367,
+        1035,
+        387,
+        264,
+        5089,
+        25426,
+        11,
+        26297,
+        432,
+        311,
+        10987,
+        264,
+        3598,
+        37682,
+        13,
+        576,
+        81722,
+        11,
+        879,
+        8597,
+        2765,
+        12114,
+        15311,
+        448,
+        5665,
+        38755,
+        11,
+        10859,
+        57749,
+        389,
+        264,
+        1910,
+        8317,
+        323,
+        15634,
+        30426,
+        58682,
+        367,
+        438,
+        862,
+        6028,
+        16538,
+        13,
+        24150,
+        518,
+        279,
+        5622,
+        315,
+        279,
+        19637,
+        8953,
+        1965,
+        11,
+        57749,
+        12300,
+        264,
+        17003,
+        3383,
+        11,
+        714,
+        33796,
+        72,
+        28863,
+        8458,
+        35936,
+        911,
+        862,
+        16963,
+        315,
+        19429,
+        304,
+        279,
+        1909,
+        10971,
+        13,
+        151645
+      ],
+      "blocks": [
+        {
+          "tokens": [
+            2304
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 7,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            50677,
+            4311,
+            43967,
+            9403,
+            3065
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            276,
+            33796,
+            72,
+            28863,
+            13605
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            13997,
+            806,
+            2083
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            504,
+            58682,
+            367,
+            1035,
+            387
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            264
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 10,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            5089,
+            25426,
+            11,
+            26297
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 12,
+          "target_context_count": 18
+        },
+        {
+          "tokens": [
+            432,
+            311,
+            10987,
+            264,
+            3598
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 5,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            37682,
+            13,
+            576
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 7,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            81722
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 21,
+          "target_context_count": 29
+        },
+        {
+          "tokens": [
+            11
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 21,
+          "target_context_count": 29
+        },
+        {
+          "tokens": [
+            879,
+            8597,
+            2765,
+            12114
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 17,
+          "target_context_count": 24
+        },
+        {
+          "tokens": [
+            15311,
+            448,
+            5665,
+            38755,
+            11
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            10859
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 24,
+          "target_context_count": 32
+        },
+        {
+          "tokens": [
+            57749,
+            389
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 11,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            264,
+            1910,
+            8317,
+            323,
+            15634
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 6,
+          "target_context_count": 10
+        },
+        {
+          "tokens": [
+            30426
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 21,
+          "target_context_count": 29
+        },
+        {
+          "tokens": [
+            58682,
+            367,
+            438,
+            862
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 7,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            6028,
+            16538,
+            13,
+            24150
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 20,
+          "target_context_count": 27
+        },
+        {
+          "tokens": [
+            518
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 23,
+          "target_context_count": 31
+        },
+        {
+          "tokens": [
+            279,
+            5622,
+            315,
+            279,
+            19637
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 13,
+          "target_context_count": 18
+        },
+        {
+          "tokens": [
+            8953,
+            1965,
+            11,
+            57749,
+            12300
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 7,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            264,
+            17003,
+            3383
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 21,
+          "target_context_count": 29
+        },
+        {
+          "tokens": [
+            11,
+            714
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 17,
+          "target_context_count": 24
+        },
+        {
+          "tokens": [
+            33796,
+            72,
+            28863,
+            8458
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            35936,
+            911
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 20,
+          "target_context_count": 28
+        },
+        {
+          "tokens": [
+            862,
+            16963,
+            315,
+            19429,
+            304
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 18,
+          "target_context_count": 26
+        },
+        {
+          "tokens": [
+            279,
+            1909,
+            10971,
+            13,
+            151645
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 12,
+          "target_context_count": 19
+        }
+      ],
+      "tokens": 92,
+      "num_blocks": 28,
+      "AATPS": 3.2857142857142856,
+      "elapsed_sec": 3.392980189062655,
+      "token_rate": 27.114806121345474
+    },
+    {
+      "prompt_idx": 9,
+      "width": 8,
+      "output_ids": [
+        44787,
+        59195,
+        11,
+        264,
+        220,
+        20,
+        18,
+        4666,
+        6284,
+        67966,
+        879,
+        607,
+        38940,
+        323,
+        25574,
+        315,
+        806,
+        11734,
+        594,
+        2487,
+        220,
+        17,
+        15,
+        1635,
+        4134,
+        11,
+        572,
+        14639,
+        3927,
+        291,
+        304,
+        4882,
+        7148,
+        1283,
+        2326,
+        5555,
+        389,
+        279,
+        1598,
+        13,
+        59195,
+        11,
+        879,
+        8597,
+        3949,
+        264,
+        2272,
+        11652,
+        369,
+        279,
+        220,
+        16,
+        24,
+        24,
+        21,
+        9901,
+        315,
+        11331,
+        95572,
+        43742,
+        11,
+        1030,
+        3647,
+        1297,
+        291,
+        504,
+        264,
+        24479,
+        80811,
+        304,
+        57386,
+        13,
+        576,
+        584,
+        572,
+        18683,
+        537,
+        311,
+        5486,
+        1435,
+        4152,
+        311,
+        806,
+        11406,
+        6993,
+        11,
+        323,
+        264,
+        6938,
+        20,
+        11,
+        15,
+        15,
+        15,
+        11313,
+        572,
+        8900,
+        369,
+        1995,
+        6388,
+        311,
+        806,
+        8004,
+        389,
+        18096,
+        594,
+        4553,
+        318,
+        365,
+        754,
+        13,
+        151645
+      ],
+      "blocks": [
+        {
+          "tokens": [
+            44787,
+            59195,
+            11,
+            264,
+            220
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 8,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            20,
+            18,
+            4666,
+            6284,
+            67966
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            879,
+            607,
+            38940,
+            323
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 10,
+          "target_context_count": 15
+        },
+        {
+          "tokens": [
+            25574
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 21,
+          "target_context_count": 29
+        },
+        {
+          "tokens": [
+            315,
+            806,
+            11734,
+            594
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 11,
+          "target_context_count": 17
+        },
+        {
+          "tokens": [
+            2487,
+            220,
+            17,
+            15,
+            1635
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 8,
+          "target_context_count": 11
+        },
+        {
+          "tokens": [
+            4134,
+            11,
+            572,
+            14639,
+            3927
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 11,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            291,
+            304,
+            4882
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 17,
+          "target_context_count": 25
+        },
+        {
+          "tokens": [
+            7148,
+            1283,
+            2326,
+            5555,
+            389
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 10,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            279,
+            1598,
+            13,
+            59195,
+            11
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 12,
+          "target_context_count": 18
+        },
+        {
+          "tokens": [
+            879,
+            8597,
+            3949,
+            264,
+            2272
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 17,
+          "target_context_count": 24
+        },
+        {
+          "tokens": [
+            11652,
+            369,
+            279,
+            220
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 8,
+          "target_context_count": 13
+        },
+        {
+          "tokens": [
+            16,
+            24,
+            24,
+            21
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 7,
+          "target_context_count": 10
+        },
+        {
+          "tokens": [
+            9901,
+            315,
+            11331,
+            95572,
+            43742
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 5
+        },
+        {
+          "tokens": [
+            11,
+            1030,
+            3647,
+            1297,
+            291
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 14,
+          "target_context_count": 22
+        },
+        {
+          "tokens": [
+            504,
+            264,
+            24479,
+            80811,
+            304
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 10,
+          "target_context_count": 14
+        },
+        {
+          "tokens": [
+            57386,
+            13,
+            576
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 19,
+          "target_context_count": 27
+        },
+        {
+          "tokens": [
+            584
+          ],
+          "accepted_count": 0,
+          "draft_tree_size": 15,
+          "target_context_count": 20
+        },
+        {
+          "tokens": [
+            572,
+            18683,
+            537,
+            311,
+            5486
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 11,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            1435,
+            4152,
+            311,
+            806,
+            11406
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 19,
+          "target_context_count": 27
+        },
+        {
+          "tokens": [
+            6993,
+            11
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 12,
+          "target_context_count": 16
+        },
+        {
+          "tokens": [
+            323,
+            264
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 13,
+          "target_context_count": 20
+        },
+        {
+          "tokens": [
+            6938,
+            20,
+            11,
+            15,
+            15
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 4,
+          "target_context_count": 6
+        },
+        {
+          "tokens": [
+            15,
+            11313,
+            572,
+            8900,
+            369
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 6,
+          "target_context_count": 9
+        },
+        {
+          "tokens": [
+            1995,
+            6388
+          ],
+          "accepted_count": 1,
+          "draft_tree_size": 8,
+          "target_context_count": 12
+        },
+        {
+          "tokens": [
+            311,
+            806,
+            8004,
+            389
+          ],
+          "accepted_count": 3,
+          "draft_tree_size": 5,
+          "target_context_count": 7
+        },
+        {
+          "tokens": [
+            18096,
+            594,
+            4553,
+            318,
+            365
+          ],
+          "accepted_count": 4,
+          "draft_tree_size": 5,
+          "target_context_count": 7
+        },
+        {
+          "tokens": [
+            754,
+            13,
+            151645
+          ],
+          "accepted_count": 2,
+          "draft_tree_size": 7,
+          "target_context_count": 13
+        }
+      ],
+      "tokens": 112,
+      "num_blocks": 28,
+      "AATPS": 4.0,
+      "elapsed_sec": 3.5271487338468432,
+      "token_rate": 31.753693550044463
+    }
+  ]
+}

@@ -118,11 +118,22 @@ class ContextRuntimeCache:
 def _repeat_cache(past_key_values, batch_size: int):
     if past_key_values is None:
         return None
+    if batch_size == 1 and cache_is_legacy(past_key_values):
+        # Legacy caches are immutable tuples from the model's perspective;
+        # forwarding one row needs neither traversal nor materialization.
+        return past_key_values
+
+    def expand_copy(x):
+        # ``repeat`` uses a relatively expensive generic tiling kernel for
+        # these one-row K/V tensors.  Broadcasting the row and materializing
+        # once produces the identical contiguous cache substantially faster.
+        return x.expand((batch_size,) + tuple(x.shape[1:])).contiguous()
+
     if cache_is_legacy(past_key_values):
-        return tree_map(lambda x: x.repeat((batch_size, 1, 1, 1)), past_key_values)
+        return tree_map(expand_copy, past_key_values)
     if cache_is_dynamic(past_key_values):
         legacy_cache = dynamic_cache_to_legacy(past_key_values)
-        repeated = tree_map(lambda x: x.repeat((batch_size, 1, 1, 1)), legacy_cache)
+        repeated = tree_map(expand_copy, legacy_cache)
         return dynamic_cache_from_legacy(repeated)
     return None
 
@@ -205,6 +216,7 @@ def ms_pfr_tokens_from_logprobs(
     device,
     *,
     generator=None,
+    support_indices: LongTensor | None = None,
 ) -> LongTensor:
     """Return the token ids for the first ``num_samples`` arrivals in a shared
     Poisson race.
@@ -227,19 +239,32 @@ def ms_pfr_tokens_from_logprobs(
         if logprobs.shape[0] != 1:
             raise ValueError("batched MS-PFR is handled by the caller")
         logprobs = logprobs[0]
-    probs = logprobs.exp()
-    vocab_size = probs.shape[-1]
+    vocab_size = logprobs.shape[-1]
 
     uniform_noise = source.uniform_noise(
         (num_samples, vocab_size), device=device, generator=generator,
     )
+    if num_samples == 1:
+        # Comparing E / p is equivalent to comparing log(p) - log(E), while
+        # avoiding a vocabulary-wide exp(logprobs) and division.  Masked
+        # entries remain -inf in log space.
+        exp_interarrival = -_safe_log(uniform_noise)
+        scores = logprobs - torch.log(exp_interarrival[0])
+        return torch.argmax(scores).reshape(1).to(torch.long)
+
     exp_interarrival = -_safe_log(uniform_noise)
-    arrival_times = torch.cumsum(exp_interarrival, dim=0)
-    arrival_times = torch.where(
-        probs.unsqueeze(0) > 0,
-        arrival_times / probs.unsqueeze(0),
-        torch.full_like(arrival_times, float("inf")),
-    )
+    if support_indices is not None:
+        support_indices = support_indices.reshape(-1).to(device=device)
+        active_noise = exp_interarrival.index_select(1, support_indices)
+        active_probs = logprobs.index_select(0, support_indices).exp()
+        arrival_times = torch.cumsum(active_noise, dim=0)
+        arrival_times = arrival_times / active_probs.unsqueeze(0)
+        active_size = int(support_indices.numel())
+    else:
+        probs = logprobs.exp()
+        arrival_times = torch.cumsum(exp_interarrival, dim=0)
+        arrival_times = arrival_times / probs.unsqueeze(0)
+        active_size = vocab_size
 
     flat_winners = torch.topk(
         arrival_times.flatten(),
@@ -247,7 +272,10 @@ def ms_pfr_tokens_from_logprobs(
         largest=False,
         sorted=True,
     ).indices
-    return (flat_winners % vocab_size).to(torch.long)
+    active_winners = (flat_winners % active_size).to(torch.long)
+    if support_indices is not None:
+        return support_indices.index_select(0, active_winners)
+    return active_winners
 
 
 def _single_ms_pfr_from_logits(

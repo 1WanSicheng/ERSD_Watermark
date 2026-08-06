@@ -27,3 +27,6 @@ __pycache__/
 *.pfx
 .env
 .env.*
+
+# Local PF exploration archive; frozen code and curated results live in PF_sd/.
+data/pf_sd_intermediate_archive_20260806/

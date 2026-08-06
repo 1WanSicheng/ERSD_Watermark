@@ -4,12 +4,12 @@ Cache-aware variant of mpfr_batched_torchgen.
 Same algorithm as mpfr_batched_torchgen.py (MPFR_spec direct-finite MPFR with
 GPU torch.Generator sampling, draft tree + ONE batched target forward over
 depth-L leaves) but threads the TARGET KV cache across blocks AND within the
-batched verify forward.  Draft side remains cache-free for simplicity.
+batched verify forward.  The draft KV cache is also threaded across depths and
+blocks.
 
 Cache convention:
 - At the start of block, `target_past_key_values` covers [0, len(input_ids)-1).
-- We feed batch_ids[:, cached_n:] of shape (B, root_len + L - cached_n) to
-  the target -- only the new tokens since the cache was last filled.
+- We construct and feed only each leaf suffix after ``cached_n`` to the target.
 - After forward, cache covers [0, root_len + L) per batch row.
 - We select the alive row (the leaf row containing the realized path) and
   truncate to length (root_len + accepted_count), exposing the next block's
@@ -17,8 +17,10 @@ Cache convention:
 """
 from __future__ import annotations
 
+import inspect
 import sys
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
@@ -56,6 +58,18 @@ from accuwm.pfr import PFRSourceFactory, SharedPFRSource
 from accuwm.utils import cache_len
 
 
+@lru_cache(maxsize=None)
+def _supports_num_logits_to_keep(model_type: type) -> bool:
+    return "num_logits_to_keep" in inspect.signature(model_type.forward).parameters
+
+
+def _model_forward(model, *, num_logits_to_keep: int, **kwargs):
+    """Avoid materializing unused vocabulary logits when the model supports it."""
+    if _supports_num_logits_to_keep(type(model)):
+        kwargs["num_logits_to_keep"] = int(num_logits_to_keep)
+    return model(**kwargs)
+
+
 def _context_label(context: ContextKey) -> bytes:
     """Per-context bytes label fed to SharedPFRSource.  Mirrors the
     per-context blake2b seed in the original mpfr_direct_optimized."""
@@ -64,12 +78,8 @@ def _context_label(context: ContextKey) -> bytes:
     )
 
 
-def _gpu_source_for_context(factory: PFRSourceFactory, context: ContextKey) -> SharedPFRSource:
-    return factory.build(_context_label(context))
-
-
 def _make_source_cache(factory: PFRSourceFactory):
-    """Per-block cache that memoises (label bytes, SharedPFRSource) per context.
+    """Memoise (label bytes, SharedPFRSource) per generation context.
     Same context can appear at multiple depths within a tree; the cache lets us
     pay the prefix byte-serialisation + sha256 cost once per unique context.
     Output bytes downstream are unchanged because ``factory.build(label).seed()``
@@ -79,7 +89,16 @@ def _make_source_cache(factory: PFRSourceFactory):
     def get(context: ContextKey) -> SharedPFRSource:
         src = cache.get(context)
         if src is None:
-            src = factory.build(_context_label(context))
+            parent = cache.get(context[:-1]) if context else None
+            if parent is not None:
+                # Context labels are prefix bytes followed by one int64 token,
+                # so children can reuse the already serialized parent label.
+                label = parent.label + int(context[-1]).to_bytes(
+                    8, "big", signed=True
+                )
+            else:
+                label = _context_label(context)
+            src = factory.build(label)
             cache[context] = src
         return src
 
@@ -97,7 +116,8 @@ def build_draft_tree_torchgen(
     process_logits_kwargs: Optional[Dict[str, Any]],
     max_vocab_size: Optional[int],
     past_key_values: Any = None,
-) -> Tuple[DraftTree, Dict[ContextKey, Any]]:
+    source_for_context: Any = None,
+) -> Tuple[DraftTree, List[Any]]:
     """Build the multi-draft tree using the GPU torch.Generator MPFR primitive.
     Identical to mpfr_direct_optimized.build_draft_tree_direct except the
     sampler is ms_pfr_tokens_from_logprobs (GPU) instead of the CPU/blake2b
@@ -105,10 +125,9 @@ def build_draft_tree_torchgen(
 
     If ``past_key_values`` is provided (covering [0, cached_n)), only the
     suffix ``batch_ids[:, cached_n:]`` is fed to the draft model at each depth
-    and the draft KV cache is threaded across depths.  A ``past_by_context``
-    dict is returned mapping each prev-level context (depths 0..lookahead-1)
-    to a 1-row cache covering that context's full length, suitable for cross-
-    block reuse.
+    and the draft KV cache is threaded across depths.  The returned cache list
+    is aligned with tree levels 0..lookahead-1; the caller selects the single
+    realized row for cross-block reuse after target verification.
     """
     if lookahead <= 0:
         raise ValueError("lookahead must be positive")
@@ -123,7 +142,11 @@ def build_draft_tree_torchgen(
     levels: List[List[ContextKey]] = [[root]]
     multiplicities: Dict[ContextKey, int] = {root: int(num_drafts)}
     draft_sets: Dict[ContextKey, set[int]] = {}
-    past_by_context: Dict[ContextKey, Any] = {}
+    # One batched cache per expanded level.  The old path wrapped every row in
+    # a separate DynamicCache even though only the realized path survives the
+    # block.  Retaining level-aligned caches lets the caller select exactly one
+    # row after verification.
+    level_caches: List[Any] = []
     draft_tree_size = 0
     draft_forward_calls = 0
     cached_n = cache_len(past_key_values)
@@ -132,7 +155,7 @@ def build_draft_tree_torchgen(
     # the per-call Generator alloc) and memoise SharedPFRSource per context
     # (saves redundant prefix byte-serialisation + sha256 hashing when the
     # same context appears at multiple depths).
-    source_for = _make_source_cache(source_factory)
+    source_for = source_for_context or _make_source_cache(source_factory)
     shared_gen = torch.Generator(device=draft_device)
 
     # ``level_cache`` is the B-batched draft KV cache aligned with the current
@@ -150,33 +173,46 @@ def build_draft_tree_torchgen(
             levels.append([])
             break
 
-        batch_ids = _batch_from_contexts(prev_level, draft_device)
-        n_prev = batch_ids.shape[0]
+        n_prev = len(prev_level)
 
         if depth == 1:
             # First depth: prev_level == [root]; need to encode the part of
             # the prompt not yet in the cross-block cache.
             if cached_n > 0:
                 batch_past = _repeat_cache(past_key_values, n_prev)
-                input_tokens = batch_ids[:, cached_n:]
+                input_tokens = _batch_from_contexts(
+                    [context[cached_n:] for context in prev_level],
+                    draft_device,
+                )
             else:
                 batch_past = None
-                input_tokens = batch_ids
+                input_tokens = _batch_from_contexts(prev_level, draft_device)
         else:
             # Depth >= 2: gather parent rows from the previous depth's
             # batched cache (length root_len + depth - 2) and feed only the
             # 1 new token per row.
             prev_prev_level = levels[depth - 2]
             prev_idx_map = {ctx: i for i, ctx in enumerate(prev_prev_level)}
-            parent_idx = torch.tensor(
-                [prev_idx_map[ctx[:-1]] for ctx in prev_level],
-                device=draft_device,
-                dtype=torch.long,
+            parent_rows = [prev_idx_map[ctx[:-1]] for ctx in prev_level]
+            if (
+                len(parent_rows) == len(prev_prev_level)
+                and all(row == index for index, row in enumerate(parent_rows))
+            ):
+                # One child per parent in unchanged order: the cache is
+                # already aligned, so index_select would only copy it.
+                batch_past = level_cache
+            else:
+                parent_idx = torch.tensor(
+                    parent_rows, device=draft_device, dtype=torch.long
+                )
+                batch_past = _gather_cache_rows(level_cache, parent_idx)
+            input_tokens = _batch_from_contexts(
+                [context[-1:] for context in prev_level], draft_device
             )
-            batch_past = _gather_cache_rows(level_cache, parent_idx)
-            input_tokens = batch_ids[:, -1:]
 
-        out = ref_model(
+        out = _model_forward(
+            ref_model,
+            num_logits_to_keep=1,
             input_ids=input_tokens,
             past_key_values=batch_past,
             use_cache=True,
@@ -187,16 +223,14 @@ def build_draft_tree_torchgen(
         draft_forward_calls += 1
         draft_tree_size += len(prev_level)
         level_cache = out.past_key_values
-
-        # Capture per-row cache for cross-block reuse.
-        for row, context in enumerate(prev_level):
-            past_by_context[context] = _select_cache_row(level_cache, row)
+        level_caches.append(level_cache)
 
         logits = out.logits[:, -1, :]
         if max_vocab_size is not None and max_vocab_size < logits.shape[-1]:
             logits = logits[..., :max_vocab_size]
-        processed = process_logits_exact(
-            logits, temperature=draft_temp, top_k=top_k, top_p=top_p
+        processed, support_indices = process_logits_exact(
+            logits, temperature=draft_temp, top_k=top_k, top_p=top_p,
+            return_support=True,
         )
         logprobs = _normalize_logprobs_from_processed_logits(processed)
 
@@ -220,6 +254,7 @@ def build_draft_tree_torchgen(
                 num_samples=mult,
                 device=draft_device,
                 generator=shared_gen,
+                support_indices=(support_indices[row] if mult > 1 else None),
             ))
 
         flat = (
@@ -253,13 +288,14 @@ def build_draft_tree_torchgen(
         draft_tree_size=draft_tree_size,
         draft_forward_calls=draft_forward_calls,
     )
-    return tree, past_by_context
+    return tree, level_caches
 
 
 @dataclass
 class MPFRCachedBlock:
     output_ids: LongTensor
     output_logprobs: FloatTensor
+    output_tokens: Tuple[int, ...]
     accepted_count: int
     attempted_draft_tokens: int
     draft_tree_size: int
@@ -271,25 +307,59 @@ class MPFRCachedBlock:
     draft_past_key_values: Any = None
 
 
-def _select_and_truncate_cache(cache: Any, batch_index: int, seq_len: int) -> Any:
+@dataclass
+class TargetLogitStore:
+    """Raw target logits plus the row/position for each verified context.
+
+    Target verification materializes the tree logits in one model forward,
+    but generation follows only one realized path.  Keeping raw logits here
+    lets us defer top-k and log-softmax until a context is actually visited,
+    instead of processing every context in the proposal tree.
+    """
+
+    logits: FloatTensor
+    position_by_context: Dict[ContextKey, Tuple[int, int]]
+    temperature: Any
+    top_k: int
+    top_p: float
+
+    def logprobs(self, context: ContextKey) -> FloatTensor:
+        row, pos = self.position_by_context[context]
+        processed = process_logits_exact(
+            self.logits[row, pos, :],
+            temperature=self.temperature,
+            top_k=self.top_k,
+            top_p=self.top_p,
+        )
+        return _normalize_logprobs_from_processed_logits(processed)
+
+
+def _select_and_truncate_cache(
+    cache: Any,
+    batch_index: int,
+    seq_len: int,
+    *,
+    make_contiguous: bool = True,
+) -> Any:
     if cache is None:
         return None
     seq_len = max(int(seq_len), 0)
+
+    def finish(tensor):
+        view = tensor[batch_index, :, :seq_len, :].unsqueeze(0)
+        return view.contiguous() if make_contiguous else view
+
     if hasattr(cache, "key_cache") and hasattr(cache, "value_cache"):
         for i in range(len(cache.key_cache)):
-            cache.key_cache[i] = (
-                cache.key_cache[i][batch_index, :, :seq_len, :].unsqueeze(0).contiguous()
-            )
-            cache.value_cache[i] = (
-                cache.value_cache[i][batch_index, :, :seq_len, :].unsqueeze(0).contiguous()
-            )
+            cache.key_cache[i] = finish(cache.key_cache[i])
+            cache.value_cache[i] = finish(cache.value_cache[i])
         return cache
     selected = []
     for layer in cache:
         k, v = layer[:2]
         selected.append((
-            k[batch_index, :, :seq_len, :].unsqueeze(0).contiguous(),
-            v[batch_index, :, :seq_len, :].unsqueeze(0).contiguous(),
+            finish(k),
+            finish(v),
         ) + tuple(layer[2:]))
     return tuple(selected)
 
@@ -304,12 +374,11 @@ def _target_logprobs_from_leaves_one_forward_cached(
     target_past_key_values: Any,
     process_logits_kwargs: Optional[Dict[str, Any]],
     max_vocab_size: Optional[int],
-) -> Tuple[Dict[ContextKey, FloatTensor], Any]:
+) -> Tuple[TargetLogitStore, Any]:
     if not leaves:
         raise ValueError("cannot batch target over an empty leaf set")
     device = _model_device(model)
-    batch_ids = _batch_from_contexts(leaves, device)  # (B, root_len + L)
-    n_leaves = batch_ids.shape[0]
+    n_leaves = len(leaves)
 
     if target_past_key_values is None:
         cached_n = 0
@@ -321,11 +390,18 @@ def _target_logprobs_from_leaves_one_forward_cached(
                 f"target cache too long (cached_n={cached_n}, root_len={root_len}); "
                 "cache should cover at most [0, root_len - 1)"
             )
-        target_past_repeated = _repeat_cache(target_past_key_values, n_leaves)
+        target_past_repeated = _repeat_cache(
+            target_past_key_values, n_leaves
+        )
 
-    new_input_ids = batch_ids[:, cached_n:]
+    new_input_ids = _batch_from_contexts(
+        [leaf[cached_n:] for leaf in leaves], device
+    )
 
-    out = model(
+    full_input_length = int(new_input_ids.shape[1])
+    out = _model_forward(
+        model,
+        num_logits_to_keep=lookahead + 1,
         input_ids=new_input_ids,
         past_key_values=target_past_repeated,
         use_cache=True,
@@ -335,6 +411,7 @@ def _target_logprobs_from_leaves_one_forward_cached(
     )
     new_target_cache = out.past_key_values
     logits_all = out.logits  # (B, full_seq_len - cached_n, V)
+    kept_start = full_input_length - int(logits_all.shape[1])
     if max_vocab_size is not None and max_vocab_size < logits_all.shape[-1]:
         logits_all = logits_all[..., :max_vocab_size]
 
@@ -342,25 +419,27 @@ def _target_logprobs_from_leaves_one_forward_cached(
     top_k = _top_k(process_logits_kwargs)
     top_p = _top_p(process_logits_kwargs)
 
-    logprobs_by_context: Dict[ContextKey, FloatTensor] = {}
+    position_by_context: Dict[ContextKey, Tuple[int, int]] = {}
     for row, leaf in enumerate(leaves):
         for d in range(0, lookahead + 1):
             context = leaf[: root_len + d]
-            if context in logprobs_by_context:
+            if context in position_by_context:
                 continue
-            pos = root_len + d - 1 - cached_n
+            pos = root_len + d - 1 - cached_n - kept_start
             if pos < 0:
                 raise RuntimeError(
                     f"output position {pos} is negative; cached_n={cached_n}, "
                     f"root_len={root_len}, d={d}"
                 )
-            raw_logits = logits_all[row, pos, :]
-            processed = process_logits_exact(
-                raw_logits, temperature=target_temp, top_k=top_k, top_p=top_p
-            )
-            logprobs_by_context[context] = _normalize_logprobs_from_processed_logits(processed)
+            position_by_context[context] = (row, pos)
 
-    return logprobs_by_context, new_target_cache
+    return TargetLogitStore(
+        logits=logits_all,
+        position_by_context=position_by_context,
+        temperature=target_temp,
+        top_k=top_k,
+        top_p=top_p,
+    ), new_target_cache
 
 
 @torch.no_grad()
@@ -376,15 +455,19 @@ def mpfr_batched_torchgen_cached_block(
     target_past_key_values: Any = None,
     ref_past_key_values: Any = None,
     process_logits_kwargs: Optional[Dict[str, Any]] = None,
+    root_context: Optional[ContextKey] = None,
+    return_logprobs: bool = True,
+    source_for_context: Any = None,
 ) -> MPFRCachedBlock:
     device = _model_device(model)
     input_ids = input_ids.to(device)
-    root = _context_key(input_ids)
+    root = root_context if root_context is not None else _context_key(input_ids)
     root_len = len(root)
     block_len = min(int(lookahead), int(max_new_tokens))
     max_vocab_size = getattr(model.config, "vocab_size", None)
 
-    draft_tree, draft_past_by_context = build_draft_tree_torchgen(
+    source_for = source_for_context or _make_source_cache(source_factory)
+    draft_tree, draft_level_caches = build_draft_tree_torchgen(
         ref_model=ref_model,
         root=root,
         lookahead=block_len,
@@ -393,13 +476,14 @@ def mpfr_batched_torchgen_cached_block(
         process_logits_kwargs=process_logits_kwargs,
         max_vocab_size=max_vocab_size,
         past_key_values=ref_past_key_values,
+        source_for_context=source_for,
     )
 
     leaves = draft_tree.levels[block_len]
     if not leaves:
         raise RuntimeError("draft tree did not reach lookahead depth")
 
-    logprobs_by_context, new_target_cache_repeated = (
+    target_logits, new_target_cache_repeated = (
         _target_logprobs_from_leaves_one_forward_cached(
             model=model,
             leaves=leaves,
@@ -417,16 +501,19 @@ def mpfr_batched_torchgen_cached_block(
     accepted_count = 0
     got_eos = False
     accepted_all = True
+    target_generator = torch.Generator(device=device)
 
     for _ in range(block_len):
-        logprobs = logprobs_by_context[current]
-        source = _gpu_source_for_context(source_factory, current)
+        logprobs = target_logits.logprobs(current)
+        source = source_for(current)
         token = int(ms_pfr_tokens_from_logprobs(
             logprobs, source=source, num_samples=1, device=device,
+            generator=target_generator,
         )[0].item())
 
         output_tokens.append(token)
-        output_logprobs.append(logprobs)
+        if return_logprobs:
+            output_logprobs.append(logprobs)
 
         if token == getattr(model.config, "eos_token_id", None):
             got_eos = True
@@ -443,18 +530,29 @@ def mpfr_batched_torchgen_cached_block(
             break
 
     if accepted_all and not got_eos and len(output_tokens) < max_new_tokens:
-        logprobs = logprobs_by_context[current]
-        source = _gpu_source_for_context(source_factory, current)
+        logprobs = target_logits.logprobs(current)
+        source = source_for(current)
         token = int(ms_pfr_tokens_from_logprobs(
             logprobs, source=source, num_samples=1, device=device,
+            generator=target_generator,
         )[0].item())
         output_tokens.append(token)
-        output_logprobs.append(logprobs)
+        if return_logprobs:
+            output_logprobs.append(logprobs)
         if token == getattr(model.config, "eos_token_id", None):
             got_eos = True
 
     output_ids = torch.tensor([output_tokens], device=device, dtype=torch.long)
-    output_logprobs_tensor = torch.stack(output_logprobs, dim=0).unsqueeze(0)
+    if return_logprobs:
+        output_logprobs_tensor = torch.stack(output_logprobs, dim=0).unsqueeze(0)
+    else:
+        # Generation and watermark detection use token ids plus the keyed
+        # context labels; retaining full-vocabulary log-probability rows is
+        # optional.  An explicit fast path avoids a multi-MiB stack/copy per
+        # block while preserving the default API for callers that need them.
+        output_logprobs_tensor = torch.empty(
+            (1, 0, int(max_vocab_size or 0)), device=device
+        )
 
     alive_row_idx = 0
     cur_len = len(current)
@@ -468,20 +566,24 @@ def mpfr_batched_torchgen_cached_block(
         new_target_cache_repeated, alive_row_idx, new_cache_len
     )
 
-    # Same logic as ms_pfr_batched_cached: pick deepest cached draft ancestor
-    # of the realized prefix, falling back to its parent if accepted_count
-    # reached block_len (deepest level has no past_by_context entry).
-    draft_past_for_next = draft_past_by_context.get(current)
-    if draft_past_for_next is None and len(current) > root_len:
-        draft_past_for_next = draft_past_by_context.get(current[:-1])
+    # Pick the realized row only once.  Caches exist for contexts at depths
+    # 0..block_len-1; a fully accepted depth-block_len leaf therefore reuses
+    # its parent cache and feeds the final accepted token in the next block.
+    cache_depth = min(accepted_count, block_len - 1)
+    cache_context = current[: root_len + cache_depth]
+    cache_row = draft_tree.levels[cache_depth].index(cache_context)
+    draft_past_for_next = _select_cache_row(
+        draft_level_caches[cache_depth], cache_row
+    )
 
     return MPFRCachedBlock(
         output_ids=output_ids,
         output_logprobs=output_logprobs_tensor,
+        output_tokens=tuple(output_tokens),
         accepted_count=accepted_count,
         attempted_draft_tokens=block_len,
         draft_tree_size=draft_tree.draft_tree_size,
-        target_context_count=len(logprobs_by_context),
+        target_context_count=len(target_logits.position_by_context),
         target_forward_calls=1,
         draft_forward_calls=draft_tree.draft_forward_calls,
         got_eos=got_eos,
@@ -505,6 +607,7 @@ def finite_multi_draft_pfr_cached_generator(
     max_proposals: int = 100_000,
     allow_incomplete: bool = False,
     proposal: str = "batched_target_torchgen_cached",
+    return_logprobs: bool = True,
 ) -> Iterable[Tuple[LongTensor, FloatTensor, Dict[str, Any]]]:
     del labeler, max_proposals, allow_incomplete, proposal
 
@@ -520,6 +623,11 @@ def finite_multi_draft_pfr_cached_generator(
     input_ids = input_ids.to(device)
     target_past_key_values = None
     ref_past_key_values = None
+    current_context = _context_key(input_ids)
+    # Keep the immutable context -> keyed-source mapping across blocks.  The
+    # realized next root was already visited in the preceding block, and its
+    # descendants can extend the cached label bytes incrementally.
+    source_for_context = _make_source_cache(source_factory)
     generated = 0
 
     while generated < max_length:
@@ -537,6 +645,9 @@ def finite_multi_draft_pfr_cached_generator(
             target_past_key_values=target_past_key_values,
             ref_past_key_values=ref_past_key_values,
             process_logits_kwargs=process_logits_kwargs,
+            root_context=current_context,
+            return_logprobs=return_logprobs,
+            source_for_context=source_for_context,
         )
         meta = {
             "accepted_count": block.accepted_count,
@@ -554,7 +665,13 @@ def finite_multi_draft_pfr_cached_generator(
         else:
             yield block.output_ids, block.output_logprobs
 
-        input_ids = torch.cat([input_ids, block.output_ids.to(device)], dim=1)
+        # These Python token ids already exist because verification branches
+        # on each sampled id.  Reuse them instead of copying the newly-created
+        # output tensor GPU -> CPU once more on every block.
+        new_tokens = block.output_tokens
+        current_context = current_context + new_tokens
+        # ``current_context`` and the threaded caches fully specify subsequent
+        # blocks, so rebuilding a growing dense input tensor is unnecessary.
         target_past_key_values = block.target_past_key_values
         ref_past_key_values = block.draft_past_key_values
         generated += int(block.output_ids.shape[-1])
@@ -577,6 +694,7 @@ def finite_multi_draft_pfr_cached_sample_generator(
     max_proposals: int = 100_000,
     allow_incomplete: bool = False,
     proposal: str = "batched_target_torchgen_cached",
+    return_logprobs: bool = True,
 ):
     if B is not None:
         num_drafts = int(B)
@@ -594,4 +712,5 @@ def finite_multi_draft_pfr_cached_sample_generator(
         max_proposals=max_proposals,
         allow_incomplete=allow_incomplete,
         proposal=proposal,
+        return_logprobs=return_logprobs,
     )

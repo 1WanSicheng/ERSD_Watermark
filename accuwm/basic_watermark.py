@@ -44,8 +44,7 @@ def gen_n_token_uwm(
     """
     assert cch.data.shape == input_ids.shape[:-1]
     if past_key_values is not None:
-        # cached_n = cache_len(past_key_values)
-        cached_n = past_key_values[0][0].shape[2]
+        cached_n = cache_len(past_key_values)
         input_tokens = input_ids[:, cached_n:]
     else:
         input_tokens = input_ids

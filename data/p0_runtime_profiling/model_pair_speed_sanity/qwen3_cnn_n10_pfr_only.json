@@ -1,0 +1,21 @@
+{
+  "experiment": "qwen3_model_pair_speed_sanity_n10_pfr_only",
+  "samples": 10,
+  "dataset": "cnn_dailymail",
+  "max_new_tokens": 128,
+  "lookaheads": [1, 2, 4],
+  "private_key": "1234",
+  "target_model": "Qwen/Qwen3-14B",
+  "draft_model": "Qwen/Qwen3-1.7B",
+  "process_logits": {
+    "top_k": 50,
+    "top_p": 1.0,
+    "temperature": 1.0
+  },
+  "decoders": ["pfr"],
+  "metrics": {
+    "aatps": true,
+    "token_rate": true
+  },
+  "output": "data/p0_runtime_profiling/model_pair_speed_sanity/qwen3_cnn_n10_pfr_only_results.json"
+}

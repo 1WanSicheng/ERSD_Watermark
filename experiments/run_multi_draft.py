@@ -187,6 +187,16 @@ def run_one_prompt(
         )
         if urec is not None:
             Us, skipped = urec
+            # Keep the detector inputs so the signal-only top-k experiment
+            # can be audited and re-aggregated without another generation
+            # pass. This mirrors the single-draft runner.
+            row["u_per_token"] = (
+                Us.detach().cpu().numpy().reshape(-1).tolist()
+            )
+            if skipped is not None:
+                row["skipped_per_token"] = (
+                    np.asarray(skipped, dtype=bool).reshape(-1).tolist()
+                )
 
     if anlppt_applies:
         anlppt_cfg = (metrics_cfg or {}).get("anlppt") or {}

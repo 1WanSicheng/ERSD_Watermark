@@ -1,0 +1,265 @@
+{
+  "hardware": {
+    "gpu": "NVIDIA A100-SXM4-40GB",
+    "torch": "2.11.0+cu130"
+  },
+  "config": {
+    "target": "Qwen/Qwen2.5-7B-Instruct",
+    "draft": "Qwen/Qwen2.5-0.5B-Instruct",
+    "device": "cuda:0",
+    "samples": 5,
+    "warmup": 1,
+    "lookahead": 4,
+    "max_new_tokens": 64,
+    "top_k": 50,
+    "temperature": 1.0
+  },
+  "baselines": {
+    "target_only": {
+      "method": "target_only",
+      "samples": 5,
+      "tokens": 320,
+      "elapsed_sec": 8.151598109165207,
+      "token_rate_global": 39.256106068356054,
+      "token_rate": {
+        "mean": 39.256712200097624,
+        "std": 0.1543558938892994
+      },
+      "peak_allocated_gib": 15.193059921264648,
+      "rows": [
+        {
+          "tokens": 64,
+          "elapsed_sec": 1.6330702221021056,
+          "token_rate": 39.18998652588161,
+          "peak_allocated_bytes": 16313423872
+        },
+        {
+          "tokens": 64,
+          "elapsed_sec": 1.6371221209410578,
+          "token_rate": 39.092990792410305,
+          "peak_allocated_bytes": 16312092672
+        },
+        {
+          "tokens": 64,
+          "elapsed_sec": 1.6214832421392202,
+          "token_rate": 39.47003480317496,
+          "peak_allocated_bytes": 16310761472
+        },
+        {
+          "tokens": 64,
+          "elapsed_sec": 1.635992483003065,
+          "token_rate": 39.11998414718883,
+          "peak_allocated_bytes": 16311427072
+        },
+        {
+          "tokens": 64,
+          "elapsed_sec": 1.623930040979758,
+          "token_rate": 39.41056473183241,
+          "peak_allocated_bytes": 16310761472
+        }
+      ]
+    },
+    "vsps": {
+      "method": "vsps",
+      "samples": 5,
+      "tokens": 320,
+      "elapsed_sec": 12.148935098201036,
+      "token_rate_global": 26.33975714030971,
+      "token_rate": {
+        "mean": 26.489342102518286,
+        "std": 1.9910905416149691
+      },
+      "peak_allocated_gib": 15.190799236297607,
+      "rows": [
+        {
+          "tokens": 64,
+          "elapsed_sec": 2.2240835269913077,
+          "token_rate": 28.77589767798776,
+          "peak_allocated_bytes": 16310996480
+        },
+        {
+          "tokens": 64,
+          "elapsed_sec": 2.2252613168675452,
+          "token_rate": 28.76066712474537,
+          "peak_allocated_bytes": 16310515200
+        },
+        {
+          "tokens": 64,
+          "elapsed_sec": 2.4560591701883823,
+          "token_rate": 26.058004129880608,
+          "peak_allocated_bytes": 16308750336
+        },
+        {
+          "tokens": 64,
+          "elapsed_sec": 2.6868215641006827,
+          "token_rate": 23.819966630877367,
+          "peak_allocated_bytes": 16310433792
+        },
+        {
+          "tokens": 64,
+          "elapsed_sec": 2.5567095200531185,
+          "token_rate": 25.03217494910033,
+          "peak_allocated_bytes": 16309767680
+        }
+      ]
+    }
+  },
+  "methods": [
+    {
+      "method": "pfr_nowm",
+      "samples": 5,
+      "lookahead": 4,
+      "max_new_tokens": 64,
+      "end_to_end": {
+        "tokens": 320,
+        "elapsed_sec": 12.069598124129698,
+        "token_rate_global": 26.512896014346314,
+        "peak_allocated_gib": 15.19940710067749,
+        "rows": [
+          {
+            "tokens": 64,
+            "elapsed_sec": 2.528835504082963,
+            "token_rate": 25.30809137117381,
+            "peak_allocated_bytes": 16318698496
+          },
+          {
+            "tokens": 64,
+            "elapsed_sec": 2.4397951958235353,
+            "token_rate": 26.231709985147855,
+            "peak_allocated_bytes": 16318044160
+          },
+          {
+            "tokens": 64,
+            "elapsed_sec": 2.112640096107498,
+            "token_rate": 30.29384897026184,
+            "peak_allocated_bytes": 16317847552
+          },
+          {
+            "tokens": 64,
+            "elapsed_sec": 2.6566738730762154,
+            "token_rate": 24.090273423697706,
+            "peak_allocated_bytes": 16318633984
+          },
+          {
+            "tokens": 64,
+            "elapsed_sec": 2.3316534550394863,
+            "token_rate": 27.448332796485904,
+            "peak_allocated_bytes": 16320239104
+          }
+        ]
+      },
+      "instrumented": {
+        "tokens": 320,
+        "elapsed_sec": 12.310351649997756,
+        "token_rate": 25.994383352977437,
+        "peak_allocated_gib": 15.199047565460205,
+        "phase_sec": {
+          "draft_forward": 8.742302799830213,
+          "fresh_uniform_rng": 0.03930784552358091,
+          "pfr_arrival_sampling": 0.2629415118135512,
+          "target_forward": 2.9432820787187666
+        },
+        "phase_calls": {
+          "draft_forward": 435,
+          "fresh_uniform_rng": 755,
+          "pfr_arrival_sampling": 755,
+          "target_forward": 112
+        },
+        "derived_sec": {
+          "target_forward": 2.9432820787187666,
+          "draft_forward": 8.742302799830213,
+          "pfr_arrival_sampling_including_rng": 0.2629415118135512,
+          "keyed_uniform_rng_subset": 0.0,
+          "fresh_uniform_rng_subset": 0.03930784552358091,
+          "remainder_cache_python": 0.36182525963522494
+        },
+        "derived_fraction": {
+          "target_forward": 0.2390900083442623,
+          "draft_forward": 0.7101586573956079,
+          "pfr_arrival_sampling_including_rng": 0.0213593826796653,
+          "keyed_uniform_rng_subset": 0.0,
+          "fresh_uniform_rng_subset": 0.003193072516623688,
+          "remainder_cache_python": 0.02939195158046447
+        }
+      }
+    },
+    {
+      "method": "pfr",
+      "samples": 5,
+      "lookahead": 4,
+      "max_new_tokens": 64,
+      "end_to_end": {
+        "tokens": 320,
+        "elapsed_sec": 12.586589176673442,
+        "token_rate_global": 25.423885336072757,
+        "peak_allocated_gib": 15.19659948348999,
+        "rows": [
+          {
+            "tokens": 64,
+            "elapsed_sec": 2.7677341050002724,
+            "token_rate": 23.123608544757122,
+            "peak_allocated_bytes": 16316560896
+          },
+          {
+            "tokens": 64,
+            "elapsed_sec": 2.1011088169179857,
+            "token_rate": 30.460107294146948,
+            "peak_allocated_bytes": 16315258368
+          },
+          {
+            "tokens": 64,
+            "elapsed_sec": 2.222382507054135,
+            "token_rate": 28.797922858398838,
+            "peak_allocated_bytes": 16316855808
+          },
+          {
+            "tokens": 64,
+            "elapsed_sec": 2.768424871843308,
+            "token_rate": 23.11783882991439,
+            "peak_allocated_bytes": 16314914304
+          },
+          {
+            "tokens": 64,
+            "elapsed_sec": 2.7269388758577406,
+            "token_rate": 23.46953962430464,
+            "peak_allocated_bytes": 16317224448
+          }
+        ]
+      },
+      "instrumented": {
+        "tokens": 320,
+        "elapsed_sec": 12.753387808101252,
+        "token_rate": 25.09137217616236,
+        "peak_allocated_gib": 15.19659948348999,
+        "phase_sec": {
+          "draft_forward": 9.091574478661641,
+          "keyed_uniform_rng": 0.033248651307076216,
+          "pfr_arrival_sampling": 0.2620813990943134,
+          "target_forward": 3.023984946543351
+        },
+        "phase_calls": {
+          "draft_forward": 453,
+          "keyed_uniform_rng": 773,
+          "pfr_arrival_sampling": 773,
+          "target_forward": 115
+        },
+        "derived_sec": {
+          "target_forward": 3.023984946543351,
+          "draft_forward": 9.091574478661641,
+          "pfr_arrival_sampling_including_rng": 0.2620813990943134,
+          "keyed_uniform_rng_subset": 0.033248651307076216,
+          "fresh_uniform_rng_subset": 0.0,
+          "remainder_cache_python": 0.37574698380194604
+        },
+        "derived_fraction": {
+          "target_forward": 0.2371122867150989,
+          "draft_forward": 0.7128752465981204,
+          "pfr_arrival_sampling_including_rng": 0.020549943516014867,
+          "keyed_uniform_rng_subset": 0.002607044638441551,
+          "fresh_uniform_rng_subset": 0.0,
+          "remainder_cache_python": 0.029462523170765868
+        }
+      }
+    }
+  ]
+}

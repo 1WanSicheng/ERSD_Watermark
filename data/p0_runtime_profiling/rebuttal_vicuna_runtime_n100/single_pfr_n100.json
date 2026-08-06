@@ -1,0 +1,1425 @@
+{
+  "hardware": {
+    "gpu": "NVIDIA A100-SXM4-40GB",
+    "torch": "2.11.0+cu130"
+  },
+  "config": {
+    "target": "lmsys/vicuna-7b-v1.5",
+    "draft": "double7/vicuna-68m",
+    "device": "cuda:0",
+    "target_device_map_requested": null,
+    "target_device_map_actual": {
+      "": "cuda:0"
+    },
+    "draft_device_map_actual": {
+      "": "cuda:0"
+    },
+    "dtype": "float16",
+    "samples": 100,
+    "profile_samples": 100,
+    "warmup": 1,
+    "lookaheads": [
+      4
+    ],
+    "max_new_tokens": 128,
+    "dataset": "cnn_dailymail",
+    "top_k": 50,
+    "temperature": 1.0,
+    "seed_protocol": "one paired seed per prompt; identical across methods and end-to-end/instrumented passes",
+    "mse_mapping": "mc_uwm_speed (reweight_in_mc=False)",
+    "mws_mapping": "mc_uwm_strength (reweight_in_mc=True)",
+    "methods": [
+      "pfr"
+    ]
+  },
+  "results": [
+    {
+      "method": "pfr",
+      "end_to_end": {
+        "tokens": 11240,
+        "blocks": 5205,
+        "elapsed_sec": 206.35340001923032,
+        "token_rate_global": 54.46966223455747,
+        "token_rate_per_prompt": {
+          "mean": 55.43484212573002,
+          "std": 8.853899657153898
+        },
+        "tokens_per_block": 2.159462055715658,
+        "peak_allocated_gib_per_gpu": [
+          13.546814441680908
+        ],
+        "incremental_peak_allocated_mib_per_gpu": [
+          880.6513671875
+        ],
+        "rows": [
+          {
+            "tokens": 128,
+            "blocks": 64,
+            "accepted": 65,
+            "elapsed_sec": 2.5211993239354342,
+            "token_rate": 50.769488467179194,
+            "peak_allocated_bytes_per_gpu": [
+              14491128832
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              868777984
+            ]
+          },
+          {
+            "tokens": 125,
+            "blocks": 50,
+            "accepted": 75,
+            "elapsed_sec": 1.9921510329004377,
+            "token_rate": 62.746246612641826,
+            "peak_allocated_bytes_per_gpu": [
+              14452516864
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              830166016
+            ]
+          },
+          {
+            "tokens": 93,
+            "blocks": 36,
+            "accepted": 57,
+            "elapsed_sec": 1.4372240549419075,
+            "token_rate": 64.70807365088184,
+            "peak_allocated_bytes_per_gpu": [
+              14436753920
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              814403072
+            ]
+          },
+          {
+            "tokens": 97,
+            "blocks": 50,
+            "accepted": 47,
+            "elapsed_sec": 1.9846634010318667,
+            "token_rate": 48.87478650010261,
+            "peak_allocated_bytes_per_gpu": [
+              14452456448
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              830105600
+            ]
+          },
+          {
+            "tokens": 92,
+            "blocks": 31,
+            "accepted": 61,
+            "elapsed_sec": 1.243252580985427,
+            "token_rate": 73.99944420552013,
+            "peak_allocated_bytes_per_gpu": [
+              14436560384
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              814209536
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 52,
+            "accepted": 76,
+            "elapsed_sec": 2.0703327390365303,
+            "token_rate": 61.825810695322,
+            "peak_allocated_bytes_per_gpu": [
+              14492947456
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              870596608
+            ]
+          },
+          {
+            "tokens": 86,
+            "blocks": 42,
+            "accepted": 44,
+            "elapsed_sec": 1.6627599350176752,
+            "token_rate": 51.72123659515877,
+            "peak_allocated_bytes_per_gpu": [
+              14359759360
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              737409024
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 46,
+            "accepted": 82,
+            "elapsed_sec": 1.8333519720472395,
+            "token_rate": 69.81747201388008,
+            "peak_allocated_bytes_per_gpu": [
+              14444152832
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              821801984
+            ]
+          },
+          {
+            "tokens": 123,
+            "blocks": 52,
+            "accepted": 71,
+            "elapsed_sec": 2.0679190000519156,
+            "token_rate": 59.480086017349834,
+            "peak_allocated_bytes_per_gpu": [
+              14447525888
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              825175040
+            ]
+          },
+          {
+            "tokens": 122,
+            "blocks": 51,
+            "accepted": 71,
+            "elapsed_sec": 2.0259397821500897,
+            "token_rate": 60.21896656302579,
+            "peak_allocated_bytes_per_gpu": [
+              14507938816
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              885587968
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 61,
+            "accepted": 67,
+            "elapsed_sec": 2.4126513600349426,
+            "token_rate": 53.05366623636254,
+            "peak_allocated_bytes_per_gpu": [
+              14486098944
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              863748096
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 39,
+            "accepted": 89,
+            "elapsed_sec": 1.538832339225337,
+            "token_rate": 83.17995192669036,
+            "peak_allocated_bytes_per_gpu": [
+              14434976256
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              812625920
+            ]
+          },
+          {
+            "tokens": 108,
+            "blocks": 56,
+            "accepted": 52,
+            "elapsed_sec": 2.2120349048636854,
+            "token_rate": 48.82382269942318,
+            "peak_allocated_bytes_per_gpu": [
+              14339847680
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              717497344
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 54,
+            "accepted": 74,
+            "elapsed_sec": 2.140861959196627,
+            "token_rate": 59.789002018622845,
+            "peak_allocated_bytes_per_gpu": [
+              14438842368
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              816491520
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 70,
+            "accepted": 58,
+            "elapsed_sec": 2.749270054977387,
+            "token_rate": 46.5578125976616,
+            "peak_allocated_bytes_per_gpu": [
+              14474398720
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              852047872
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 59,
+            "accepted": 70,
+            "elapsed_sec": 2.3339900821447372,
+            "token_rate": 54.84170690321827,
+            "peak_allocated_bytes_per_gpu": [
+              14495338496
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              872987648
+            ]
+          },
+          {
+            "tokens": 86,
+            "blocks": 45,
+            "accepted": 41,
+            "elapsed_sec": 1.786789292935282,
+            "token_rate": 48.13102492836291,
+            "peak_allocated_bytes_per_gpu": [
+              14438243840
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              815892992
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 50,
+            "accepted": 78,
+            "elapsed_sec": 1.9911307690199465,
+            "token_rate": 64.28507960981528,
+            "peak_allocated_bytes_per_gpu": [
+              14486543360
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              864192512
+            ]
+          },
+          {
+            "tokens": 79,
+            "blocks": 26,
+            "accepted": 53,
+            "elapsed_sec": 1.0455770869739354,
+            "token_rate": 75.556361156152,
+            "peak_allocated_bytes_per_gpu": [
+              14421940224
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              799589376
+            ]
+          },
+          {
+            "tokens": 91,
+            "blocks": 48,
+            "accepted": 43,
+            "elapsed_sec": 1.9029664099216461,
+            "token_rate": 47.82007686817072,
+            "peak_allocated_bytes_per_gpu": [
+              14380169216
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              757818368
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 47,
+            "accepted": 82,
+            "elapsed_sec": 1.8663704530335963,
+            "token_rate": 68.58231161554714,
+            "peak_allocated_bytes_per_gpu": [
+              14514063360
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              891712512
+            ]
+          },
+          {
+            "tokens": 113,
+            "blocks": 61,
+            "accepted": 52,
+            "elapsed_sec": 2.419689250877127,
+            "token_rate": 46.70021159082224,
+            "peak_allocated_bytes_per_gpu": [
+              14449913856
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              827563008
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 54,
+            "accepted": 74,
+            "elapsed_sec": 2.1501831160858274,
+            "token_rate": 59.529813550489585,
+            "peak_allocated_bytes_per_gpu": [
+              14481710080
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              859359232
+            ]
+          },
+          {
+            "tokens": 70,
+            "blocks": 42,
+            "accepted": 28,
+            "elapsed_sec": 1.6679413199890405,
+            "token_rate": 41.96790328358791,
+            "peak_allocated_bytes_per_gpu": [
+              14361442304
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              739091456
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 58,
+            "accepted": 71,
+            "elapsed_sec": 2.3072202240582556,
+            "token_rate": 55.47801578076324,
+            "peak_allocated_bytes_per_gpu": [
+              14529091584
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              906740736
+            ]
+          },
+          {
+            "tokens": 80,
+            "blocks": 37,
+            "accepted": 43,
+            "elapsed_sec": 1.4687726001720876,
+            "token_rate": 54.46724699972403,
+            "peak_allocated_bytes_per_gpu": [
+              14336979968
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              714629632
+            ]
+          },
+          {
+            "tokens": 85,
+            "blocks": 40,
+            "accepted": 45,
+            "elapsed_sec": 1.590548784006387,
+            "token_rate": 53.440674599050006,
+            "peak_allocated_bytes_per_gpu": [
+              14434309120
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              811958272
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 63,
+            "accepted": 65,
+            "elapsed_sec": 2.484119253931567,
+            "token_rate": 51.52731689407298,
+            "peak_allocated_bytes_per_gpu": [
+              14474968064
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              852617216
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 59,
+            "accepted": 70,
+            "elapsed_sec": 2.3297302089631557,
+            "token_rate": 54.9419840578735,
+            "peak_allocated_bytes_per_gpu": [
+              14438254080
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              815903232
+            ]
+          },
+          {
+            "tokens": 112,
+            "blocks": 54,
+            "accepted": 58,
+            "elapsed_sec": 2.1441081380471587,
+            "token_rate": 52.236171307109984,
+            "peak_allocated_bytes_per_gpu": [
+              14480663552
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              858312704
+            ]
+          },
+          {
+            "tokens": 124,
+            "blocks": 61,
+            "accepted": 63,
+            "elapsed_sec": 2.424110738094896,
+            "token_rate": 51.15277864634656,
+            "peak_allocated_bytes_per_gpu": [
+              14512669696
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              890318848
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 60,
+            "accepted": 68,
+            "elapsed_sec": 2.3710946831852198,
+            "token_rate": 53.983504289272275,
+            "peak_allocated_bytes_per_gpu": [
+              14523015168
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              900664320
+            ]
+          },
+          {
+            "tokens": 105,
+            "blocks": 56,
+            "accepted": 49,
+            "elapsed_sec": 2.2189328528475016,
+            "token_rate": 47.320043896441526,
+            "peak_allocated_bytes_per_gpu": [
+              14434656256
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              812305408
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 42,
+            "accepted": 87,
+            "elapsed_sec": 1.6735811070539057,
+            "token_rate": 76.48269896242151,
+            "peak_allocated_bytes_per_gpu": [
+              14505912320
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              883561472
+            ]
+          },
+          {
+            "tokens": 61,
+            "blocks": 29,
+            "accepted": 32,
+            "elapsed_sec": 1.1481807460077107,
+            "token_rate": 53.12752387818769,
+            "peak_allocated_bytes_per_gpu": [
+              14260504064
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              638153728
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 67,
+            "accepted": 61,
+            "elapsed_sec": 2.6547577420715243,
+            "token_rate": 48.215322238827255,
+            "peak_allocated_bytes_per_gpu": [
+              14534580736
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              912229376
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 61,
+            "accepted": 67,
+            "elapsed_sec": 2.4175824499689043,
+            "token_rate": 52.945453836185145,
+            "peak_allocated_bytes_per_gpu": [
+              14528134144
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              905783296
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 61,
+            "accepted": 68,
+            "elapsed_sec": 2.4181240231264383,
+            "token_rate": 52.93359595117308,
+            "peak_allocated_bytes_per_gpu": [
+              14498533376
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              876182528
+            ]
+          },
+          {
+            "tokens": 123,
+            "blocks": 65,
+            "accepted": 58,
+            "elapsed_sec": 2.578824490075931,
+            "token_rate": 47.696150115426576,
+            "peak_allocated_bytes_per_gpu": [
+              14461837312
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              839486464
+            ]
+          },
+          {
+            "tokens": 111,
+            "blocks": 60,
+            "accepted": 51,
+            "elapsed_sec": 2.3740625050850213,
+            "token_rate": 46.75529804385871,
+            "peak_allocated_bytes_per_gpu": [
+              14457139200
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              834788352
+            ]
+          },
+          {
+            "tokens": 89,
+            "blocks": 51,
+            "accepted": 38,
+            "elapsed_sec": 2.019018913852051,
+            "token_rate": 44.08081538483384,
+            "peak_allocated_bytes_per_gpu": [
+              14434354176
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              812003328
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 61,
+            "accepted": 67,
+            "elapsed_sec": 2.407487855060026,
+            "token_rate": 53.16745408745108,
+            "peak_allocated_bytes_per_gpu": [
+              14473192448
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              850841600
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 43,
+            "accepted": 85,
+            "elapsed_sec": 1.7024892780464143,
+            "token_rate": 75.1840270893679,
+            "peak_allocated_bytes_per_gpu": [
+              14439226368
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              816875520
+            ]
+          },
+          {
+            "tokens": 94,
+            "blocks": 48,
+            "accepted": 46,
+            "elapsed_sec": 1.9039792839903384,
+            "token_rate": 49.37028506055793,
+            "peak_allocated_bytes_per_gpu": [
+              14434541568
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              812190720
+            ]
+          },
+          {
+            "tokens": 120,
+            "blocks": 69,
+            "accepted": 51,
+            "elapsed_sec": 2.7341438678558916,
+            "token_rate": 43.889424185313146,
+            "peak_allocated_bytes_per_gpu": [
+              14447676416
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              825325568
+            ]
+          },
+          {
+            "tokens": 79,
+            "blocks": 45,
+            "accepted": 34,
+            "elapsed_sec": 1.7881646358873695,
+            "token_rate": 44.17937723099896,
+            "peak_allocated_bytes_per_gpu": [
+              14434271232
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              811920384
+            ]
+          },
+          {
+            "tokens": 90,
+            "blocks": 46,
+            "accepted": 44,
+            "elapsed_sec": 1.8291403502225876,
+            "token_rate": 49.20344138110994,
+            "peak_allocated_bytes_per_gpu": [
+              14434696192
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              812345344
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 53,
+            "accepted": 75,
+            "elapsed_sec": 2.0934780510142446,
+            "token_rate": 61.1422698881351,
+            "peak_allocated_bytes_per_gpu": [
+              14479608832
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              857257984
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 58,
+            "accepted": 71,
+            "elapsed_sec": 2.2964764938224107,
+            "token_rate": 55.73756158372348,
+            "peak_allocated_bytes_per_gpu": [
+              14462991360
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              840640512
+            ]
+          },
+          {
+            "tokens": 77,
+            "blocks": 30,
+            "accepted": 47,
+            "elapsed_sec": 1.1927837261464447,
+            "token_rate": 64.55487135858716,
+            "peak_allocated_bytes_per_gpu": [
+              14239451136
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              617101312
+            ]
+          },
+          {
+            "tokens": 116,
+            "blocks": 51,
+            "accepted": 65,
+            "elapsed_sec": 2.0195858678780496,
+            "token_rate": 57.437518178852955,
+            "peak_allocated_bytes_per_gpu": [
+              14379260416
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              756910080
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 49,
+            "accepted": 80,
+            "elapsed_sec": 1.9486508679110557,
+            "token_rate": 65.68647165472765,
+            "peak_allocated_bytes_per_gpu": [
+              14544194048
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              921842688
+            ]
+          },
+          {
+            "tokens": 113,
+            "blocks": 54,
+            "accepted": 59,
+            "elapsed_sec": 2.144890356808901,
+            "token_rate": 52.683345627101325,
+            "peak_allocated_bytes_per_gpu": [
+              14445093888
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              822743040
+            ]
+          },
+          {
+            "tokens": 123,
+            "blocks": 52,
+            "accepted": 71,
+            "elapsed_sec": 2.058639684924856,
+            "token_rate": 59.748192411091956,
+            "peak_allocated_bytes_per_gpu": [
+              14434553344
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              812203008
+            ]
+          },
+          {
+            "tokens": 124,
+            "blocks": 56,
+            "accepted": 68,
+            "elapsed_sec": 2.226983787957579,
+            "token_rate": 55.68069272463067,
+            "peak_allocated_bytes_per_gpu": [
+              14478702592
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              856351744
+            ]
+          },
+          {
+            "tokens": 112,
+            "blocks": 59,
+            "accepted": 53,
+            "elapsed_sec": 2.336728810099885,
+            "token_rate": 47.93025169027316,
+            "peak_allocated_bytes_per_gpu": [
+              14434791424
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              812440576
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 74,
+            "accepted": 54,
+            "elapsed_sec": 2.9252510119695216,
+            "token_rate": 43.7569287135533,
+            "peak_allocated_bytes_per_gpu": [
+              14483696640
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              861345792
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 45,
+            "accepted": 83,
+            "elapsed_sec": 1.795289328088984,
+            "token_rate": 71.29770004050046,
+            "peak_allocated_bytes_per_gpu": [
+              14487559168
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              865208320
+            ]
+          },
+          {
+            "tokens": 113,
+            "blocks": 43,
+            "accepted": 70,
+            "elapsed_sec": 1.7056664349511266,
+            "token_rate": 66.24976471629861,
+            "peak_allocated_bytes_per_gpu": [
+              14231037440
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              608687616
+            ]
+          },
+          {
+            "tokens": 82,
+            "blocks": 45,
+            "accepted": 37,
+            "elapsed_sec": 1.7779295081272721,
+            "token_rate": 46.12106364462796,
+            "peak_allocated_bytes_per_gpu": [
+              14131341824
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              508992512
+            ]
+          },
+          {
+            "tokens": 76,
+            "blocks": 38,
+            "accepted": 38,
+            "elapsed_sec": 1.51067979587242,
+            "token_rate": 50.30847715555094,
+            "peak_allocated_bytes_per_gpu": [
+              14364482560
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              742131712
+            ]
+          },
+          {
+            "tokens": 120,
+            "blocks": 59,
+            "accepted": 61,
+            "elapsed_sec": 2.3389107030816376,
+            "token_rate": 51.30593478489525,
+            "peak_allocated_bytes_per_gpu": [
+              14446026752
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              823675904
+            ]
+          },
+          {
+            "tokens": 107,
+            "blocks": 40,
+            "accepted": 67,
+            "elapsed_sec": 1.5957261289004236,
+            "token_rate": 67.05411289701142,
+            "peak_allocated_bytes_per_gpu": [
+              14433871360
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              811521024
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 72,
+            "accepted": 56,
+            "elapsed_sec": 2.8490807849448174,
+            "token_rate": 44.92677100501353,
+            "peak_allocated_bytes_per_gpu": [
+              14485216256
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              862865408
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 65,
+            "accepted": 63,
+            "elapsed_sec": 2.574405604042113,
+            "token_rate": 49.72021494943348,
+            "peak_allocated_bytes_per_gpu": [
+              14545781248
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              923429888
+            ]
+          },
+          {
+            "tokens": 111,
+            "blocks": 60,
+            "accepted": 51,
+            "elapsed_sec": 2.3801076009403914,
+            "token_rate": 46.63654700154875,
+            "peak_allocated_bytes_per_gpu": [
+              14435186688
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              812835840
+            ]
+          },
+          {
+            "tokens": 96,
+            "blocks": 51,
+            "accepted": 45,
+            "elapsed_sec": 2.024554598843679,
+            "token_rate": 47.417837017006235,
+            "peak_allocated_bytes_per_gpu": [
+              14403467264
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              781116416
+            ]
+          },
+          {
+            "tokens": 107,
+            "blocks": 41,
+            "accepted": 66,
+            "elapsed_sec": 1.6354576230514795,
+            "token_rate": 65.42511312543618,
+            "peak_allocated_bytes_per_gpu": [
+              14435655680
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              813304832
+            ]
+          },
+          {
+            "tokens": 103,
+            "blocks": 52,
+            "accepted": 51,
+            "elapsed_sec": 2.0601081009954214,
+            "token_rate": 49.99737632711193,
+            "peak_allocated_bytes_per_gpu": [
+              14421032960
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              798682112
+            ]
+          },
+          {
+            "tokens": 82,
+            "blocks": 39,
+            "accepted": 43,
+            "elapsed_sec": 1.552230933913961,
+            "token_rate": 52.82719098583896,
+            "peak_allocated_bytes_per_gpu": [
+              14435715584
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              813364736
+            ]
+          },
+          {
+            "tokens": 108,
+            "blocks": 53,
+            "accepted": 55,
+            "elapsed_sec": 2.0953280250541866,
+            "token_rate": 51.543242255449265,
+            "peak_allocated_bytes_per_gpu": [
+              14402356736
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              780006400
+            ]
+          },
+          {
+            "tokens": 116,
+            "blocks": 47,
+            "accepted": 69,
+            "elapsed_sec": 1.8664268250577152,
+            "token_rate": 62.150842691844055,
+            "peak_allocated_bytes_per_gpu": [
+              14467063808
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              844712960
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 79,
+            "accepted": 50,
+            "elapsed_sec": 3.1132219608407468,
+            "token_rate": 41.114961159220634,
+            "peak_allocated_bytes_per_gpu": [
+              14464698368
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              842347520
+            ]
+          },
+          {
+            "tokens": 118,
+            "blocks": 65,
+            "accepted": 53,
+            "elapsed_sec": 2.57719149091281,
+            "token_rate": 45.786275647761755,
+            "peak_allocated_bytes_per_gpu": [
+              14498778112
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              876427264
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 52,
+            "accepted": 76,
+            "elapsed_sec": 2.0547441199887544,
+            "token_rate": 62.29486131864465,
+            "peak_allocated_bytes_per_gpu": [
+              14434526720
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              812176384
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 54,
+            "accepted": 74,
+            "elapsed_sec": 2.1387964400928468,
+            "token_rate": 59.84674258876334,
+            "peak_allocated_bytes_per_gpu": [
+              14485596160
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              863245312
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 53,
+            "accepted": 75,
+            "elapsed_sec": 2.1003929879516363,
+            "token_rate": 60.94097663353432,
+            "peak_allocated_bytes_per_gpu": [
+              14506400768
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              884049920
+            ]
+          },
+          {
+            "tokens": 79,
+            "blocks": 42,
+            "accepted": 37,
+            "elapsed_sec": 1.67007014201954,
+            "token_rate": 47.303402421450926,
+            "peak_allocated_bytes_per_gpu": [
+              14373914624
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              751563776
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 77,
+            "accepted": 51,
+            "elapsed_sec": 3.018262847792357,
+            "token_rate": 42.40850000642681,
+            "peak_allocated_bytes_per_gpu": [
+              14434816512
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              812466176
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 54,
+            "accepted": 74,
+            "elapsed_sec": 2.141586038051173,
+            "token_rate": 59.768787116523704,
+            "peak_allocated_bytes_per_gpu": [
+              14476950528
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              854599680
+            ]
+          },
+          {
+            "tokens": 124,
+            "blocks": 60,
+            "accepted": 64,
+            "elapsed_sec": 2.3795416278298944,
+            "token_rate": 52.110876544356195,
+            "peak_allocated_bytes_per_gpu": [
+              14515204096
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              892853248
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 53,
+            "accepted": 76,
+            "elapsed_sec": 2.0973328438121825,
+            "token_rate": 61.02989345617785,
+            "peak_allocated_bytes_per_gpu": [
+              14484586496
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              862235648
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 60,
+            "accepted": 68,
+            "elapsed_sec": 2.368229293031618,
+            "token_rate": 54.04882051608467,
+            "peak_allocated_bytes_per_gpu": [
+              14514880512
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              892529664
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 53,
+            "accepted": 75,
+            "elapsed_sec": 2.1066596200689673,
+            "token_rate": 60.759696906237544,
+            "peak_allocated_bytes_per_gpu": [
+              14434402816
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              812052480
+            ]
+          },
+          {
+            "tokens": 96,
+            "blocks": 45,
+            "accepted": 51,
+            "elapsed_sec": 1.7890706681646407,
+            "token_rate": 53.65914365947535,
+            "peak_allocated_bytes_per_gpu": [
+              14420826112
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              798475264
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 56,
+            "accepted": 73,
+            "elapsed_sec": 2.2154698779340833,
+            "token_rate": 57.77555419501324,
+            "peak_allocated_bytes_per_gpu": [
+              14433430016
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              811079680
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 44,
+            "accepted": 84,
+            "elapsed_sec": 1.7548345678951591,
+            "token_rate": 72.94134862725546,
+            "peak_allocated_bytes_per_gpu": [
+              14449785856
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              827435008
+            ]
+          },
+          {
+            "tokens": 114,
+            "blocks": 62,
+            "accepted": 52,
+            "elapsed_sec": 2.455844987882301,
+            "token_rate": 46.41986793242325,
+            "peak_allocated_bytes_per_gpu": [
+              14440252416
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              817901568
+            ]
+          },
+          {
+            "tokens": 98,
+            "blocks": 52,
+            "accepted": 46,
+            "elapsed_sec": 2.062549520051107,
+            "token_rate": 47.51401071697504,
+            "peak_allocated_bytes_per_gpu": [
+              14383306240
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              760955904
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 51,
+            "accepted": 78,
+            "elapsed_sec": 2.010956479003653,
+            "token_rate": 63.65130291801182,
+            "peak_allocated_bytes_per_gpu": [
+              14452572160
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              830221312
+            ]
+          },
+          {
+            "tokens": 111,
+            "blocks": 51,
+            "accepted": 60,
+            "elapsed_sec": 2.0282283779233694,
+            "token_rate": 54.727564808874696,
+            "peak_allocated_bytes_per_gpu": [
+              14452037632
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              829686784
+            ]
+          },
+          {
+            "tokens": 93,
+            "blocks": 43,
+            "accepted": 50,
+            "elapsed_sec": 1.6962935079354793,
+            "token_rate": 54.82541763258188,
+            "peak_allocated_bytes_per_gpu": [
+              14137708032
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              515358720
+            ]
+          },
+          {
+            "tokens": 116,
+            "blocks": 57,
+            "accepted": 59,
+            "elapsed_sec": 2.263254937948659,
+            "token_rate": 51.253616221042535,
+            "peak_allocated_bytes_per_gpu": [
+              14437715456
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              815364608
+            ]
+          },
+          {
+            "tokens": 98,
+            "blocks": 48,
+            "accepted": 50,
+            "elapsed_sec": 1.9064647248014808,
+            "token_rate": 51.40404578437961,
+            "peak_allocated_bytes_per_gpu": [
+              14433955840
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              811604992
+            ]
+          },
+          {
+            "tokens": 84,
+            "blocks": 35,
+            "accepted": 49,
+            "elapsed_sec": 1.4025920149870217,
+            "token_rate": 59.88911893297586,
+            "peak_allocated_bytes_per_gpu": [
+              14382218240
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              759867392
+            ]
+          },
+          {
+            "tokens": 79,
+            "blocks": 45,
+            "accepted": 34,
+            "elapsed_sec": 1.7777434040326625,
+            "token_rate": 44.438359225968775,
+            "peak_allocated_bytes_per_gpu": [
+              14297937408
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              675587072
+            ]
+          },
+          {
+            "tokens": 98,
+            "blocks": 35,
+            "accepted": 63,
+            "elapsed_sec": 1.3992776749655604,
+            "token_rate": 70.03613489539309,
+            "peak_allocated_bytes_per_gpu": [
+              14458370048
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              836019200
+            ]
+          },
+          {
+            "tokens": 112,
+            "blocks": 64,
+            "accepted": 48,
+            "elapsed_sec": 2.533543243072927,
+            "token_rate": 44.20686337453453,
+            "peak_allocated_bytes_per_gpu": [
+              14434492928
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              812142592
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 50,
+            "accepted": 78,
+            "elapsed_sec": 1.9852708359248936,
+            "token_rate": 64.47483017618985,
+            "peak_allocated_bytes_per_gpu": [
+              14476243968
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              853893120
+            ]
+          },
+          {
+            "tokens": 128,
+            "blocks": 57,
+            "accepted": 72,
+            "elapsed_sec": 2.255348176928237,
+            "token_rate": 56.753986506125536,
+            "peak_allocated_bytes_per_gpu": [
+              14468368384
+            ],
+            "incremental_peak_allocated_bytes_per_gpu": [
+              846017536
+            ]
+          }
+        ]
+      },
+      "instrumented": {
+        "tokens": 11240,
+        "blocks": 5205,
+        "elapsed_sec": 210.88718388788402,
+        "token_rate": 53.29863955116224,
+        "phase_sec": {
+          "target_forward": 136.01977666583844,
+          "draft_forward": 42.05051711760461,
+          "logits_processing": 8.242445786017925,
+          "pfr_arrival_sampling": 9.737224717391655,
+          "mse_watermark_step": 0.0,
+          "mc_accept_residual_sampling": 0.0,
+          "basic_sampling": 0.0,
+          "keyed_uniform_rng": 1.2139550724532455,
+          "fresh_uniform_rng": 0.0,
+          "mse_code_cpu_numpy": 0.0,
+          "mse_code_to_device": 0.0,
+          "mse_reweight_gpu": 0.0
+        },
+        "phase_calls": {
+          "target_forward": 5205,
+          "draft_forward": 20722,
+          "logits_processing": 46649,
+          "pfr_arrival_sampling": 31962,
+          "mse_watermark_step": 0,
+          "mc_accept_residual_sampling": 0,
+          "basic_sampling": 0,
+          "keyed_uniform_rng": 31962,
+          "fresh_uniform_rng": 0,
+          "mse_code_cpu_numpy": 0,
+          "mse_code_to_device": 0,
+          "mse_reweight_gpu": 0
+        },
+        "phase_ms_per_token": {
+          "target_forward": 12.101403617957157,
+          "draft_forward": 3.7411492097513,
+          "logits_processing": 0.7333136820300644,
+          "pfr_arrival_sampling": 0.8663011314405387,
+          "mse_watermark_step": 0.0,
+          "mc_accept_residual_sampling": 0.0,
+          "basic_sampling": 0.0,
+          "keyed_uniform_rng": 0.10800312032502184,
+          "fresh_uniform_rng": 0.0,
+          "mse_code_cpu_numpy": 0.0,
+          "mse_code_to_device": 0.0,
+          "mse_reweight_gpu": 0.0
+        },
+        "phase_fraction": {
+          "target_forward": 0.6449883494966291,
+          "draft_forward": 0.19939816323765,
+          "logits_processing": 0.039084621616456004,
+          "pfr_arrival_sampling": 0.046172671747413296,
+          "mse_watermark_step": 0.0,
+          "mc_accept_residual_sampling": 0.0,
+          "basic_sampling": 0.0,
+          "keyed_uniform_rng": 0.005756419380604144,
+          "fresh_uniform_rng": 0.0,
+          "mse_code_cpu_numpy": 0.0,
+          "mse_code_to_device": 0.0,
+          "mse_reweight_gpu": 0.0
+        },
+        "remainder_sec": 14.837219601031393,
+        "remainder_ms_per_token": 1.320037331052615,
+        "remainder_fraction": 0.07035619390185155
+      },
+      "lookahead": 4
+    }
+  ]
+}

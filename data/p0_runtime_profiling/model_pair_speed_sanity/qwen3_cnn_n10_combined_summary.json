@@ -1,0 +1,26 @@
+{
+  "status": "complete_diagnostic",
+  "aggregation": "arithmetic mean across 10 prompt rows",
+  "config": {
+    "target": "Qwen/Qwen3-14B",
+    "draft": "Qwen/Qwen3-1.7B",
+    "dataset": "cnn_dailymail",
+    "samples": 10,
+    "max_new_tokens": 128,
+    "top_k": 50,
+    "temperature": 1.0
+  },
+  "results": [
+    {"method": "basic_uwm", "lookahead": null, "AATPS": 1.0, "token_rate": 22.317},
+    {"method": "vsps", "lookahead": 1, "AATPS": 1.8043, "token_rate": 21.724},
+    {"method": "vsps", "lookahead": 2, "AATPS": 2.3753, "token_rate": 21.139},
+    {"method": "vsps", "lookahead": 4, "AATPS": 3.2621, "token_rate": 19.147},
+    {"method": "pfr", "lookahead": 1, "AATPS": 1.804, "token_rate": 22.14},
+    {"method": "pfr", "lookahead": 2, "AATPS": 2.397, "token_rate": 21.92},
+    {"method": "pfr", "lookahead": 4, "AATPS": 3.363, "token_rate": 20.16}
+  ],
+  "provenance": {
+    "basic_uwm_vsps": "qwen3_cnn_n10.log",
+    "pfr": "qwen3_cnn_n10_pfr_only_results.json"
+  }
+}

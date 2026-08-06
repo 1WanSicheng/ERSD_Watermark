@@ -65,6 +65,8 @@ class LogitsProcessor:
         self.top_k = top_k
 
     def __call__(self, logits):
+        if self.top_k is None or self.top_k <= 0 or self.top_k >= logits.shape[-1]:
+            return logits / self.temperature
         val, ind = torch.topk(logits, self.top_k, sorted=False, dim=-1)
         probs = torch.full_like(logits, float("-inf"))
         probs.scatter_(-1, ind, val)

@@ -1,0 +1,25 @@
+{
+  "experiment": "vicuna_model_pair_speed_sanity_n20",
+  "samples": 20,
+  "dataset": "cnn_dailymail",
+  "max_new_tokens": 128,
+  "lookaheads": [1, 2, 4],
+  "private_key": "1234",
+  "target_model": "lmsys/vicuna-7b-v1.5",
+  "draft_model": "double7/vicuna-68m",
+  "process_logits": {
+    "top_k": 50,
+    "top_p": 1.0,
+    "temperature": 1.0
+  },
+  "decoders": [
+    "basic_uwm",
+    "mc",
+    "pfr"
+  ],
+  "metrics": {
+    "aatps": true,
+    "token_rate": true
+  },
+  "output": "data/p0_runtime_profiling/model_pair_speed_sanity/vicuna_cnn_n20_results.json"
+}

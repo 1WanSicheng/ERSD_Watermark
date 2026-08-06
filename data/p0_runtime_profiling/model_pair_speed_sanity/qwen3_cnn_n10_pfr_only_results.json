@@ -1,0 +1,384 @@
+{
+  "config": {
+    "experiment": "qwen3_model_pair_speed_sanity_n10_pfr_only",
+    "samples": 10,
+    "dataset": "cnn_dailymail",
+    "max_new_tokens": 128,
+    "lookaheads": [
+      1,
+      2,
+      4
+    ],
+    "private_key": "1234",
+    "target_model": "Qwen/Qwen3-14B",
+    "draft_model": "Qwen/Qwen3-1.7B",
+    "process_logits": {
+      "top_k": 50,
+      "top_p": 1.0,
+      "temperature": 1.0
+    },
+    "decoders": [
+      "pfr"
+    ],
+    "metrics": {
+      "aatps": true,
+      "token_rate": true
+    },
+    "output": "data/p0_runtime_profiling/model_pair_speed_sanity/qwen3_cnn_n10_pfr_only_results.json"
+  },
+  "summary": {
+    "pfr_L1": {
+      "AATPS": 1.8037510600804432,
+      "blocks": 71.0,
+      "elapsed_sec": 5.78601576066576,
+      "token_rate": 22.14136563498303,
+      "tokens": 128.0
+    },
+    "pfr_L2": {
+      "AATPS": 2.3971665711425407,
+      "blocks": 53.5,
+      "elapsed_sec": 5.849443764938042,
+      "token_rate": 21.918371749833636,
+      "tokens": 128.0
+    },
+    "pfr_L4": {
+      "AATPS": 3.362739211160264,
+      "blocks": 38.2,
+      "elapsed_sec": 6.3693568303249775,
+      "token_rate": 20.15619839135177,
+      "tokens": 128.0
+    }
+  },
+  "rows": [
+    {
+      "decoder": "pfr",
+      "lookahead": 1,
+      "tokens": 128,
+      "blocks": 71,
+      "AATPS": 1.8028169014084507,
+      "token_rate": 20.740615701097287,
+      "elapsed_sec": 6.171465777326375,
+      "wm_kind": "PFR",
+      "prompt_idx": 0
+    },
+    {
+      "decoder": "pfr",
+      "lookahead": 1,
+      "tokens": 128,
+      "blocks": 71,
+      "AATPS": 1.8028169014084507,
+      "token_rate": 22.29337337371332,
+      "elapsed_sec": 5.741616481915116,
+      "wm_kind": "PFR",
+      "prompt_idx": 1
+    },
+    {
+      "decoder": "pfr",
+      "lookahead": 1,
+      "tokens": 128,
+      "blocks": 70,
+      "AATPS": 1.8285714285714285,
+      "token_rate": 22.489207538856206,
+      "elapsed_sec": 5.691618958953768,
+      "wm_kind": "PFR",
+      "prompt_idx": 2
+    },
+    {
+      "decoder": "pfr",
+      "lookahead": 1,
+      "tokens": 128,
+      "blocks": 74,
+      "AATPS": 1.7297297297297298,
+      "token_rate": 21.49485227821009,
+      "elapsed_sec": 5.954914150759578,
+      "wm_kind": "PFR",
+      "prompt_idx": 3
+    },
+    {
+      "decoder": "pfr",
+      "lookahead": 1,
+      "tokens": 128,
+      "blocks": 68,
+      "AATPS": 1.8823529411764706,
+      "token_rate": 23.154060849181434,
+      "elapsed_sec": 5.528187942225486,
+      "wm_kind": "PFR",
+      "prompt_idx": 4
+    },
+    {
+      "decoder": "pfr",
+      "lookahead": 1,
+      "tokens": 128,
+      "blocks": 69,
+      "AATPS": 1.855072463768116,
+      "token_rate": 22.849714051494335,
+      "elapsed_sec": 5.601820649113506,
+      "wm_kind": "PFR",
+      "prompt_idx": 5
+    },
+    {
+      "decoder": "pfr",
+      "lookahead": 1,
+      "tokens": 128,
+      "blocks": 72,
+      "AATPS": 1.7777777777777777,
+      "token_rate": 22.07397243385444,
+      "elapsed_sec": 5.7986844182014465,
+      "wm_kind": "PFR",
+      "prompt_idx": 6
+    },
+    {
+      "decoder": "pfr",
+      "lookahead": 1,
+      "tokens": 128,
+      "blocks": 72,
+      "AATPS": 1.7777777777777777,
+      "token_rate": 21.994829536478647,
+      "elapsed_sec": 5.819549534935504,
+      "wm_kind": "PFR",
+      "prompt_idx": 7
+    },
+    {
+      "decoder": "pfr",
+      "lookahead": 1,
+      "tokens": 128,
+      "blocks": 71,
+      "AATPS": 1.8028169014084507,
+      "token_rate": 22.33924656996431,
+      "elapsed_sec": 5.729826187249273,
+      "wm_kind": "PFR",
+      "prompt_idx": 8
+    },
+    {
+      "decoder": "pfr",
+      "lookahead": 1,
+      "tokens": 128,
+      "blocks": 72,
+      "AATPS": 1.7777777777777777,
+      "token_rate": 21.983784016980245,
+      "elapsed_sec": 5.822473505977541,
+      "wm_kind": "PFR",
+      "prompt_idx": 9
+    },
+    {
+      "decoder": "pfr",
+      "lookahead": 2,
+      "tokens": 128,
+      "blocks": 53,
+      "AATPS": 2.4150943396226414,
+      "token_rate": 22.151741598191027,
+      "elapsed_sec": 5.778326703235507,
+      "wm_kind": "PFR",
+      "prompt_idx": 0
+    },
+    {
+      "decoder": "pfr",
+      "lookahead": 2,
+      "tokens": 128,
+      "blocks": 54,
+      "AATPS": 2.3703703703703702,
+      "token_rate": 21.736124233725437,
+      "elapsed_sec": 5.88881433615461,
+      "wm_kind": "PFR",
+      "prompt_idx": 1
+    },
+    {
+      "decoder": "pfr",
+      "lookahead": 2,
+      "tokens": 128,
+      "blocks": 52,
+      "AATPS": 2.4615384615384617,
+      "token_rate": 22.339867485956283,
+      "elapsed_sec": 5.729666932020336,
+      "wm_kind": "PFR",
+      "prompt_idx": 2
+    },
+    {
+      "decoder": "pfr",
+      "lookahead": 2,
+      "tokens": 128,
+      "blocks": 55,
+      "AATPS": 2.327272727272727,
+      "token_rate": 21.392834328180538,
+      "elapsed_sec": 5.983311890158802,
+      "wm_kind": "PFR",
+      "prompt_idx": 3
+    },
+    {
+      "decoder": "pfr",
+      "lookahead": 2,
+      "tokens": 128,
+      "blocks": 49,
+      "AATPS": 2.6122448979591835,
+      "token_rate": 23.71744742376581,
+      "elapsed_sec": 5.396870823111385,
+      "wm_kind": "PFR",
+      "prompt_idx": 4
+    },
+    {
+      "decoder": "pfr",
+      "lookahead": 2,
+      "tokens": 128,
+      "blocks": 53,
+      "AATPS": 2.4150943396226414,
+      "token_rate": 22.166495307324187,
+      "elapsed_sec": 5.77448072982952,
+      "wm_kind": "PFR",
+      "prompt_idx": 5
+    },
+    {
+      "decoder": "pfr",
+      "lookahead": 2,
+      "tokens": 128,
+      "blocks": 59,
+      "AATPS": 2.169491525423729,
+      "token_rate": 19.965510940160254,
+      "elapsed_sec": 6.4110555639490485,
+      "wm_kind": "PFR",
+      "prompt_idx": 6
+    },
+    {
+      "decoder": "pfr",
+      "lookahead": 2,
+      "tokens": 128,
+      "blocks": 53,
+      "AATPS": 2.4150943396226414,
+      "token_rate": 22.074261261365976,
+      "elapsed_sec": 5.79860854614526,
+      "wm_kind": "PFR",
+      "prompt_idx": 7
+    },
+    {
+      "decoder": "pfr",
+      "lookahead": 2,
+      "tokens": 128,
+      "blocks": 54,
+      "AATPS": 2.3703703703703702,
+      "token_rate": 21.64015963595907,
+      "elapsed_sec": 5.914928639773279,
+      "wm_kind": "PFR",
+      "prompt_idx": 8
+    },
+    {
+      "decoder": "pfr",
+      "lookahead": 2,
+      "tokens": 128,
+      "blocks": 53,
+      "AATPS": 2.4150943396226414,
+      "token_rate": 21.999275283707803,
+      "elapsed_sec": 5.818373485002667,
+      "wm_kind": "PFR",
+      "prompt_idx": 9
+    },
+    {
+      "decoder": "pfr",
+      "lookahead": 4,
+      "tokens": 128,
+      "blocks": 35,
+      "AATPS": 3.657142857142857,
+      "token_rate": 21.998261164104715,
+      "elapsed_sec": 5.818641711957753,
+      "wm_kind": "PFR",
+      "prompt_idx": 0
+    },
+    {
+      "decoder": "pfr",
+      "lookahead": 4,
+      "tokens": 128,
+      "blocks": 40,
+      "AATPS": 3.2,
+      "token_rate": 19.316480765395227,
+      "elapsed_sec": 6.626465843059123,
+      "wm_kind": "PFR",
+      "prompt_idx": 1
+    },
+    {
+      "decoder": "pfr",
+      "lookahead": 4,
+      "tokens": 128,
+      "blocks": 40,
+      "AATPS": 3.2,
+      "token_rate": 19.30718737392968,
+      "elapsed_sec": 6.629655450116843,
+      "wm_kind": "PFR",
+      "prompt_idx": 2
+    },
+    {
+      "decoder": "pfr",
+      "lookahead": 4,
+      "tokens": 128,
+      "blocks": 42,
+      "AATPS": 3.0476190476190474,
+      "token_rate": 18.612760279978062,
+      "elapsed_sec": 6.877002554945648,
+      "wm_kind": "PFR",
+      "prompt_idx": 3
+    },
+    {
+      "decoder": "pfr",
+      "lookahead": 4,
+      "tokens": 128,
+      "blocks": 35,
+      "AATPS": 3.657142857142857,
+      "token_rate": 21.680000127380435,
+      "elapsed_sec": 5.9040590059012175,
+      "wm_kind": "PFR",
+      "prompt_idx": 4
+    },
+    {
+      "decoder": "pfr",
+      "lookahead": 4,
+      "tokens": 128,
+      "blocks": 36,
+      "AATPS": 3.5555555555555554,
+      "token_rate": 21.207106225912206,
+      "elapsed_sec": 6.035712682176381,
+      "wm_kind": "PFR",
+      "prompt_idx": 5
+    },
+    {
+      "decoder": "pfr",
+      "lookahead": 4,
+      "tokens": 128,
+      "blocks": 38,
+      "AATPS": 3.3684210526315788,
+      "token_rate": 20.15101859428609,
+      "elapsed_sec": 6.3520362209528685,
+      "wm_kind": "PFR",
+      "prompt_idx": 6
+    },
+    {
+      "decoder": "pfr",
+      "lookahead": 4,
+      "tokens": 128,
+      "blocks": 37,
+      "AATPS": 3.4594594594594597,
+      "token_rate": 20.61920682943899,
+      "elapsed_sec": 6.207804260309786,
+      "wm_kind": "PFR",
+      "prompt_idx": 7
+    },
+    {
+      "decoder": "pfr",
+      "lookahead": 4,
+      "tokens": 128,
+      "blocks": 40,
+      "AATPS": 3.2,
+      "token_rate": 19.100964496690377,
+      "elapsed_sec": 6.701232287101448,
+      "wm_kind": "PFR",
+      "prompt_idx": 8
+    },
+    {
+      "decoder": "pfr",
+      "lookahead": 4,
+      "tokens": 128,
+      "blocks": 39,
+      "AATPS": 3.282051282051282,
+      "token_rate": 19.568998056401895,
+      "elapsed_sec": 6.54095828672871,
+      "wm_kind": "PFR",
+      "prompt_idx": 9
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "hardware": {
+    "gpu": "NVIDIA A100-SXM4-40GB",
+    "torch": "2.11.0+cu130"
+  },
+  "config": {
+    "target": "Qwen/Qwen2.5-7B-Instruct",
+    "draft": "Qwen/Qwen2.5-0.5B-Instruct",
+    "device": "cuda:0",
+    "samples": 1,
+    "warmup": 0,
+    "lookahead": 4,
+    "max_new_tokens": 8,
+    "draft_counts": [
+      2
+    ],
+    "top_k": 50,
+    "temperature": 1.0
+  },
+  "results": [
+    {
+      "num_drafts": 2,
+      "lookahead": 4,
+      "samples": 1,
+      "max_new_tokens": 8,
+      "end_to_end": {
+        "tokens": 8,
+        "elapsed_sec": 0.5344281741417944,
+        "token_rate_global": 14.969270684216287,
+        "token_rate": {
+          "mean": 14.969270684216287,
+          "std": 0.0
+        },
+        "peak_allocated_gib": 15.195682048797607,
+        "rows": [
+          {
+            "tokens": 8,
+            "elapsed_sec": 0.5344281741417944,
+            "token_rate": 14.969270684216287,
+            "peak_allocated_bytes": 16316239360
+          }
+        ]
+      },
+      "instrumented": {
+        "tokens": 8,
+        "elapsed_sec": 0.2657306999899447,
+        "token_rate": 30.10566712955154,
+        "peak_allocated_gib": 15.195682048797607,
+        "phase_sec": {
+          "draft_forward": 0.15866630501113832,
+          "keyed_uniform_rng": 0.0007599689997732639,
+          "pfr_arrival_sampling": 0.006203158991411328,
+          "target_forward": 0.07535160682164133
+        },
+        "phase_calls": {
+          "draft_forward": 8,
+          "keyed_uniform_rng": 18,
+          "pfr_arrival_sampling": 18,
+          "target_forward": 3
+        },
+        "derived_sec": {
+          "target_forward": 0.07535160682164133,
+          "draft_forward": 0.15866630501113832,
+          "pfr_arrival_sampling_including_rng": 0.006203158991411328,
+          "keyed_uniform_rng_subset": 0.0007599689997732639,
+          "remainder_tree_cache_python": 0.025509629165753722
+        },
+        "derived_fraction": {
+          "target_forward": 0.28356379908114737,
+          "draft_forward": 0.5970943704176532,
+          "pfr_arrival_sampling_including_rng": 0.023343779968389263,
+          "keyed_uniform_rng_subset": 0.002859921716994014,
+          "remainder_tree_cache_python": 0.09599805053281014
+        }
+      }
+    }
+  ]
+}
