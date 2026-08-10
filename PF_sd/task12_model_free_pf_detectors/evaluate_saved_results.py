@@ -48,6 +48,32 @@ def _specs() -> list[DetectorSpec]:
     return specs
 
 
+def _recovery_settings(method: str) -> tuple[str, str]:
+    """Return the exact target-pivot coupling and RNG backend for ``method``.
+
+    The current fast multi-draft methods ``latin_pf_counter_fused`` and
+    ``latin_pf_counter_tree_free`` use Latin-hypercube PF fields.  Their
+    detector pivot is therefore B * min_b U_b, not the iid-field max-order
+    transform 1-(1-min_b U_b)^B.
+    """
+    if method in {"target_anchor_pf", "random_anchor_pf"}:
+        return "random_anchor", "torch_dense"
+    if method in {"target_reverse_latin_pf_counter", "reverse_latin_pf_counter"}:
+        return "latin_reverse", "counter_philox"
+    if method in {
+        "target_latin_pf_counter",
+        "latin_pf_counter",
+        "latin_pf_counter_fused",
+        "latin_pf_counter_tree_free",
+    }:
+        return "latin_hypercube", "counter_philox"
+    if method in {"target_pf_counter", "max_order_pf_counter"}:
+        return "max_order", "counter_philox"
+    if method in {"target_pf", "max_order_pf"}:
+        return "max_order", "torch_dense"
+    raise ValueError(f"unsupported PF method for pivot recovery: {method}")
+
+
 def _load_tokenizer(config: dict):
     from transformers import AutoTokenizer
 
@@ -63,7 +89,9 @@ def _load_tokenizer(config: dict):
     return tokenizer
 
 
-def _recover_rows(payload: dict, method: str, device: str) -> list[np.ndarray]:
+def _recover_rows(
+    payload: dict, method: str, device: str, width: int | None = None
+) -> list[np.ndarray]:
     config = payload["config"]
     tokenizer = _load_tokenizer(config)
     prompts = frozen_benchmark._load_prompts(config)
@@ -71,6 +99,22 @@ def _recover_rows(payload: dict, method: str, device: str) -> list[np.ndarray]:
     base_key = shared.private_key_from_str(config.get("private_key", "max-order-pf"))
     vocab_size = int(tokenizer.vocab_size)
     rows = [row for row in payload["rows"] if row["method"] == method]
+    available_widths = sorted({int(row["width"]) for row in rows})
+    if width is not None:
+        rows = [row for row in rows if int(row["width"]) == int(width)]
+        if not rows:
+            raise ValueError(
+                f"no rows for method={method!r}, width={width}; "
+                f"available widths are {available_widths}"
+            )
+    elif len(available_widths) > 1:
+        raise ValueError(
+            f"saved results contain multiple widths {available_widths}; "
+            "pass --width so detector metrics are not pooled across B"
+        )
+    if not rows:
+        raise ValueError(f"no saved rows for method={method!r}")
+    target_coupling, rng_backend = _recovery_settings(method)
     recovered = []
     for row in rows:
         prompt_idx = int(row["prompt_idx"])
@@ -94,15 +138,18 @@ def _recover_rows(payload: dict, method: str, device: str) -> list[np.ndarray]:
             private_key=private_key,
             vocab_size=vocab_size,
             device=device,
-            target_coupling="latin_hypercube",
-            rng_backend="counter_philox",
+            target_coupling=target_coupling,
+            rng_backend=rng_backend,
         )
         recovered.append(pivots.detach().cpu().numpy().astype(np.float64))
     return recovered
 
 
-def evaluate(payload: dict, method: str, device: str, n_null: int) -> dict:
-    sequences = _recover_rows(payload, method, device)
+def evaluate(
+    payload: dict, method: str, device: str, n_null: int, width: int | None = None
+) -> dict:
+    sequences = _recover_rows(payload, method, device, width=width)
+    target_coupling, rng_backend = _recovery_settings(method)
     lengths = sorted({len(pivots) for pivots in sequences})
     calibrators = {
         (spec.name, length): NullCalibrator(spec, length, n_null=n_null)
@@ -139,6 +186,9 @@ def evaluate(payload: dict, method: str, device: str, n_null: int) -> dict:
     return {
         "source_config": payload["config"],
         "evaluated_method": method,
+        "evaluated_width": width,
+        "target_coupling": target_coupling,
+        "rng_backend": rng_backend,
         "n_null": n_null,
         "model_access": False,
         "detectors": results,
@@ -151,11 +201,14 @@ def main() -> None:
     parser.add_argument("output", type=Path)
     parser.add_argument("--method", default="latin_pf_counter_tree_free")
     parser.add_argument("--device", default="cuda:0")
+    parser.add_argument("--width", type=int)
     parser.add_argument("--n-null", type=int, default=200_000)
     args = parser.parse_args()
     with args.input.open() as handle:
         payload = json.load(handle)
-    result = evaluate(payload, args.method, args.device, args.n_null)
+    result = evaluate(
+        payload, args.method, args.device, args.n_null, width=args.width
+    )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open("w") as handle:
         json.dump(result, handle, indent=2)
