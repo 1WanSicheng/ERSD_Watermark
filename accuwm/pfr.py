@@ -656,7 +656,12 @@ def pfr_cached_block(
     accepted_count = 0
     got_eos = False
 
-    eos_token_id = getattr(model.config, "eos_token_id", None)
+    # int (Qwen/Vicuna) or list (Llama-3); normalize for membership tests.
+    _eos_cfg = getattr(model.config, "eos_token_id", None)
+    eos_token_ids = (
+        set(int(e) for e in _eos_cfg) if isinstance(_eos_cfg, (list, tuple))
+        else {int(_eos_cfg)} if _eos_cfg is not None else None
+    )
 
     for d in range(block_len):
         logprobs = logprobs_per_depth[d]
@@ -669,7 +674,7 @@ def pfr_cached_block(
         output_tokens.append(target_token)
         output_logprobs.append(logprobs)
 
-        if eos_token_id is not None and target_token == eos_token_id:
+        if eos_token_ids is not None and target_token in eos_token_ids:
             got_eos = True
             accepted = False
             break
@@ -705,7 +710,7 @@ def pfr_cached_block(
         )[0].item())
         output_tokens.append(bonus_token)
         output_logprobs.append(logprobs)
-        if eos_token_id is not None and bonus_token == eos_token_id:
+        if eos_token_ids is not None and bonus_token in eos_token_ids:
             got_eos = True
 
     output_ids = torch.tensor([output_tokens], device=device, dtype=torch.long)

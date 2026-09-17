@@ -503,6 +503,14 @@ def mpfr_batched_torchgen_cached_block(
     accepted_all = True
     target_generator = torch.Generator(device=device)
 
+    # config.eos_token_id may be an int (Qwen/Vicuna) or a list (Llama-3:
+    # [end_of_text, eom_id, eot_id]); normalize to a set for membership tests.
+    _eos_cfg = getattr(model.config, "eos_token_id", None)
+    eos_ids = (
+        set(int(e) for e in _eos_cfg) if isinstance(_eos_cfg, (list, tuple))
+        else {int(_eos_cfg)} if _eos_cfg is not None else set()
+    )
+
     for _ in range(block_len):
         logprobs = target_logits.logprobs(current)
         source = source_for(current)
@@ -515,7 +523,7 @@ def mpfr_batched_torchgen_cached_block(
         if return_logprobs:
             output_logprobs.append(logprobs)
 
-        if token == getattr(model.config, "eos_token_id", None):
+        if token in eos_ids:
             got_eos = True
             accepted_all = False
             break
@@ -539,7 +547,7 @@ def mpfr_batched_torchgen_cached_block(
         output_tokens.append(token)
         if return_logprobs:
             output_logprobs.append(logprobs)
-        if token == getattr(model.config, "eos_token_id", None):
+        if token in eos_ids:
             got_eos = True
 
     output_ids = torch.tensor([output_tokens], device=device, dtype=torch.long)

@@ -30,3 +30,10 @@ __pycache__/
 
 # Local PF exploration archive; frozen code and curated results live in PF_sd/.
 data/pf_sd_intermediate_archive_20260806/
+
+# Raw per-prompt run outputs (~1 GB, incl. u_per_token detector inputs).
+# Curated summaries live in data/iclr_tr_refresh_20260917/.
+outputs/multi/shards/
+outputs/multi/shards_seeds/
+outputs/multi/shards_llama/
+outputs/pilot/

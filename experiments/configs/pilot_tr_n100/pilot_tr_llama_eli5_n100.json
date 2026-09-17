@@ -1,0 +1,44 @@
+{
+  "experiment": "pilot_tr_llama_eli5_n100",
+  "samples": 100,
+  "dataset": "eli5",
+  "max_new_tokens": 128,
+  "lookaheads": [
+    4
+  ],
+  "num_drafts": [
+    2,
+    4,
+    6,
+    8
+  ],
+  "private_key": "1234",
+  "target_model": "unsloth/Meta-Llama-3.1-8B-Instruct",
+  "draft_model": "unsloth/Llama-3.2-1B-Instruct",
+  "process_logits": {
+    "top_k": 50,
+    "top_p": 1.0,
+    "temperature": 1.0
+  },
+  "decoders": [
+    "mpfr_torchgen_cached",
+    "invariant_multi"
+  ],
+  "metrics": {
+    "aatps": true,
+    "token_rate": true,
+    "anlppt": {
+      "variants": [
+        "U",
+        "Li",
+        "PL"
+      ],
+      "li_delta": 0.5,
+      "pl_eps": 0.1,
+      "applies_to": [
+        "mpfr_torchgen_cached"
+      ]
+    }
+  },
+  "output": "outputs/pilot/pilot_tr_llama_eli5_n100.json"
+}

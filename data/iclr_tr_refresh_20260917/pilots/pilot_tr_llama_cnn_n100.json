@@ -1,0 +1,125 @@
+{
+ "config": {
+  "experiment": "pilot_tr_llama_cnn_n100",
+  "samples": 100,
+  "dataset": "cnn_dailymail",
+  "max_new_tokens": 128,
+  "lookaheads": [
+   4
+  ],
+  "num_drafts": [
+   2,
+   4,
+   6,
+   8
+  ],
+  "private_key": "1234",
+  "target_model": "unsloth/Meta-Llama-3.1-8B-Instruct",
+  "draft_model": "unsloth/Llama-3.2-1B-Instruct",
+  "process_logits": {
+   "top_k": 50,
+   "top_p": 1.0,
+   "temperature": 1.0
+  },
+  "decoders": [
+   "mpfr_torchgen_cached",
+   "invariant_multi"
+  ],
+  "metrics": {
+   "aatps": true,
+   "token_rate": true,
+   "anlppt": {
+    "variants": [
+     "U",
+     "Li",
+     "PL"
+    ],
+    "li_delta": 0.5,
+    "pl_eps": 0.1,
+    "applies_to": [
+     "mpfr_torchgen_cached"
+    ]
+   }
+  },
+  "output": "outputs/pilot/pilot_tr_llama_cnn_n100.json"
+ },
+ "summary": {
+  "mpfr_torchgen_cached_L4_B2": {
+   "AATPS": 3.4133026806093962,
+   "ANLPPT_Li": 0.03932188425399866,
+   "ANLPPT_PL": 0.06297313977526488,
+   "ANLPPT_U": 0.05745208715053704,
+   "blocks": 35.14,
+   "elapsed_sec": 3.254243832717184,
+   "n_added": 118.87,
+   "n_skipped": 0.0,
+   "token_rate": 36.90179156859424,
+   "tokens": 118.87
+  },
+  "mpfr_torchgen_cached_L4_B4": {
+   "AATPS": 3.7462458312201243,
+   "ANLPPT_Li": 0.03998139538115859,
+   "ANLPPT_PL": 0.06354791445669182,
+   "ANLPPT_U": 0.05840779493535425,
+   "blocks": 32.0,
+   "elapsed_sec": 3.0154083508485927,
+   "n_added": 119.11,
+   "n_skipped": 0.0,
+   "token_rate": 39.74495980312639,
+   "tokens": 119.11
+  },
+  "mpfr_torchgen_cached_L4_B6": {
+   "AATPS": 3.919174890960936,
+   "ANLPPT_Li": 0.03849535634572852,
+   "ANLPPT_PL": 0.06226542059489257,
+   "ANLPPT_U": 0.05657050366897013,
+   "blocks": 30.53,
+   "elapsed_sec": 2.9126240215008146,
+   "n_added": 119.12,
+   "n_skipped": 0.0,
+   "token_rate": 41.11712725008693,
+   "tokens": 119.12
+  },
+  "mpfr_torchgen_cached_L4_B8": {
+   "AATPS": 4.030343293598015,
+   "ANLPPT_Li": 0.039898388774417884,
+   "ANLPPT_PL": 0.06281165762347737,
+   "ANLPPT_U": 0.0574998785761627,
+   "blocks": 29.74,
+   "elapsed_sec": 2.870076670933049,
+   "n_added": 119.27,
+   "n_skipped": 0.0,
+   "token_rate": 41.810909908822275,
+   "tokens": 119.27
+  },
+  "invariant_multi_L4_B2": {
+   "AATPS": 3.4418618592341677,
+   "blocks": 36.47,
+   "elapsed_sec": 3.4250990459439343,
+   "token_rate": 36.66692826518879,
+   "tokens": 124.61
+  },
+  "invariant_multi_L4_B4": {
+   "AATPS": 3.7049975637433104,
+   "blocks": 33.55,
+   "elapsed_sec": 3.1966011576214806,
+   "token_rate": 38.88839619474832,
+   "tokens": 123.31
+  },
+  "invariant_multi_L4_B6": {
+   "AATPS": 3.920149343506718,
+   "blocks": 31.28,
+   "elapsed_sec": 3.0546598427463323,
+   "token_rate": 40.12691916767875,
+   "tokens": 121.75
+  },
+  "invariant_multi_L4_B8": {
+   "AATPS": 4.002808155061125,
+   "blocks": 30.68,
+   "elapsed_sec": 3.0701989585114644,
+   "token_rate": 39.993051500294534,
+   "tokens": 122.27
+  }
+ },
+ "n_rows": 800
+}

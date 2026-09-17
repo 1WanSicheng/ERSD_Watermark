@@ -726,7 +726,11 @@ def _run_invariant_multi(target, draft, input_ids, *,
     )
 
     generator = InvariantGenerator(strategy)
-    eos = int(getattr(target.config, "eos_token_id", 0) or 0)
+    _eos_cfg = getattr(target.config, "eos_token_id", 0)
+    # Pass through int (Qwen/Vicuna) or list (Llama-3) — InvariantGenerator's
+    # stop check handles both.
+    eos = ([int(e) for e in _eos_cfg] if isinstance(_eos_cfg, (list, tuple))
+           else int(_eos_cfg or 0))
     top_k = int((plk or {}).get("top_k", 50) or 0)
     top_p = float((plk or {}).get("top_p", 1.0) or 1.0)
     temperature = float((plk or {}).get("temperature", 1.0) or 1.0)

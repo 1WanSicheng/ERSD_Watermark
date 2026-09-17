@@ -1,0 +1,125 @@
+{
+ "config": {
+  "experiment": "pilot_tr_vicuna_cnn_n100",
+  "samples": 100,
+  "dataset": "cnn_dailymail",
+  "max_new_tokens": 128,
+  "lookaheads": [
+   4
+  ],
+  "num_drafts": [
+   2,
+   4,
+   6,
+   8
+  ],
+  "private_key": "1234",
+  "target_model": "lmsys/vicuna-7b-v1.5",
+  "draft_model": "double7/vicuna-68m",
+  "process_logits": {
+   "top_k": 50,
+   "top_p": 1.0,
+   "temperature": 1.0
+  },
+  "decoders": [
+   "mpfr_torchgen_cached",
+   "invariant_multi"
+  ],
+  "metrics": {
+   "aatps": true,
+   "token_rate": true,
+   "anlppt": {
+    "variants": [
+     "U",
+     "Li",
+     "PL"
+    ],
+    "li_delta": 0.5,
+    "pl_eps": 0.1,
+    "applies_to": [
+     "mpfr_torchgen_cached"
+    ]
+   }
+  },
+  "output": "outputs/pilot/pilot_tr_vicuna_cnn_n100.json"
+ },
+ "summary": {
+  "mpfr_torchgen_cached_L4_B2": {
+   "AATPS": 2.4451613051983467,
+   "ANLPPT_Li": 0.016765194626288758,
+   "ANLPPT_PL": 0.024011643824922678,
+   "ANLPPT_U": 0.022516867971844247,
+   "blocks": 46.29,
+   "elapsed_sec": 1.864312210304197,
+   "n_added": 111.52,
+   "n_skipped": 0.0,
+   "token_rate": 60.79327858810968,
+   "tokens": 111.52
+  },
+  "mpfr_torchgen_cached_L4_B4": {
+   "AATPS": 2.6918711999711546,
+   "ANLPPT_Li": 0.016883327894096172,
+   "ANLPPT_PL": 0.02430014111976475,
+   "ANLPPT_U": 0.022857925379133316,
+   "blocks": 41.71,
+   "elapsed_sec": 1.7789756652899087,
+   "n_added": 110.86,
+   "n_skipped": 0.0,
+   "token_rate": 63.01310578388771,
+   "tokens": 110.86
+  },
+  "mpfr_torchgen_cached_L4_B6": {
+   "AATPS": 2.844836700675224,
+   "ANLPPT_Li": 0.016693264044830895,
+   "ANLPPT_PL": 0.02413618902918524,
+   "ANLPPT_U": 0.022704298340771496,
+   "blocks": 39.86,
+   "elapsed_sec": 1.8124986715556588,
+   "n_added": 112.02,
+   "n_skipped": 0.0,
+   "token_rate": 62.46910849988124,
+   "tokens": 112.02
+  },
+  "mpfr_torchgen_cached_L4_B8": {
+   "AATPS": 2.919149545028779,
+   "ANLPPT_Li": 0.01715517535744288,
+   "ANLPPT_PL": 0.024925924724700958,
+   "ANLPPT_U": 0.02320505941600337,
+   "blocks": 38.62,
+   "elapsed_sec": 1.9107369081384968,
+   "n_added": 111.48,
+   "n_skipped": 0.0,
+   "token_rate": 59.003656662204584,
+   "tokens": 111.48
+  },
+  "invariant_multi_L4_B2": {
+   "AATPS": 2.5154937925623857,
+   "blocks": 46.24,
+   "elapsed_sec": 1.840249107881682,
+   "token_rate": 63.09100970820853,
+   "tokens": 114.15
+  },
+  "invariant_multi_L4_B4": {
+   "AATPS": 2.6985489637278657,
+   "blocks": 43.64,
+   "elapsed_sec": 1.8022205903450959,
+   "token_rate": 65.14489632831219,
+   "tokens": 115.65
+  },
+  "invariant_multi_L4_B6": {
+   "AATPS": 2.8348241435042554,
+   "blocks": 40.69,
+   "elapsed_sec": 1.779643942589173,
+   "token_rate": 64.62612982506394,
+   "tokens": 114.18
+  },
+  "invariant_multi_L4_B8": {
+   "AATPS": 2.9200701300241225,
+   "blocks": 40.19,
+   "elapsed_sec": 1.9611791732371784,
+   "token_rate": 59.752370584094606,
+   "tokens": 116.08
+  }
+ },
+ "n_rows": 800
+}

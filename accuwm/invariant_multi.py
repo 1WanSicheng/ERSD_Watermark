@@ -284,8 +284,13 @@ class InvariantGenerator:
 
             new_token_count = input_ids.size(-1) - input_len
             window = min(new_token_count, self.max_draft_len)
-            if window > 0 and eos_token_id in input_ids[0, -window:]:
-                break
+            if window > 0:
+                # eos_token_id: int (Qwen/Vicuna) or list (Llama-3).
+                tail = input_ids[0, -window:]
+                eos_list = (eos_token_id if isinstance(eos_token_id, (list, tuple))
+                            else [eos_token_id])
+                if any(int(e) in tail for e in eos_list):
+                    break
         t_1 = perf_counter()
 
         num_tokens = input_ids.size(-1) - input_len

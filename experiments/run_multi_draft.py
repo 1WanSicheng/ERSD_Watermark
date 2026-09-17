@@ -266,6 +266,10 @@ def run_one_prompt(
 
 def run_experiment(config: dict) -> dict:
     samples = int(config.get("samples", 100))
+    # Per-prompt seed is idx + 7 + seed_offset.  Offset 0 (default) reproduces
+    # the original single-seed protocol exactly; multi-seed replicates use
+    # large offsets (e.g. 10000, 20000) so (prompt, seed) pairs never collide.
+    seed_offset = int(config.get("seed_offset", 0))
     dataset = str(config.get("dataset", "cnn_dailymail"))
     max_new_tokens = int(config.get("max_new_tokens", 128))
     lookaheads: List[int] = list(config.get("lookaheads", [4]))
@@ -331,7 +335,7 @@ def run_experiment(config: dict) -> dict:
                         decoder_name=d_name, decoder_fn=decoder_fn,
                         target=target, draft=draft, tokenizer=tokenizer,
                         prompt=prompt, lookahead=L, num_drafts=B,
-                        max_length=max_new_tokens, seed=idx + 7,
+                        max_length=max_new_tokens, seed=idx + 7 + seed_offset,
                         base_key=base_key, plk=plk, vocab_size=vocab_size,
                         metrics_cfg=metrics_cfg,
                         rouge_applies=rouge_applies,
