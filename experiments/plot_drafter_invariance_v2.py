@@ -1,4 +1,4 @@
-"""Composite figure (NeurIPS-ready):
+"""Composite figure (paper-ready):
 
   Left  : TPR vs T_eval, all decoders compared on default drafter D_0
           (data: data/0506 ablation_n500_qwen_cnn/tpr_vs_T_2x2_data.json,
@@ -30,7 +30,7 @@ OUT_DIR = DATA_DIR  # write figure next to data files
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # ---------------------------------------------------------------------------
-# NeurIPS rcParams
+# Paper-style rcParams
 # ---------------------------------------------------------------------------
 plt.rcParams.update({
     "figure.dpi":          150,
@@ -130,7 +130,7 @@ def main():
     T_right  = right["T_grid"]
 
     # Layout (per Figure 2 revision guide):
-    # - figsize 7.2 x 3.2 (NeurIPS double-column main-text figure).
+    # - figsize 7.2 x 3.2 (double-column main-text figure).
     # - Left:right region width ratio 1.25:1.0 (left ~55%, right ~45%);
     #   right region is a 2x2, so widths sum to [2.5, 1.0, 1.0].
     # - Bottom margin reserved for shared right-side legend (D0..D3).

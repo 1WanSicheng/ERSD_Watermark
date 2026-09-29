@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
-"""Aggregate multi-seed Qwen shard outputs into paper-style Tables 5-6.
+"""Aggregate 3-seed multi-draft shard outputs into paper-style tables
+(Table 1 and Appendix Tables 6-9).
 
-Seed 1 = outputs/multi/shards/shard_qwen_*_n1000_B*.json  (seed_offset 0)
-Seeds 2,3 = outputs/multi/shards_seeds/shard_qwen_*_n1000_B*_s{2,3}.json
+Default inputs are the raw run outputs under outputs/multi/.  With
+--results-dir DIR the script instead reads the released per-seed summaries
+DIR/{pair}_{cell}_B{B}_s{seed}.json (seed_offset 0 / 10000 / 20000).
 
 For each (cell, decoder, B) the per-seed cell mean is taken from the shard's
 "summary" block; the table reports mean +- std over the seed-level means
 (ddof=1).  Emits a plain-text table and a LaTeX fragment per cell.
 
-Usage: python scripts/aggregate_3seed_tables.py [--latex]
+Usage: python scripts/aggregate_3seed_tables.py --pair {qwen,llama} [--latex] [--results-dir DIR]
 """
 import argparse
 import glob
@@ -20,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 METRICS = ["AATPS", "token_rate", "ANLPPT_U", "ANLPPT_Li", "ANLPPT_PL", "LPPL"]
 HEADS = ["AATPS", "TR", "ANLPPT-U", "ANLPPT-Li", "ANLPPT-PL", "LPPL"]
-DECS = [("mpfr_torchgen_cached", "MPFR"), ("invariant_multi", "Invariant")]
+DECS = [("mpfr_torchgen_cached", "MPFR"), ("invariant_multi", "GLS")]
 
 
 def load_seed(pattern: str) -> dict:
@@ -66,9 +68,15 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--latex", action="store_true")
     ap.add_argument("--pair", choices=sorted(PAIRS), default="qwen")
+    ap.add_argument("--results-dir", type=Path, default=None)
     args = ap.parse_args()
 
-    spec = PAIRS[args.pair]
+    spec = dict(PAIRS[args.pair])
+    if args.results_dir is not None:
+        rd = args.results_dir.resolve()
+        spec["patterns"] = lambda cell: [
+            str(rd / f"{args.pair}_{cell}_B*_s{s}.json") for s in (1, 2, 3)
+        ]
     for cell, ds_name in (("cnn", "CNN/DailyMail"), ("eli5", "ELI5")):
         title = f"{spec['title']} x {ds_name}"
         seeds = [load_seed(str(ROOT / p)) for p in spec["patterns"](cell)]

@@ -21,7 +21,7 @@ from matplotlib.lines import Line2D
 
 DEFAULT_DATA = Path("data/0506 ablation_n500_qwen_cnn") / "tpr_vs_T_2x2_data.json"
 
-# NeurIPS rcParams
+# Paper-style rcParams
 plt.rcParams.update({
     "figure.dpi":          150,
     "savefig.dpi":         300,

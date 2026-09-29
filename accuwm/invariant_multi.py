@@ -7,7 +7,7 @@ unchanged from the original; this file only consolidates the strategy, the
 generator, and the small set of helpers they depend on into one module under
 ``accuwm/``.
 
-Both classes implement Ashish-style multi-draft speculative decoding with
+Both classes implement Rowan et al. (2025)-style multi-draft speculative decoding with
 unkeyed, pre-sampled common randomness shared across drafts, hence the name
 "invariant".  No watermark.
 """

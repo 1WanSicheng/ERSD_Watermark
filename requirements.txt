@@ -6,3 +6,4 @@ jsonnet
 setuptools<66 
 accelerate
 pyarrow>=21.0.0
+scipy
