@@ -54,7 +54,7 @@ from accuwm.multi_draft_utils import (
     _select_cache_row,
     ms_pfr_tokens_from_logprobs,
 )
-from accuwm.pfr import PFRSourceFactory, SharedPFRSource
+from accuwm.pfr import FreshNoiseSourceFactory, PFRSourceFactory, SharedPFRSource
 from accuwm.utils import cache_len
 
 
@@ -616,6 +616,7 @@ def finite_multi_draft_pfr_cached_generator(
     allow_incomplete: bool = False,
     proposal: str = "batched_target_torchgen_cached",
     return_logprobs: bool = True,
+    watermark: bool = True,
 ) -> Iterable[Tuple[LongTensor, FloatTensor, Dict[str, Any]]]:
     del labeler, max_proposals, allow_incomplete, proposal
 
@@ -624,9 +625,17 @@ def finite_multi_draft_pfr_cached_generator(
 
     model.eval()
     ref_model.eval()
-    source_factory = PFRSourceFactory(
-        private_key=(private_key.encode("utf-8") if isinstance(private_key, str) else bytes(private_key))
-    )
+    if watermark:
+        source_factory = PFRSourceFactory(
+            private_key=(private_key.encode("utf-8") if isinstance(private_key, str) else bytes(private_key))
+        )
+    else:
+        # MPFR-NoWM ablation: identical draft/verify/cache logic, but the keyed
+        # Poisson source is replaced by unkeyed fresh noise, so the emitted
+        # tokens carry no recoverable watermark.  This isolates the cost of
+        # keying from the cost of the multi-draft Poisson coupling at B > 1
+        # (the B = 1 analogue is accuwm/pfr_no_watermark.py).
+        source_factory = FreshNoiseSourceFactory()
     device = _model_device(model)
     input_ids = input_ids.to(device)
     target_past_key_values = None
@@ -703,6 +712,7 @@ def finite_multi_draft_pfr_cached_sample_generator(
     allow_incomplete: bool = False,
     proposal: str = "batched_target_torchgen_cached",
     return_logprobs: bool = True,
+    watermark: bool = True,
 ):
     if B is not None:
         num_drafts = int(B)
@@ -721,4 +731,5 @@ def finite_multi_draft_pfr_cached_sample_generator(
         allow_incomplete=allow_incomplete,
         proposal=proposal,
         return_logprobs=return_logprobs,
+        watermark=watermark,
     )

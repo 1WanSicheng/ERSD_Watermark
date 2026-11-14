@@ -704,6 +704,26 @@ def _run_mpfr_torchgen_cached(target, draft, input_ids, *, lookahead,
     return out, blocks, pk, "PFR", sentinel, None
 
 
+def _run_mpfr_no_watermark(target, draft, input_ids, *, lookahead,
+                           max_length, seed, base_key, plk,
+                           num_drafts: int, **_):
+    """MPFR-NoWM: identical to _run_mpfr_torchgen_cached but with the keyed
+    Poisson source replaced by unkeyed fresh noise.  Isolates the cost of
+    watermark keying from the cost of the multi-draft Poisson coupling at
+    B > 1 (the B = 1 analogue is the pfr_no_watermark decoder)."""
+    pk = seeded_private_key(seed, base_key)
+    gen = finite_multi_draft_pfr_cached_sample_generator(
+        model=target, ref_model=draft, input_ids=input_ids,
+        n=lookahead, max_length=max_length, num_drafts=num_drafts,
+        private_key=pk, return_meta=True,
+        process_logits_kwargs=plk, return_logprobs=False,
+        watermark=False,
+    )
+    out, blocks, _, _ = _drain(gen, max_length)
+    sentinel = (_DEFER_PREFIX_LABELS, input_ids, _mpfr_direct_label)
+    return out, blocks, pk, "PFR", sentinel, None
+
+
 def _run_invariant_multi(target, draft, input_ids, *,
                          lookahead, max_length, seed, base_key,
                          num_drafts: int, plk, **_):
@@ -755,6 +775,7 @@ def _run_invariant_multi(target, draft, input_ids, *,
 
 MULTI_DRAFT_DECODERS: Dict[str, Callable] = {
     "mpfr_torchgen_cached":  _run_mpfr_torchgen_cached,
+    "mpfr_no_watermark":     _run_mpfr_no_watermark,
     "invariant_multi":       _run_invariant_multi,
 }
 
