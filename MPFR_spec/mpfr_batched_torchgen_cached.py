@@ -85,21 +85,26 @@ def _make_source_cache(factory: PFRSourceFactory):
     Output bytes downstream are unchanged because ``factory.build(label).seed()``
     is a deterministic function of (label, private_key)."""
     cache: Dict[ContextKey, SharedPFRSource] = {}
+    # Labels are tracked here rather than read back off the source object, so
+    # that label-ignoring sources (FreshNoiseSource, used by the MPFR-NoWM
+    # ablation) work with the same incremental-prefix optimization.
+    labels: Dict[ContextKey, bytes] = {}
 
     def get(context: ContextKey) -> SharedPFRSource:
         src = cache.get(context)
         if src is None:
-            parent = cache.get(context[:-1]) if context else None
-            if parent is not None:
+            parent_label = labels.get(context[:-1]) if context else None
+            if parent_label is not None:
                 # Context labels are prefix bytes followed by one int64 token,
                 # so children can reuse the already serialized parent label.
-                label = parent.label + int(context[-1]).to_bytes(
+                label = parent_label + int(context[-1]).to_bytes(
                     8, "big", signed=True
                 )
             else:
                 label = _context_label(context)
             src = factory.build(label)
             cache[context] = src
+            labels[context] = label
         return src
 
     return get
